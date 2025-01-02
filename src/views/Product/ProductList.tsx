@@ -23,7 +23,6 @@ function ProductQueryForm() {
         <Space>
           <Button type="primary">查询</Button>
           <Button>重置</Button>
-
         </Space>
       </Form.Item>
     </Form>

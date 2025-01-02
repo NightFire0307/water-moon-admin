@@ -7,17 +7,29 @@ import {
   VideoCameraOutlined,
 } from '@ant-design/icons'
 import { Breadcrumb, Layout, Menu } from 'antd'
-import { useState } from 'react'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Outlet, useMatches, useNavigate } from 'react-router-dom'
 import styles from './AdminLayout.module.less'
 
 type MenuItem = Required<MenuProps>['items'][number]
 type ItemType = { title: string }[]
+interface MatchType { title: string }
 const { Header, Sider, Content } = Layout
 
 function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [breadcrumb, setBreadcrumb] = useState<ItemType>([])
   const navigate = useNavigate()
+  const matches = useMatches()
+
+  useEffect(() => {
+    const breadcrumbItems: ItemType = []
+    for (const match of matches) {
+      breadcrumbItems.push({ title: (match.handle as MatchType)?.title || '' })
+    }
+
+    setBreadcrumb(breadcrumbItems)
+  }, [matches])
 
   const menuItems: MenuItem[] = [
     {
@@ -49,11 +61,6 @@ function AdminLayout() {
     },
   ]
 
-  const breadcrumbItems: ItemType = [
-    { title: '首页' },
-    { title: '系统管理' },
-  ]
-
   const toggle = () => {
     setCollapsed(!collapsed)
   }
@@ -81,7 +88,7 @@ function AdminLayout() {
           这是头部
         </Header>
         <Content style={{ margin: '0 16px' }}>
-          <Breadcrumb items={breadcrumbItems} style={{ margin: '16px 0' }}>
+          <Breadcrumb items={breadcrumb} style={{ margin: '16px 0' }}>
           </Breadcrumb>
           <div className={styles.content}>
             <Outlet />
