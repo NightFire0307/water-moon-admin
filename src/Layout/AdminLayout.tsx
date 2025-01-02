@@ -12,6 +12,7 @@ import { Outlet } from 'react-router-dom'
 import styles from './AdminLayout.module.less'
 
 type MenuItem = Required<MenuProps>['items'][number]
+type ItemType = { title: string }[]
 const { Header, Sider, Content } = Layout
 
 function AdminLayout() {
@@ -47,6 +48,11 @@ function AdminLayout() {
     },
   ]
 
+  const breadcrumbItems: ItemType = [
+    { title: '首页' },
+    { title: '系统管理' },
+  ]
+
   const toggle = () => {
     setCollapsed(!collapsed)
   }
@@ -71,9 +77,7 @@ function AdminLayout() {
           这是头部
         </Header>
         <Content style={{ margin: '0 16px' }}>
-          <Breadcrumb style={{ margin: '16px 0' }}>
-            <Breadcrumb.Item>User</Breadcrumb.Item>
-            <Breadcrumb.Item>Bill</Breadcrumb.Item>
+          <Breadcrumb items={breadcrumbItems} style={{ margin: '16px 0' }}>
           </Breadcrumb>
           <div className={styles.content}>
             <Outlet />
