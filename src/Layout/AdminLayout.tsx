@@ -8,7 +8,7 @@ import {
 } from '@ant-design/icons'
 import { Breadcrumb, Layout, Menu } from 'antd'
 import { useState } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import styles from './AdminLayout.module.less'
 
 type MenuItem = Required<MenuProps>['items'][number]
@@ -17,6 +17,7 @@ const { Header, Sider, Content } = Layout
 
 function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const navigate = useNavigate()
 
   const menuItems: MenuItem[] = [
     {
@@ -38,12 +39,12 @@ function AdminLayout() {
       ],
     },
     {
-      key: '3',
+      key: '/product',
       icon: <UploadOutlined />,
       label: '产品管理',
       children: [
-        { key: '3-1', label: '产品列表' },
-        { key: '3-2', label: '产品分类' },
+        { key: '/product/list', label: '产品列表' },
+        { key: '/product/type', label: '产品类型' },
       ],
     },
   ]
@@ -57,14 +58,17 @@ function AdminLayout() {
     setCollapsed(!collapsed)
   }
 
+  function handleMenuClick({ key }: { key: string }) {
+    navigate(key)
+  }
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider style={{ position: 'relative' }} width={250} collapsedWidth={65} trigger={null} collapsible collapsed={collapsed} theme="light">
         <div className={styles.logoWrapper}>
           <div className={styles.logo}>LOGO</div>
         </div>
-        <Menu mode="inline" defaultSelectedKeys={['1-2']} items={menuItems}>
-        </Menu>
+        <Menu mode="inline" defaultSelectedKeys={['1-2']} items={menuItems} onClick={handleMenuClick} />
 
         <button className={styles.collapseButton} onClick={toggle}>
           {

@@ -4,7 +4,9 @@ import App from './App.tsx'
 import { ProtectedRoute } from './components/ProtectedRoute.tsx'
 import { Dashboard } from './views/Dashboard/Dashboard.tsx'
 import { Login } from './views/Login/Login.tsx'
+import { ProductList } from './views/Product/ProductList.tsx'
 import './assets/normalize.less'
+import 'dayjs/locale/zh-cn'
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
@@ -18,8 +20,10 @@ createRoot(document.getElementById('root')!).render(
         )}
       >
         <Route index element={<Dashboard />} />
-        <Route path="product" element={<h1>Product</h1>} />
-        <Route path="productType" element={<h1>Product Type</h1>} />
+        <Route path="product">
+          <Route path="list" element={<ProductList />} />
+          <Route path="type" element={<h1>Product Type</h1>} />
+        </Route>
       </Route>
       <Route path="/login" element={<Login />} />
     </Routes>
