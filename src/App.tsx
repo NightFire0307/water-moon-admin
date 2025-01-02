@@ -1,10 +1,7 @@
+import AdminLayout from './Layout/AdminLayout.tsx'
 import './App.css'
-import {Outlet} from "react-router";
 
 function App() {
-    return <div>
-        <h1>Home</h1>
-        <Outlet />
-    </div>
+  return <AdminLayout />
 }
 export default App
