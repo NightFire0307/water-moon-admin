@@ -74,10 +74,15 @@ export function ProductType() {
       message.warning(msg)
     }
     else {
-      message.success(msg)
+      message.success('创建成功')
       setModalVisible(false)
     }
     setConfirmLoading(false)
+  }
+
+  function handleCancel() {
+    setModalVisible(false)
+    form.resetFields()
   }
 
   useEffect(() => {
@@ -96,7 +101,7 @@ export function ProductType() {
         title={modalTitle}
         open={modalVisible}
         onOk={handleOk}
-        onCancel={() => setModalVisible(false)}
+        onCancel={handleCancel}
         confirmLoading={confirmLoading}
         centered
       >
