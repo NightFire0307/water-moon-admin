@@ -19,6 +19,8 @@ const { Header, Sider, Content } = Layout
 function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const [breadcrumb, setBreadcrumb] = useState<ItemType>([])
+  const [selectedKeys, setSelectedKeys] = useState<string[]>(['/product/list'])
+  const [openKeys, setOpenKeys] = useState<string[]>(['/product'])
   const navigate = useNavigate()
   const matches = useMatches()
 
@@ -29,34 +31,42 @@ function AdminLayout() {
     }
 
     setBreadcrumb(breadcrumbItems)
+
+    // 设置选中的菜单项
+    const selectKey: string = matches[matches.length - 1].pathname.split('/').pop() || ''
+    setSelectedKeys([selectKey])
+
+    // 设置展开的菜单项
+    const openKey: string = matches[matches.length - 2].pathname.split('/').pop() || ''
+    setOpenKeys([openKey])
   }, [matches])
 
   const menuItems: MenuItem[] = [
     {
-      key: '1',
+      key: 'system',
       icon: <UserOutlined />,
       label: '系统管理',
       children: [
-        { key: '1-1', label: '用户列表' },
-        { key: '1-2', label: '角色列表' },
-        { key: '1-3', label: '权限列表' },
+        { key: 'user', label: '用户列表' },
+        { key: 'role', label: '角色列表' },
+        { key: 'permission', label: '权限列表' },
       ],
     },
     {
-      key: '2',
+      key: 'selection',
       icon: <VideoCameraOutlined />,
       label: '选片管理',
       children: [
-        { key: '2-1', label: '订单列表' },
+        { key: 'order', label: '订单列表' },
       ],
     },
     {
-      key: '/product',
+      key: 'product',
       icon: <UploadOutlined />,
       label: '产品管理',
       children: [
-        { key: '/product/list', label: '产品列表' },
-        { key: '/product/type', label: '产品类型' },
+        { key: 'list', label: '产品列表' },
+        { key: 'type', label: '产品类型' },
       ],
     },
   ]
@@ -65,8 +75,9 @@ function AdminLayout() {
     setCollapsed(!collapsed)
   }
 
-  function handleMenuClick({ key }: { key: string }) {
-    navigate(key)
+  function handleMenuClick({ keyPath }: { keyPath: string[] }) {
+    const route = keyPath.reverse().join('/')
+    navigate(route)
   }
 
   return (
@@ -75,7 +86,7 @@ function AdminLayout() {
         <div className={styles.logoWrapper}>
           <div className={styles.logo}>LOGO</div>
         </div>
-        <Menu mode="inline" defaultSelectedKeys={['1-2']} items={menuItems} onClick={handleMenuClick} />
+        <Menu mode="inline" selectedKeys={selectedKeys} openKeys={openKeys} items={menuItems} onClick={handleMenuClick} />
 
         <button className={styles.collapseButton} onClick={toggle}>
           {
