@@ -1,3 +1,5 @@
+import type { Response } from './common.ts'
+
 export interface Permission {
   id: number
   name: string
@@ -25,12 +27,6 @@ export interface LoginResponse {
   accessToken: string
   refreshToken: string
   userInfo: UserInfo
-}
-
-export interface Response<T> {
-  code: number
-  message: string
-  data: T
 }
 
 export type LoginResponseData = Promise<Response<LoginResponse>>

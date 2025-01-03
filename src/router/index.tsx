@@ -4,6 +4,7 @@ import { ProtectedRoute } from '../components/ProtectedRoute.tsx'
 import { Dashboard } from '../views/Dashboard/Dashboard.tsx'
 import { Login } from '../views/Login/Login.tsx'
 import { ProductList } from '../views/Product/ProductList.tsx'
+import { ProductType } from '../views/Product/ProductType.tsx'
 
 export const router = createBrowserRouter([
   {
@@ -40,7 +41,7 @@ export const router = createBrowserRouter([
           },
           {
             path: 'type',
-            element: <h1>Product Type</h1>,
+            element: <ProductType />,
             handle: {
               title: '产品类型',
             },

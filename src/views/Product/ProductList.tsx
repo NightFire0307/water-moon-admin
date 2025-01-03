@@ -1,6 +1,9 @@
 import type { TableColumnsType } from 'antd'
 import { Button, Divider, Flex, Form, Input, Select, Space, Table } from 'antd'
+import { useForm } from 'antd/es/form/Form'
 import dayjs from 'dayjs'
+import { useEffect, useState } from 'react'
+import { getProductList } from '../../apis/product.ts'
 
 interface Product {
   id: number
@@ -10,19 +13,30 @@ interface Product {
 }
 
 function ProductQueryForm() {
+  const [form] = useForm()
+
+  const handleQuery = () => {
+    const values = form.getFieldsValue()
+    console.log(values)
+  }
+
+  const handleReset = () => {
+    form.resetFields()
+  }
+
   return (
-    <Form layout="inline">
-      <Form.Item label="产品名称">
-        <Input />
+    <Form form={form} layout="inline">
+      <Form.Item label="产品名称" name="name">
+        <Input placeholder="请输入产品名称" />
       </Form.Item>
-      <Form.Item label="产品类型" style={{ width: '250px' }}>
+      <Form.Item label="产品类型" name="productType" style={{ width: '250px' }}>
         <Select placeholder="请选择产品类型"></Select>
       </Form.Item>
 
       <Form.Item>
         <Space>
-          <Button type="primary">查询</Button>
-          <Button>重置</Button>
+          <Button type="primary" onClick={handleQuery}>查询</Button>
+          <Button onClick={handleReset}>重置</Button>
         </Space>
       </Form.Item>
     </Form>
@@ -30,20 +44,12 @@ function ProductQueryForm() {
 }
 
 export function ProductList() {
-  const dataSource: Product[] = [
-    {
-      id: 3,
-      name: '水晶相册',
-      createdAt: '2024-12-19T04:48:27.429Z',
-      updatedAt: '2024-12-20T06:25:15.768Z',
-    },
-    {
-      id: 4,
-      name: '陌上花开',
-      createdAt: '2024-12-19T04:48:48.875Z',
-      updatedAt: '2024-12-20T06:25:18.687Z',
-    },
-  ]
+  const [dataSource, setDataSource] = useState<Product[]>([])
+  useEffect(() => {
+    getProductList().then(({ data }) => {
+      setDataSource(data.list)
+    })
+  }, [])
 
   const columns: TableColumnsType<Product> = [
     {

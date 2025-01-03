@@ -1,4 +1,7 @@
+import { message } from 'antd'
 import axios from 'axios'
+import localforage from 'localforage'
+import { useUserInfo } from '../store/useUserInfo.tsx'
 
 // create an axios instance
 const service = axios.create({
@@ -7,16 +10,21 @@ const service = axios.create({
 
 // request interceptor
 service.interceptors.request.use(
-  (config) => {
+  async (config) => {
+    const tokenFromStore = useUserInfo.getState().accessToken
+    const tokenFormLocal = await localforage.getItem('accessToken')
+
+    const accessToken = tokenFromStore || tokenFormLocal
+
     if (window.location.pathname === '/login') {
       return config
     }
 
     // 设置请求头部 Authorization
-    // if (store.token) {
-    //   config.headers.Authorization = `Bearer ${store.token}`
-    //   config.headers['Content-Type'] = 'application/json'
-    // }
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`
+      config.headers['Content-Type'] = 'application/json'
+    }
     return config
   },
   (error) => {
@@ -31,7 +39,7 @@ service.interceptors.response.use(
     return response.data
   },
   (error) => {
-    console.error(`err${error}`) // for debug
+    message.error(`接口请求错误：${error.code}`)
     return Promise.reject(error)
   },
 )
