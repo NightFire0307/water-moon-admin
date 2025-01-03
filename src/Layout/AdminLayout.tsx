@@ -86,7 +86,15 @@ function AdminLayout() {
         <div className={styles.logoWrapper}>
           <div className={styles.logo}>LOGO</div>
         </div>
-        <Menu mode="inline" selectedKeys={selectedKeys} openKeys={openKeys} items={menuItems} onClick={handleMenuClick} />
+
+        <Menu
+          mode="inline"
+          selectedKeys={selectedKeys}
+          openKeys={openKeys}
+          items={menuItems}
+          onClick={handleMenuClick}
+          onOpenChange={openKey => setOpenKeys(openKey)}
+        />
 
         <button className={styles.collapseButton} onClick={toggle}>
           {
