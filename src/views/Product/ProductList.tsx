@@ -1,9 +1,9 @@
 import type { TableColumnsType } from 'antd'
+import { getProductList } from '@/apis/product.ts'
 import { Button, Divider, Flex, Form, Input, Select, Space, Table } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
-import { getProductList } from '../../apis/product.ts'
 
 interface Product {
   id: number

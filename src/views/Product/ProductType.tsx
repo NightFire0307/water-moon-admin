@@ -1,10 +1,10 @@
+import type { IProductType } from '@/types/product.ts'
 import type { TableColumnsType } from 'antd'
-import type { IProductType } from '../../types/product.ts'
+import { createProductType, deleteProductType, getProductTypes, queryProductByName } from '@/apis/product.ts'
 import { Button, Divider, Form, Input, message, Modal, Popconfirm, Space, Table } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
-import { createProductType, deleteProductType, getProductTypes, queryProductByName } from '../../apis/product.ts'
 
 interface IProductQueryForm {
   onQuery: (name: string) => void
