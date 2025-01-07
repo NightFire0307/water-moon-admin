@@ -1,9 +1,9 @@
 import type { IProductType } from '@/types/product.ts'
 import type { TableColumnsType } from 'antd'
 import { createProductType, deleteProductType, getProductTypes, queryProductByName } from '@/apis/product.ts'
+import { formatDate } from '@/utils/formatDate.ts'
 import { Button, Divider, Form, Input, message, Modal, Popconfirm, Space, Table } from 'antd'
 import { useForm } from 'antd/es/form/Form'
-import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 
 interface IProductQueryForm {
@@ -63,16 +63,12 @@ export function ProductType() {
     {
       title: '创建时间',
       dataIndex: 'createdAt',
-      render: ({ createdAt }: IProductType) => {
-        return dayjs(createdAt).format('YYYY-MM-DD HH:mm:ss')
-      },
+      render: formatDate,
     },
     {
       title: '更新时间',
       dataIndex: 'updatedAt',
-      render: ({ updatedAt }: IProductType) => {
-        return dayjs(updatedAt).format('YYYY-MM-DD HH:mm:ss')
-      },
+      render: formatDate,
     },
     {
       title: '操作',

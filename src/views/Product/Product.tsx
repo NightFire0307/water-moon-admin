@@ -2,11 +2,11 @@ import type { ProductQueryParams } from '@/apis/product.ts'
 import type { IProduct, IProductType } from '@/types/product.ts'
 import type { TableColumnsType } from 'antd'
 import { createProduct, deleteProduct, getProductById, getProductList, getProductTypes, updateProduct } from '@/apis/product.ts'
+import { formatDate } from '@/utils/formatDate.ts'
 import { ProductModalForm } from '@/views/Product/ProductModalForm.tsx'
 import { ProductQueryForm } from '@/views/Product/ProductQueryForm.tsx'
-import { Button, Divider, Flex, message, Popconfirm, Space, Table } from 'antd'
 
-import dayjs from 'dayjs'
+import { Button, Divider, Flex, message, Popconfirm, Space, Table } from 'antd'
 import { useEffect, useState } from 'react'
 
 export function Product() {
@@ -90,8 +90,6 @@ export function Product() {
     }
     loadData()
   }, [])
-
-  const formatDate = (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm:ss')
 
   const columns: TableColumnsType<IProduct> = [
     {
