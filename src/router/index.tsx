@@ -3,8 +3,8 @@ import App from '../App.tsx'
 import { ProtectedRoute } from '../components/ProtectedRoute.tsx'
 import { Dashboard } from '../views/Dashboard/Dashboard.tsx'
 import { Login } from '../views/Login/Login.tsx'
-import { ProductList } from '../views/Product/ProductList.tsx'
-import { ProductType } from '../views/Product/ProductType.tsx'
+import { Product } from '../views/Product/Product.tsx'
+import { ProductType } from '../views/ProductType/ProductType.tsx'
 
 export const router = createBrowserRouter([
   {
@@ -34,7 +34,7 @@ export const router = createBrowserRouter([
         children: [
           {
             path: 'list',
-            element: <ProductList />,
+            element: <Product />,
             handle: {
               title: '产品列表',
             },

@@ -1,11 +1,52 @@
 import type { Response } from '../types/common.ts'
-import type { ProductTypeResponse } from '../types/product.ts'
+import type { IProduct, ProductResponse, ProductTypeResponse } from '../types/product.ts'
 import request from '../utils/request.ts'
 
-export function getProductList(): ProductTypeResponse {
+export interface ProductQueryParams {
+  name?: string
+  productType?: number
+}
+
+export function getProductList(params: ProductQueryParams): ProductResponse {
   return request({
     url: '/api/admin/product',
     method: 'GET',
+    params,
+  })
+}
+
+export interface ProductCreateParams {
+  name: string
+  productType: number
+}
+
+export function createProduct(data: ProductCreateParams): Promise<Response<IProduct>> {
+  return request({
+    url: '/api/admin/product',
+    method: 'POST',
+    data,
+  })
+}
+
+export function getProductById(id: number) {
+  return request({
+    url: `/api/admin/product/${id}`,
+    method: 'GET',
+  })
+}
+
+export function updateProduct(id: number, data: ProductCreateParams): Promise<Response<IProduct>> {
+  return request({
+    url: `/api/admin/product/${id}`,
+    method: 'PUT',
+    data,
+  })
+}
+
+export function deleteProduct(id: number): Promise<Response<string>> {
+  return request({
+    url: `/api/admin/product/${id}`,
+    method: 'DELETE',
   })
 }
 
@@ -16,7 +57,7 @@ export function queryProductByName(name: string): ProductTypeResponse {
   })
 }
 
-export function getProductTypes() {
+export function getProductTypes(): ProductTypeResponse {
   return request({
     url: '/api/admin/product/type',
     method: 'GET',
