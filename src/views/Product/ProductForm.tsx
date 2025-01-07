@@ -54,7 +54,7 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>((props, 
                   )
                 : field.type === 'select' && field.options
                   ? (
-                      <Select options={field.options} fieldNames={field.filedNames} placeholder={field.placeholder || ''} />
+                      <Select options={field.options} fieldNames={field.filedNames} placeholder={field.placeholder || ''} style={{ width: '200px' }} />
                     )
                   : null
             }
