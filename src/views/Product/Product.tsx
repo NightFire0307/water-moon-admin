@@ -68,6 +68,16 @@ export function Product() {
     fetchProductList({})
   }
 
+  async function handleQuery(values: { name?: string, productType?: number }) {
+    try {
+      const { data } = await getProductList(values)
+      setDataSource(data.list)
+    }
+    catch {
+      message.error('查询失败')
+    }
+  }
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -123,7 +133,11 @@ export function Product() {
 
   return (
     <>
-      <ProductQueryForm onQuery={() => {}} onReset={() => fetchProductList({})} />
+      <ProductQueryForm
+        productTypeOptions={options}
+        onQuery={handleQuery}
+        onReset={() => fetchProductList({})}
+      />
       <Divider />
       <Flex>
         <Button

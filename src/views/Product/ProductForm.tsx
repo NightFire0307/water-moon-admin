@@ -18,7 +18,8 @@ interface ProductFormProps {
   layout?: 'vertical' | 'horizontal' | 'inline'
   submitButtonText?: string // 提交按钮文案
   cancelButtonText?: string // 取消按钮文案
-  onSubmit: (values: any) => void
+  onSubmit?: (values: any) => void
+  onReset?: () => void
   footer?: ReactNode
 }
 
@@ -28,7 +29,7 @@ export interface ProductFormRef {
 }
 
 export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>((props, ref) => {
-  const { fields, layout = 'horizontal', submitButtonText, cancelButtonText = '取消', onSubmit, footer } = props
+  const { fields, layout = 'horizontal', submitButtonText = '提交', cancelButtonText = '取消', onSubmit, onReset, footer } = props
   const [form] = useForm()
 
   // 通过 useImperativeHandle 暴露给父组件调用
@@ -65,7 +66,13 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>((props, 
           footer || (
             <Space>
               <Button type="primary" htmlType="submit">{submitButtonText}</Button>
-              <Button onClick={() => form.resetFields()}>{cancelButtonText}</Button>
+              <Button onClick={() => {
+                form.resetFields()
+                onReset && onReset()
+              }}
+              >
+                {cancelButtonText}
+              </Button>
             </Space>
           )
         }
