@@ -22,7 +22,7 @@ export function ProductQueryForm(props: IProductQueryFormProps) {
         },
         {
           label: '产品类型',
-          name: 'productType',
+          name: 'productTypeId',
           type: 'select',
           placeholder: '请选择产品类型',
           options: productTypeOptions,
