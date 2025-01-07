@@ -69,9 +69,19 @@ export function Product() {
   }
 
   useEffect(() => {
-    fetchProductList({})
-    fetchProductTypes()
+    const loadData = async () => {
+      try {
+        await fetchProductList({})
+        await fetchProductTypes()
+      }
+      catch {
+        message.error('加载数据失败')
+      }
+    }
+    loadData()
   }, [])
+
+  const formatDate = (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm:ss')
 
   const columns: TableColumnsType<IProduct> = [
     {
@@ -85,12 +95,12 @@ export function Product() {
     {
       title: '创建时间',
       dataIndex: 'createdAt',
-      render: (value: string) => dayjs(value).format('YYYY-MM-DD HH:mm:ss'),
+      render: formatDate,
     },
     {
       title: '更新时间',
       dataIndex: 'updatedAt',
-      render: (value: string) => dayjs(value).format('YYYY-MM-DD HH:mm:ss'),
+      render: formatDate,
     },
     {
       title: '操作',
@@ -98,7 +108,11 @@ export function Product() {
         return (
           <Space>
             <Button type="link" onClick={() => handleEdit(value.id)}>编辑</Button>
-            <Popconfirm title="是否确认删除？" onConfirm={() => handleDelete(value.id)}>
+            <Popconfirm
+              title="是否确认删除？"
+              onConfirm={() => handleDelete(value.id)}
+              onCancel={() => message.info('操作取消')}
+            >
               <Button type="link" danger>删除</Button>
             </Popconfirm>
           </Space>
