@@ -2,14 +2,17 @@ import type { IOrder } from '@/types/order.ts'
 import type { TableColumnProps } from 'antd'
 import { getOrderList } from '@/apis/order.ts'
 import { OrderStatus } from '@/types/order.ts'
+import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
 import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
-import { PlusOutlined, RedoOutlined } from '@ant-design/icons'
 
+import { PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Divider, Flex, Space, Table, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
 
 export function Order() {
   const [dataSource, setDataSource] = useState<IOrder[]>([])
+  const [mode, setMode] = useState<'create' | 'edit'>('create')
+  const [modalVisible, SetModalVisible] = useState(false)
 
   const columns: TableColumnProps[] = [
     {
@@ -87,12 +90,22 @@ export function Order() {
       <OrderQueryForm onQuery={handleQuery} onReset={() => fetchOrderList()} />
       <Divider />
       <Flex justify="flex-end" gap={4}>
-        <Button icon={<PlusOutlined />} type="primary">新 建</Button>
+        <Button
+          icon={<PlusOutlined />}
+          type="primary"
+          onClick={() => {
+            setMode('create')
+            SetModalVisible(true)
+          }}
+        >
+          新 建
+        </Button>
         <Tooltip title="刷新">
           <Button icon={<RedoOutlined rotate={-90} />} type="text" />
         </Tooltip>
       </Flex>
       <Table rowKey="id" dataSource={dataSource} columns={columns} style={{ marginTop: '14px' }} bordered />
+      <OrderModalForm open={modalVisible} mode={mode} />
     </>
   )
 }
