@@ -1,5 +1,5 @@
 import type { IProductType } from '@/types/product.ts'
-import { ProductForm } from '@/views/Product/ProductForm.tsx'
+import { CustomForm } from '@/components/CustomForm.tsx'
 
 interface IProductQueryFormProps {
   productTypeOptions: IProductType[]
@@ -11,7 +11,7 @@ export function ProductQueryForm(props: IProductQueryFormProps) {
   const { onQuery, onReset, productTypeOptions } = props
 
   return (
-    <ProductForm
+    <CustomForm
       layout="inline"
       fields={[
         {

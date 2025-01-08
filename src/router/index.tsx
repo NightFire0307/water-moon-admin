@@ -1,3 +1,4 @@
+import { Order } from '@/views/Order/Order.tsx'
 import { createBrowserRouter } from 'react-router'
 import App from '../App.tsx'
 import { ProtectedRoute } from '../components/ProtectedRoute.tsx'
@@ -25,6 +26,21 @@ export const router = createBrowserRouter([
         handle: {
           title: '仪表盘',
         },
+      },
+      {
+        path: 'selection',
+        handle: {
+          title: '选片管理',
+        },
+        children: [
+          {
+            path: 'order',
+            element: <Order />,
+            handle: {
+              title: '订单列表',
+            },
+          },
+        ],
       },
       {
         path: 'product',

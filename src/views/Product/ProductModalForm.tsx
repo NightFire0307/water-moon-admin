@@ -1,6 +1,6 @@
 import type { IProductType } from '@/types/product.ts'
-import type { ProductFormRef } from './ProductForm.tsx'
-import { ProductForm } from '@/views/Product/ProductForm.tsx'
+import type { ProductFormRef } from '../../components/CustomForm.tsx'
+import { CustomForm } from '@/components/CustomForm.tsx'
 import { Button, Modal, Space } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 
@@ -49,7 +49,7 @@ export function ProductModalForm(props: ProductModalFormProps) {
       confirmLoading={confirmLoading}
       centered
     >
-      <ProductForm
+      <CustomForm
         ref={formRef}
         fields={[
           {

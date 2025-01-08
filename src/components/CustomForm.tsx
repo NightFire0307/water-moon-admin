@@ -11,6 +11,7 @@ export interface Field {
   initialValue?: string
   options?: Array<any> // Select 时需要传入选项
   filedNames?: { label: string, value: string } // Select 时需要传入字段名
+  optionRender?: (option: any) => ReactNode // Select 时需要传入渲染函数
 }
 
 interface ProductFormProps {
@@ -28,8 +29,8 @@ export interface ProductFormRef {
   setFormValues: (values: any) => void
 }
 
-export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>((props, ref) => {
-  const { fields, layout = 'horizontal', submitButtonText = '提交', cancelButtonText = '取消', onSubmit, onReset, footer } = props
+export const CustomForm = forwardRef<ProductFormRef, ProductFormProps>((props, ref) => {
+  const { fields, layout = 'horizontal', submitButtonText = '提交', cancelButtonText = '重置', onSubmit, onReset, footer } = props
   const [form] = useForm()
 
   // 通过 useImperativeHandle 暴露给父组件调用
@@ -54,7 +55,13 @@ export const ProductForm = forwardRef<ProductFormRef, ProductFormProps>((props, 
                   )
                 : field.type === 'select' && field.options
                   ? (
-                      <Select options={field.options} fieldNames={field.filedNames} placeholder={field.placeholder || ''} style={{ width: '200px' }} />
+                      <Select
+                        options={field.options}
+                        fieldNames={field.filedNames}
+                        placeholder={field.placeholder || ''}
+                        optionRender={field.optionRender}
+                        style={{ width: '200px' }}
+                      />
                     )
                   : null
             }
