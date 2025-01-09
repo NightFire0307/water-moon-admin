@@ -1,4 +1,4 @@
-import type { CheckboxOptionType } from 'antd'
+import type { CheckboxOptionType, FormItemProps } from 'antd'
 import type { CSSProperties, ReactNode } from 'react'
 import { Button, Col, Form, Input, InputNumber, Radio, Row, Select, Space, Switch } from 'antd'
 import { useForm } from 'antd/es/form/Form'
@@ -49,9 +49,10 @@ export interface Field extends InputNumberField, SelectField, RadioField {
   children?: Field[]
   fieldCols?: number
   noStyle?: boolean
+  rules?: FormItemProps['rules']
 }
 
-interface ProductFormProps {
+interface CustomFormProps {
   fields: Field[]
   initialValues?: object
   fieldCols?: number // 字段列数
@@ -64,12 +65,14 @@ interface ProductFormProps {
   styles?: CSSProperties
 }
 
-export interface ProductFormRef {
+export interface CustomFormRef {
   resetForm: () => void
   setFormValues: (values: any) => void
+  getFormValues: () => any
+  validateFields: () => Promise<any>
 }
 
-export const CustomForm = forwardRef<ProductFormRef, ProductFormProps>((props, ref) => {
+export const CustomForm = forwardRef<CustomFormRef, CustomFormProps>((props, ref) => {
   const {
     fields,
     initialValues,
@@ -129,6 +132,12 @@ export const CustomForm = forwardRef<ProductFormRef, ProductFormProps>((props, r
     setFormValues: (values) => {
       form.setFieldsValue(values)
     },
+    getFormValues: () => {
+      return form.getFieldsValue()
+    },
+    validateFields: async () => {
+      return await form.validateFields()
+    },
   }))
 
   // 递归渲染字段
@@ -137,7 +146,7 @@ export const CustomForm = forwardRef<ProductFormRef, ProductFormProps>((props, r
       if (field.type === 'switch') {
         return (
           <Col span={field.fieldCols ? (24 / field.fieldCols) : colSpan} key={field.name}>
-            <Form.Item label={field.label} name={field.name} valuePropName="checked">
+            <Form.Item label={field.label} name={field.name} valuePropName="checked" rules={field.rules}>
               <Switch onChange={checked => handleSwitchChange(field.name, checked)} />
             </Form.Item>
             {field.children && visibleFields[field.name] && (
@@ -153,7 +162,7 @@ export const CustomForm = forwardRef<ProductFormRef, ProductFormProps>((props, r
       else if (field.type === 'radioGroup' && field.radioOptions) {
         return (
           <Col span={field.fieldCols ? (24 / field.fieldCols) : colSpan} key={field.name}>
-            <Form.Item label={field.label} name={field.name}>
+            <Form.Item label={field.label} name={field.name} rules={field.rules}>
               <Radio.Group options={field.radioOptions} onChange={e => handleRadioChange(field.name, e.target.value)} />
             </Form.Item>
             {field.children && visibleFields[field.name] && (
@@ -169,7 +178,12 @@ export const CustomForm = forwardRef<ProductFormRef, ProductFormProps>((props, r
       else {
         return (
           <Col span={field.fieldCols ? (24 / field.fieldCols) : colSpan} key={field.name}>
-            <Form.Item label={field.label} name={field.name} noStyle={field.noStyle}>
+            <Form.Item
+              label={field.label}
+              name={field.name}
+              noStyle={field.noStyle}
+              rules={field.rules}
+            >
               {/* 渲染输入框 */}
               {field.type === 'input' && <Input placeholder={field.placeholder || ''} count={field.count} />}
               {/* 渲染数字输入框 */}
