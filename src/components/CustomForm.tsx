@@ -2,8 +2,9 @@ import type { CheckboxOptionType } from 'antd'
 import type { CSSProperties, ReactNode } from 'react'
 import { Button, Col, Form, Input, InputNumber, Radio, Row, Select, Space, Switch } from 'antd'
 import { useForm } from 'antd/es/form/Form'
-import { forwardRef, useImperativeHandle, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
+// InputNumberField 用于 InputNumber 类型的字段
 interface InputNumberField {
   addonAfter?: ReactNode // InputNumber 时需要传入后缀
   step?: number // InputNumber 每次改变步数，可以为小数
@@ -11,15 +12,20 @@ interface InputNumberField {
   max?: number // InputNumber 最大值
 }
 
+// SelectField 用于 Select 类型的字段
 interface SelectField {
   options?: Array<any> // Select 时需要传入选项
-  filedNames?: { label: string, value: string } // Select 时需要传入字段名
+  fieldNames?: { label: string, value: string } // Select 时需要传入字段名
   mode?: 'multiple' | 'tags' // Select 时需要传入是否多选
 }
 
+// RadioField 用于 Radio 类型的字段
 interface RadioField {
   radioOptions?: string[] | number[] | Array<CheckboxOptionType>
-  vIf?: string
+  whenShow?: {
+    name: string
+    value: any
+  }
 }
 
 export interface Field extends InputNumberField, SelectField, RadioField {
@@ -68,6 +74,25 @@ export const CustomForm = forwardRef<ProductFormRef, ProductFormProps>((props, r
   const [form] = useForm()
   const colSpan = 24 / fieldCols // 计算每个 Col 的 span
   const totalRows = Math.ceil(fields.length / fieldCols) // 计算出行数
+  const whenShowMap = useRef<{ [key: string]: any }>()
+
+  // 建立whenShow字段的映射
+  function buildWhenShowMap(fields: Field[]) {
+    const map: { [key: string]: any } = {}
+    fields.forEach((field) => {
+      if (field.whenShow) {
+        map[field.whenShow.name] = field.whenShow.value
+      }
+      if (field.children) {
+        Object.assign(map, buildWhenShowMap(field.children))
+      }
+    })
+    return map
+  }
+
+  useEffect(() => {
+    whenShowMap.current = buildWhenShowMap(fields)
+  }, [fields])
 
   function handleSwitchChange(name: string, checked: boolean) {
     setVisibleFields(prev => ({
@@ -78,11 +103,9 @@ export const CustomForm = forwardRef<ProductFormRef, ProductFormProps>((props, r
 
   // 处理 radio 选项变化，控制字段显示
   function handleRadioChange(name: string, value: any) {
-    debugger
-    // 根据选择的值更新对应字段的可见性
     setVisibleFields(prev => ({
       ...prev,
-      [name]: value === 'custom', // 假设选择 custom 时显示相关字段
+      [name]: whenShowMap.current ? whenShowMap.current[name] === value : false,
     }))
   }
 
@@ -106,7 +129,7 @@ export const CustomForm = forwardRef<ProductFormRef, ProductFormProps>((props, r
               <Switch onChange={checked => handleSwitchChange(field.name, checked)} />
             </Form.Item>
             {field.children && visibleFields[field.name] && (
-              <Row gutter={[16, 16]}>
+              <Row gutter={16}>
                 {renderFields(field.children)}
                 {' '}
                 {/* 递归渲染子字段 */}
@@ -122,7 +145,7 @@ export const CustomForm = forwardRef<ProductFormRef, ProductFormProps>((props, r
               <Radio.Group options={field.radioOptions} onChange={e => handleRadioChange(field.name, e.target.value)} />
             </Form.Item>
             {field.children && visibleFields[field.name] && (
-              <Row gutter={[16, 16]}>
+              <Row gutter={16}>
                 {renderFields(field.children)}
                 {' '}
                 {/* 递归渲染子字段 */}
@@ -159,7 +182,7 @@ export const CustomForm = forwardRef<ProductFormRef, ProductFormProps>((props, r
               {/* 渲染group */}
               {
                 field.type === 'group' && field.children && (
-                  <Row gutter={[16, 16]}>
+                  <Row gutter={16}>
                     {renderFields(field.children)}
                   </Row>
                 )
