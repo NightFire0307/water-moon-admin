@@ -4,12 +4,24 @@ import { Button, Col, Form, Input, InputNumber, Radio, Row, Select, Space, Switc
 import { useForm } from 'antd/es/form/Form'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
+interface CountConfig {
+  // 最大字符数，不同于原生 `maxLength`，超出后标红但不会截断
+  max?: number
+  // 自定义字符计数，例如标准 emoji 长度大于 1，可以自定义计数策略将其改为 1
+  strategy?: (value: string) => number
+  // 同 `showCount`
+  show?: boolean | ((args: { value: string, count: number, maxLength?: number }) => ReactNode)
+  // 当字符数超出 `count.max` 时的自定义裁剪逻辑，不配置时不进行裁剪
+  exceedFormatter?: (value: string, config: { max: number }) => string
+}
+
 // InputNumberField 用于 InputNumber 类型的字段
 interface InputNumberField {
   addonAfter?: ReactNode // InputNumber 时需要传入后缀
   step?: number // InputNumber 每次改变步数，可以为小数
   min?: number // InputNumber 最小值
   max?: number // InputNumber 最大值
+  count?: CountConfig
 }
 
 // SelectField 用于 Select 类型的字段
@@ -159,7 +171,7 @@ export const CustomForm = forwardRef<ProductFormRef, ProductFormProps>((props, r
           <Col span={field.fieldCols ? (24 / field.fieldCols) : colSpan} key={field.name}>
             <Form.Item label={field.label} name={field.name} noStyle={field.noStyle}>
               {/* 渲染输入框 */}
-              {field.type === 'input' && <Input placeholder={field.placeholder || ''} />}
+              {field.type === 'input' && <Input placeholder={field.placeholder || ''} count={field.count} />}
               {/* 渲染数字输入框 */}
               {field.type === 'inputNumber' && (
                 <InputNumber
