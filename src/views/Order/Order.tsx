@@ -11,7 +11,6 @@ import { useEffect, useState } from 'react'
 
 export function Order() {
   const [dataSource, setDataSource] = useState<IOrder[]>([])
-  const [mode, setMode] = useState<'create' | 'edit'>('create')
   const [modalVisible, SetModalVisible] = useState(false)
 
   const columns: TableColumnProps[] = [
@@ -94,7 +93,6 @@ export function Order() {
           icon={<PlusOutlined />}
           type="primary"
           onClick={() => {
-            setMode('create')
             SetModalVisible(true)
           }}
         >
@@ -105,7 +103,10 @@ export function Order() {
         </Tooltip>
       </Flex>
       <Table rowKey="id" dataSource={dataSource} columns={columns} style={{ marginTop: '14px' }} bordered />
-      <OrderModalForm open={modalVisible} mode={mode} />
+      <OrderModalForm
+        open={modalVisible}
+        onCancel={() => SetModalVisible(false)}
+      />
     </>
   )
 }
