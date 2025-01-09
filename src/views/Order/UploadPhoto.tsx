@@ -63,6 +63,12 @@ export function UploadPhoto() {
     setDataSource(dataSource.filter(item => item.key !== key))
   }
 
+  // 清空所有文件
+  function handleAllClear() {
+    setFileList([])
+    setDataSource([])
+  }
+
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
       <Flex justify="space-between">
@@ -70,7 +76,7 @@ export function UploadPhoto() {
           <Upload {...uploadProps}>
             <Button>选择文件</Button>
           </Upload>
-          <Button disabled={dataSource.length === 0}>清空文件</Button>
+          <Button disabled={dataSource.length === 0} onClick={handleAllClear}>清空文件</Button>
         </Space>
         <Button type="primary" disabled={dataSource.length === 0}>开始上传</Button>
       </Flex>
