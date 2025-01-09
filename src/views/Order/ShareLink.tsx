@@ -46,10 +46,20 @@ export function ShareLink() {
           ],
           children: [
             {
-              vIf: 'custom',
+              whenShow: {
+                name: 'password_generate',
+                value: 'custom',
+              },
               name: 'custom_password',
               type: 'input',
               placeholder: '请输入自定义密码',
+              fieldCols: 3,
+              count: {
+                show: true,
+                max: 6,
+                strategy: txt => txt.length,
+                exceedFormatter: (txt, { max }) => txt.slice(0, max),
+              },
             },
           ],
         },
