@@ -4,9 +4,9 @@ import { getOrderList } from '@/apis/order.ts'
 import { OrderStatus } from '@/types/order.ts'
 import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
 import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
+import { MoreOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
+import { Badge, Button, Divider, Dropdown, Flex, Space, Table, Tag, Tooltip } from 'antd'
 
-import { PlusOutlined, RedoOutlined } from '@ant-design/icons'
-import { Badge, Button, Divider, Flex, Space, Table, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
 
 export function Order() {
@@ -61,12 +61,37 @@ export function Order() {
       dataIndex: 'total_photos',
       render: value => <span style={{ color: '#faad14' }}>{value}</span>,
     },
+    {
+      title: '链接状态',
+      dataIndex: 'link_status',
+      render: () => <Tag color="red">未生成</Tag>,
+    },
     { title: '操作', dataIndex: 'action', render: () => (
       <Space>
-        <a>查看</a>
-        <a>重置</a>
+        <a>详情</a>
         <a>编辑</a>
-        <a>删除</a>
+        <Dropdown menu={{
+          items: [
+            {
+              key: 'view_link',
+              label: '查看链接',
+            },
+            {
+              key: 'reset_status',
+              label: '重置状态',
+            },
+            {
+              key: 'delete',
+              label: '删除',
+              danger: true,
+            },
+          ],
+        }}
+        >
+          <a onClick={e => e.preventDefault()}>
+            <MoreOutlined />
+          </a>
+        </Dropdown>
       </Space>
     ) },
   ]

@@ -8,6 +8,16 @@ export enum OrderStatus {
   EXPIRED = 3,
 }
 
+export interface CreateOrderData {
+  order_number: string
+  customer_name: string
+  customer_phone: string
+  order_products: number[]
+  max_select_photos: number
+  is_extra_allowed: boolean
+  extra_photo_price: number
+}
+
 export interface IOrder {
   id: number
   order_number: string
