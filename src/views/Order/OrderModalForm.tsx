@@ -2,7 +2,7 @@ import type { CustomFormRef, Field } from '@/components/CustomForm.tsx'
 import type { IProduct } from '@/types/product.ts'
 import { createOrder } from '@/apis/order.ts'
 import { getProductList } from '@/apis/product.ts'
-import { CustomForm } from '@/components/CustomForm.tsx'
+import { CreateOrder } from '@/views/Order/CreateOrder.tsx'
 import { ShareLink } from '@/views/Order/ShareLink.tsx'
 import { UploadPhoto } from '@/views/Order/UploadPhoto.tsx'
 import { Button, message, Modal, Result, Space, Steps } from 'antd'
@@ -206,19 +206,20 @@ export function OrderModalForm(props: OrderModalFormProps) {
       >
         {
           currentStep === 0 && (
-            <CustomForm
-              initialValues={{
-                order_number: 'D9111',
-                customer_name: '张三',
-                customer_phone: '13800138000',
-                max_select_photos: 10,
-                is_extra_allowed: false,
-              }}
-              ref={formRef}
-              layout="vertical"
-              fields={fields}
-              footer={null}
-            />
+            // <CustomForm
+            //   initialValues={{
+            //     order_number: 'D9111',
+            //     customer_name: '张三',
+            //     customer_phone: '13800138000',
+            //     max_select_photos: 10,
+            //     is_extra_allowed: false,
+            //   }}
+            //   ref={formRef}
+            //   layout="vertical"
+            //   fields={fields}
+            //   footer={null}
+            // />
+            <CreateOrder />
           )
         }
 
