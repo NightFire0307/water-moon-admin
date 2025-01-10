@@ -27,7 +27,7 @@ interface InputNumberField {
 // SelectField 用于 Select 类型的字段
 interface SelectField {
   options?: Array<any> // Select 时需要传入选项
-  fieldNames?: { label: string, value: string } // Select 时需要传入字段名
+  fieldNames?: { label?: string, value?: string, options?: string, groupLabel?: string } // Select 时需要传入字段名
   mode?: 'multiple' | 'tags' // Select 时需要传入是否多选
 }
 
@@ -201,6 +201,13 @@ export const CustomForm = forwardRef<CustomFormRef, CustomFormProps>((props, ref
                 <Select
                   mode={field.mode}
                   options={field.options}
+                  fieldNames={{
+                    label: 'label',
+                    value: 'value',
+                    options: 'options',
+                    groupLabel: 'label',
+                    ...field.fieldNames,
+                  }}
                   placeholder={field.placeholder || ''}
                   style={{ width: '200px' }}
                 />
