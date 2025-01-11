@@ -1,13 +1,21 @@
 import type { IOrder } from '@/types/order.ts'
 import type { TableColumnProps } from 'antd'
-import { getOrderList } from '@/apis/order.ts'
+import { getOrderList, removeOrder } from '@/apis/order.ts'
 import { OrderStatus } from '@/types/order.ts'
 import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
 import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
 import { MoreOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
-import { Badge, Button, Divider, Dropdown, Flex, Space, Table, Tag, Tooltip } from 'antd'
+import { Badge, Button, Divider, Dropdown, Flex, message, Modal, Space, Table, Tag, Tooltip } from 'antd'
 
 import { useEffect, useState } from 'react'
+
+const { confirm } = Modal
+
+enum OrderAction {
+  VIEW_LINK = 'view_link',
+  RESET = 'reset',
+  DELETE = 'delete',
+}
 
 export function Order() {
   const [dataSource, setDataSource] = useState<IOrder[]>([])
@@ -66,27 +74,32 @@ export function Order() {
       dataIndex: 'link_status',
       render: () => <Tag color="red">未生成</Tag>,
     },
-    { title: '操作', dataIndex: 'action', render: () => (
+    { title: '操作', dataIndex: 'action', render: (_, record) => (
       <Space>
         <a>详情</a>
         <a>编辑</a>
-        <Dropdown menu={{
-          items: [
-            {
-              key: 'view_link',
-              label: '查看链接',
+        <Dropdown
+          menu={{
+            items: [
+              {
+                key: OrderAction.VIEW_LINK,
+                label: '查看链接',
+              },
+              {
+                key: OrderAction.RESET,
+                label: '重置状态',
+              },
+              {
+                key: OrderAction.DELETE,
+                label: '删除',
+                danger: true,
+              },
+            ],
+            onClick: ({ key }) => {
+              const id = (record as IOrder).id
+              handleMenuClick(key, id)
             },
-            {
-              key: 'reset_status',
-              label: '重置状态',
-            },
-            {
-              key: 'delete',
-              label: '删除',
-              danger: true,
-            },
-          ],
-        }}
+          }}
         >
           <a onClick={e => e.preventDefault()}>
             <MoreOutlined />
@@ -95,6 +108,38 @@ export function Order() {
       </Space>
     ) },
   ]
+
+  function handleMenuClick(key: string, id: number) {
+    if (key === OrderAction.DELETE) {
+      confirm({
+        title: '您确定要删除这个订单吗？',
+        content: '删除后无法恢复',
+        okText: '确定',
+        okType: 'danger',
+        cancelText: '取消',
+        onOk() {
+          return new Promise((resolve, reject) => {
+            (async () => {
+              try {
+                const { code } = await removeOrder(id)
+                if (code === 200) {
+                  message.success('删除成功')
+                  await fetchOrderList()
+                  resolve(null)
+                }
+                else {
+                  reject(new Error('删除失败'))
+                }
+              }
+              catch {
+                reject(new Error('删除失败'))
+              }
+            })()
+          })
+        },
+      })
+    }
+  }
 
   function handleQuery(values: any) {
     console.log(values)
