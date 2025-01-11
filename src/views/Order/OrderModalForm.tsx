@@ -1,12 +1,13 @@
-import type { CustomFormRef, Field } from '@/components/CustomForm.tsx'
-import type { IProduct } from '@/types/product.ts'
+import type { CreateOrderData } from '@/types/order.ts'
+import type { CreateOrderRef } from '@/views/Order/CreateOrder.tsx'
 import { createOrder } from '@/apis/order.ts'
-import { getProductList } from '@/apis/product.ts'
 import { CreateOrder } from '@/views/Order/CreateOrder.tsx'
 import { ShareLink } from '@/views/Order/ShareLink.tsx'
 import { UploadPhoto } from '@/views/Order/UploadPhoto.tsx'
 import { Button, message, Modal, Result, Space, Steps } from 'antd'
-import { useEffect, useRef, useState } from 'react'
+import { createContext, useRef, useState } from 'react'
+
+export const LockedOrder = createContext(false)
 
 interface OrderModalFormProps {
   open: boolean
@@ -17,137 +18,41 @@ export function OrderModalForm(props: OrderModalFormProps) {
   const { open, onCancel } = props
   const [currentStep, setCurrentStep] = useState(0)
   const [createLoading, setCreateLoading] = useState(false)
-  const [productOptions, setProductOptions] = useState<IProduct[]>([])
-  const formRef = useRef<CustomFormRef>(null)
-
-  const fields: Field[] = [
-    {
-      label: '订单号',
-      name: 'order_number',
-      type: 'input',
-      rules: [{
-        required: true,
-        message: '请输入订单号',
-      }],
-      placeholder: '请输入订单号',
-    },
-    {
-      label: '客户姓名',
-      name: 'customer_name',
-      type: 'input',
-      rules: [{
-        required: true,
-        message: '请输入客户姓名',
-      }],
-      placeholder: '请输入客户姓名',
-    },
-    {
-      label: '客户手机',
-      name: 'customer_phone',
-      type: 'input',
-      rules: [
-        {
-          required: true,
-          message: '请输入客户手机',
-        },
-        () => ({
-          validator(_, value) {
-            if (!value || /^1[3-9]\d{9}$/.test(value)) {
-              return Promise.resolve()
-            }
-            return Promise.reject(new Error('请输入正确的手机号码'))
-          },
-        }),
-      ],
-      placeholder: '请输入客户手机',
-    },
-    {
-      label: '可选',
-      name: 'max_select_photos',
-      type: 'inputNumber',
-      addonAfter: '张',
-      min: 1,
-      placeholder: '请输入可选张数',
-      rules: [{
-        required: true,
-        message: '请输入可选张数',
-      }],
-    },
-    {
-      label: '产品选择',
-      name: 'order_products',
-      type: 'select',
-      mode: 'multiple',
-      placeholder: '请选择产品',
-      fieldNames: { label: 'name', value: 'id' },
-      options: [
-        {
-          label: '单品',
-          title: '单品',
-          options: productOptions,
-        },
-        {
-          label: '套餐',
-          title: '套餐',
-          options: [
-            {
-              name: '套餐-1',
-              id: '21',
-            },
-            {
-              name: '套餐-2',
-              id: '22',
-            },
-          ],
-        },
-      ],
-      rules: [
-        {
-          required: true,
-          message: '请选择产品',
-        },
-      ],
-    },
-    {
-      label: '允许超选',
-      name: 'is_extra_allowed',
-      type: 'switch',
-      fieldCols: 1,
-      children: [
-        {
-          label: '超选单价',
-          name: 'extra_photo_price',
-          type: 'inputNumber',
-          addonAfter: '元 / 张',
-          step: 100,
-        },
-      ],
-    },
-  ]
+  const [submittedOrderData, setSubmittedOrderData] = useState<CreateOrderData>({} as CreateOrderData)
+  const [lockedOrder, setLockedOrder] = useState(false)
+  const formRef = useRef<CreateOrderRef>(null)
 
   async function handleNext() {
-    // TODO: 创建订单
-    if (currentStep === 0) {
+    if (currentStep === 0 && !lockedOrder) {
       try {
-        await formRef.current?.validateFields()
         setCreateLoading(true)
-        const values = formRef.current?.getFormValues()
+        const values = await formRef.current?.getValues()
+        if (!values)
+          return message.error('获取表单数据失败')
+
         const { code } = await createOrder(values)
-        if (code !== 200) {
+        if (code !== 201) {
           message.error('创建订单失败')
           return
         }
+        message.success('创建订单成功')
+
+        // 保存订单信息并锁定订单信息
+        setSubmittedOrderData(values)
+        setLockedOrder(true)
 
         setCreateLoading(false)
         setCurrentStep(currentStep + 1)
       }
-      catch (err) {
-        console.log(err)
+      catch {
         message.error('表单校验失败，请检查')
       }
       finally {
         setCreateLoading(false)
       }
+    }
+    else {
+      setCurrentStep(currentStep + 1)
     }
   }
 
@@ -157,17 +62,8 @@ export function OrderModalForm(props: OrderModalFormProps) {
 
   // 复制链接到剪贴板
   function handleCopyLink() {
-    message.success('复制成功')
+    // TODO: 复制链接到剪贴板
   }
-
-  async function fetchProductList() {
-    const { data } = await getProductList({})
-    setProductOptions(data.list)
-  }
-
-  useEffect(() => {
-    fetchProductList()
-  }, [])
 
   return (
     <Modal
@@ -206,20 +102,9 @@ export function OrderModalForm(props: OrderModalFormProps) {
       >
         {
           currentStep === 0 && (
-            // <CustomForm
-            //   initialValues={{
-            //     order_number: 'D9111',
-            //     customer_name: '张三',
-            //     customer_phone: '13800138000',
-            //     max_select_photos: 10,
-            //     is_extra_allowed: false,
-            //   }}
-            //   ref={formRef}
-            //   layout="vertical"
-            //   fields={fields}
-            //   footer={null}
-            // />
-            <CreateOrder />
+            <LockedOrder.Provider value={lockedOrder}>
+              <CreateOrder ref={formRef} submitData={submittedOrderData} />
+            </LockedOrder.Provider>
           )
         }
 
@@ -257,7 +142,7 @@ export function OrderModalForm(props: OrderModalFormProps) {
 
       <Space>
         {
-          currentStep > 1 && <Button onClick={handlePrev}>上一步</Button>
+          currentStep > 0 && <Button onClick={handlePrev}>上一步</Button>
         }
         {
           currentStep < 3 && <Button type="primary" onClick={handleNext} loading={createLoading}>下一步</Button>

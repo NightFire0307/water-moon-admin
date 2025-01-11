@@ -1,3 +1,4 @@
+import type { Response } from '@/types/common.ts'
 import type { CreateOrderData, OrderResponse } from '@/types/order.ts'
 import request from '@/utils/request.ts'
 
@@ -8,10 +9,17 @@ export function getOrderList(): OrderResponse {
   })
 }
 
-export function createOrder(data: CreateOrderData) {
+export function createOrder(data: CreateOrderData): Promise<Response<string>> {
   return request({
     url: '/api/admin/orders',
     method: 'POST',
     data,
+  })
+}
+
+export function removeOrder(id: number): Promise<Response<string>> {
+  return request({
+    url: `/api/admin/orders/${id}`,
+    method: 'DELETE',
   })
 }

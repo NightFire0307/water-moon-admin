@@ -77,7 +77,7 @@ export function Order() {
     { title: '操作', dataIndex: 'action', render: (_, record) => (
       <Space>
         <a>详情</a>
-        <a>编辑</a>
+        <a>照片管理</a>
         <Dropdown
           menu={{
             items: [
@@ -117,6 +117,7 @@ export function Order() {
         okText: '确定',
         okType: 'danger',
         cancelText: '取消',
+        centered: true,
         onOk() {
           return new Promise((resolve, reject) => {
             (async () => {
@@ -175,7 +176,10 @@ export function Order() {
       <Table rowKey="id" dataSource={dataSource} columns={columns} style={{ marginTop: '14px' }} bordered />
       <OrderModalForm
         open={modalVisible}
-        onCancel={() => SetModalVisible(false)}
+        onCancel={() => {
+          SetModalVisible(false)
+          fetchOrderList()
+        }}
       />
     </>
   )
