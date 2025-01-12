@@ -29,4 +29,9 @@ export interface LoginResponse {
   userInfo: UserInfo
 }
 
+export interface OssTokenResponse {
+  uploadToken: string
+}
+
 export type LoginResponseData = Promise<Response<LoginResponse>>
+export type OssTokenResponseData = Promise<Response<OssTokenResponse>>

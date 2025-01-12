@@ -1,8 +1,13 @@
-import type { TableColumnProps, UploadFile, UploadProps } from 'antd'
+import type { GetProp, TableColumnProps, UploadFile, UploadProps } from 'antd'
+import type { FileData } from 'qiniu-js'
+import { getOssToken } from '@/apis/auth.ts'
 import { Button, Flex, Space, Table, Typography, Upload } from 'antd'
+import { createDirectUploadTask } from 'qiniu-js'
 import { useState } from 'react'
 
 const { Link } = Typography
+
+type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0]
 
 interface UploadPhotoInfo {
   key: string
@@ -46,7 +51,7 @@ export function UploadPhoto() {
     fileList,
     multiple: true,
     beforeUpload: (file) => {
-      setFileList([...fileList, file])
+      setFileList(prev => [...prev, file])
 
       setDataSource(prev => [...prev, {
         key: file.uid,
@@ -56,6 +61,35 @@ export function UploadPhoto() {
       return false
     },
     showUploadList: false,
+  }
+
+  function handleUpload() {
+    fileList.forEach((file) => {
+      // 重命名文件
+      const newFileName = new File([file as FileType], `D1555/${file.name}`, { type: file.type })
+      const fileData: FileData = { type: 'file', data: newFileName }
+      const uploadTask = createDirectUploadTask(
+        fileData,
+        { tokenProvider: fetchOssUploadToken },
+      )
+
+      // 上传进度
+      uploadTask.onProgress((progress, context) => {
+        console.log('上传进度:', progress, context)
+      })
+
+      // 上传完成
+      uploadTask.onComplete((result, context) => {
+        console.log('上传完成:', result, context)
+      })
+
+      // 上传失败
+      uploadTask.onError((error, context) => {
+        console.log('上传失败:', error, context)
+      })
+
+      uploadTask.start()
+    })
   }
 
   function handleRemove(key: string) {
@@ -69,6 +103,12 @@ export function UploadPhoto() {
     setDataSource([])
   }
 
+  // 获取上传凭证
+  async function fetchOssUploadToken() {
+    const { data } = await getOssToken()
+    return data.uploadToken
+  }
+
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
       <Flex justify="space-between">
@@ -78,7 +118,7 @@ export function UploadPhoto() {
           </Upload>
           <Button disabled={dataSource.length === 0} onClick={handleAllClear}>清空文件</Button>
         </Space>
-        <Button type="primary" disabled={dataSource.length === 0}>开始上传</Button>
+        <Button type="primary" disabled={dataSource.length === 0} onClick={handleUpload}>开始上传</Button>
       </Flex>
 
       <Table columns={columns} dataSource={dataSource} pagination={false} scroll={{ y: 55 * 5 }} />

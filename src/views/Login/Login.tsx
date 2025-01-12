@@ -16,17 +16,24 @@ export function Login() {
   async function handleLogin() {
     setLoading(true)
     const values = form.getFieldsValue()
-    const { data } = await login(values)
-    const { accessToken, refreshToken } = data
-    updateToken(accessToken, refreshToken)
+    try {
+      const { data } = await login(values)
+      const { accessToken, refreshToken } = data
+      updateToken(accessToken, refreshToken)
 
-    if (accessToken && refreshToken) {
-      message.success('登录成功')
-      setTimeout(() => {
-        navigate('/product')
-      }, 1000)
+      if (accessToken && refreshToken) {
+        message.success('登录成功')
+        setTimeout(() => {
+          navigate('/product')
+        }, 1000)
+      }
     }
-    setLoading(false)
+    catch {
+      message.error('登录失败')
+    }
+    finally {
+      setLoading(false)
+    }
   }
 
   return (

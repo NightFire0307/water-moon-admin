@@ -4,9 +4,10 @@ import { getOrderList, removeOrder } from '@/apis/order.ts'
 import { OrderStatus } from '@/types/order.ts'
 import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
 import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
+import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 import { MoreOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
-import { Badge, Button, Divider, Dropdown, Flex, message, Modal, Space, Table, Tag, Tooltip } from 'antd'
 
+import { Badge, Button, Divider, Dropdown, Flex, FloatButton, message, Modal, Space, Table, Tag, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
 
 const { confirm } = Modal
@@ -20,6 +21,7 @@ enum OrderAction {
 export function Order() {
   const [dataSource, setDataSource] = useState<IOrder[]>([])
   const [modalVisible, SetModalVisible] = useState(false)
+  const [taskCenterOpen, setTaskCenterOpen] = useState(false)
 
   const columns: TableColumnProps[] = [
     {
@@ -181,6 +183,9 @@ export function Order() {
           fetchOrderList()
         }}
       />
+
+      <FloatButton shape="square" tooltip="任务中心" style={{ zIndex: 1001 }} onClick={() => setTaskCenterOpen(true)} />
+      <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
     </>
   )
 }
