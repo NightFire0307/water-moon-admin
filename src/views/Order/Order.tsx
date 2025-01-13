@@ -1,12 +1,13 @@
 import type { IOrder } from '@/types/order.ts'
 import type { TableColumnProps } from 'antd'
 import { getOrderList, removeOrder } from '@/apis/order.ts'
+import { UploadStatus, useUploadFile } from '@/store/useUploadFile.tsx'
 import { OrderStatus } from '@/types/order.ts'
 import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
 import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
 import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
-import { MoreOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
 
+import { MoreOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Divider, Dropdown, Flex, FloatButton, message, Modal, Space, Table, Tag, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
 
@@ -22,6 +23,7 @@ export function Order() {
   const [dataSource, setDataSource] = useState<IOrder[]>([])
   const [modalVisible, SetModalVisible] = useState(false)
   const [taskCenterOpen, setTaskCenterOpen] = useState(false)
+  const [incompleteFileCount, setIncompleteFileCount] = useState(0)
 
   const columns: TableColumnProps[] = [
     {
@@ -153,8 +155,38 @@ export function Order() {
     setDataSource(data.list)
   }
 
+  // function handleBeforeUnload(event: BeforeUnloadEvent) {
+  //   console.log('beforeunload')
+  //   event.preventDefault()
+  //   confirm({
+  //     title: '确定要离开吗？',
+  //     content: '离开后未完成的操作将会丢失',
+  //     okText: '确定',
+  //     cancelText: '取消',
+  //     onOk() {
+  //       console.log('离开')
+  //     },
+  //     onCancel() {
+  //       console.log('取消')
+  //       event.preventDefault()
+  //     },
+  //   })
+  // }
+
   useEffect(() => {
     fetchOrderList()
+  }, [])
+
+  useEffect(() => {
+    const unsubscribe = useUploadFile.subscribe(
+      state => state.uploadFiles,
+      (uploadFiles) => {
+        const count = uploadFiles.filter(file => file.status !== UploadStatus.Done).length
+        setIncompleteFileCount(count)
+      },
+    )
+
+    return () => unsubscribe()
   }, [])
 
   return (
@@ -184,7 +216,13 @@ export function Order() {
         }}
       />
 
-      <FloatButton shape="square" tooltip="任务中心" style={{ zIndex: 1001 }} onClick={() => setTaskCenterOpen(true)} />
+      <FloatButton
+        shape="square"
+        tooltip="任务中心"
+        badge={{ count: incompleteFileCount, color: 'red' }}
+        style={{ zIndex: 1001 }}
+        onClick={() => setTaskCenterOpen(true)}
+      />
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
     </>
   )

@@ -2,9 +2,10 @@ import type { GetProp, TableColumnProps, UploadProps } from 'antd'
 import type { FileData } from 'qiniu-js'
 import { getOssToken } from '@/apis/auth.ts'
 import { UploadStatus, useUploadFile } from '@/store/useUploadFile.tsx'
-import { Button, Flex, Space, Table, Typography, Upload } from 'antd'
+import { Button, Flex, notification, Space, Table, Typography, Upload } from 'antd'
+
 import { createDirectUploadTask } from 'qiniu-js'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 const { Link } = Typography
 
@@ -19,6 +20,7 @@ interface UploadPhotoInfo {
 export function UploadPhoto() {
   const [dataSource, setDataSource] = useState<UploadPhotoInfo[]>([])
   const [fileList, setFileList] = useState<FileType[]>([])
+  const uploadToken = useRef<string>('')
   const { setUploadFile, setUploadFileStatus, setUploadFileProgress } = useUploadFile()
 
   const columns: TableColumnProps[] = [
@@ -66,6 +68,13 @@ export function UploadPhoto() {
   }
 
   function handleUpload() {
+    setDataSource([])
+    notification.open({
+      type: 'info',
+      message: '开始上传',
+      description: '进度请查看任务中心',
+    })
+
     fileList.forEach((file) => {
       // 重命名文件
       const newFileName = new File([file as FileType], `D1555/${file.name}`, { type: file.type })
@@ -78,8 +87,7 @@ export function UploadPhoto() {
       setUploadFile(file)
 
       // 上传进度
-      uploadTask.onProgress((progress, context) => {
-        console.log('上传进度:', progress, context)
+      uploadTask.onProgress((progress) => {
         setUploadFileProgress(file.uid, progress.percent)
       })
 
@@ -95,8 +103,8 @@ export function UploadPhoto() {
         setUploadFileStatus(file.uid, UploadStatus.Error)
       })
 
-      // 开始上传[]
-      // uploadTask.start()
+      // 开始上传
+      uploadTask.start()
     })
   }
 
@@ -113,8 +121,11 @@ export function UploadPhoto() {
 
   // 获取上传凭证
   async function fetchOssUploadToken() {
+    if (uploadToken.current)
+      return uploadToken.current
     const { data } = await getOssToken()
-    return data.uploadToken
+    uploadToken.current = data.uploadToken
+    return uploadToken.current
   }
 
   return (

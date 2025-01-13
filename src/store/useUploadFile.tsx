@@ -1,6 +1,6 @@
 import type { GetProp, UploadProps } from 'antd'
 import { create } from 'zustand'
-import { devtools } from 'zustand/middleware'
+import { devtools, subscribeWithSelector } from 'zustand/middleware'
 
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0]
 
@@ -34,7 +34,7 @@ interface UploadFileAction {
 }
 
 export const useUploadFile = create<UploadFileStore & UploadFileAction>()(
-  devtools(set => ({
+  devtools(subscribeWithSelector(set => ({
     fileList: [],
     uploadFiles: [],
     setUploadFile: file => set(state => (
@@ -49,5 +49,12 @@ export const useUploadFile = create<UploadFileStore & UploadFileAction>()(
       file.status = status
       return { uploadFiles: [...state.uploadFiles] }
     })),
-  }), { enabled: true }),
+    setUploadFileProgress: (key, progress) => (set((state) => {
+      const file = state.uploadFiles.find(file => file.file.uid === key)
+      if (!file)
+        return state
+      file.progress = progress
+      return { uploadFiles: [...state.uploadFiles] }
+    })),
+  })), { enabled: true }),
 )
