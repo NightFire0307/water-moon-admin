@@ -1,6 +1,7 @@
-import type { GetProp, TableColumnProps, UploadFile, UploadProps } from 'antd'
+import type { GetProp, TableColumnProps, UploadProps } from 'antd'
 import type { FileData } from 'qiniu-js'
 import { getOssToken } from '@/apis/auth.ts'
+import { UploadStatus, useUploadFile } from '@/store/useUploadFile.tsx'
 import { Button, Flex, Space, Table, Typography, Upload } from 'antd'
 import { createDirectUploadTask } from 'qiniu-js'
 import { useState } from 'react'
@@ -16,8 +17,9 @@ interface UploadPhotoInfo {
 }
 
 export function UploadPhoto() {
-  const [fileList, setFileList] = useState<UploadFile[]>([])
   const [dataSource, setDataSource] = useState<UploadPhotoInfo[]>([])
+  const [fileList, setFileList] = useState<FileType[]>([])
+  const { setUploadFile, setUploadFileStatus, setUploadFileProgress } = useUploadFile()
 
   const columns: TableColumnProps[] = [
     {
@@ -72,23 +74,29 @@ export function UploadPhoto() {
         fileData,
         { tokenProvider: fetchOssUploadToken },
       )
+      // 添加到上传文件列表
+      setUploadFile(file)
 
       // 上传进度
       uploadTask.onProgress((progress, context) => {
         console.log('上传进度:', progress, context)
+        setUploadFileProgress(file.uid, progress.percent)
       })
 
       // 上传完成
       uploadTask.onComplete((result, context) => {
         console.log('上传完成:', result, context)
+        setUploadFileStatus(file.uid, UploadStatus.Done)
       })
 
       // 上传失败
       uploadTask.onError((error, context) => {
         console.log('上传失败:', error, context)
+        setUploadFileStatus(file.uid, UploadStatus.Error)
       })
 
-      uploadTask.start()
+      // 开始上传[]
+      // uploadTask.start()
     })
   }
 

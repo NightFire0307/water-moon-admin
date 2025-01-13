@@ -43,7 +43,7 @@ interface RadioField {
 export interface Field extends InputNumberField, SelectField, RadioField {
   label?: string
   name: string
-  type: 'input' | 'inputNumber' | 'select' | 'switch' | 'radio' | 'radioGroup' | 'group'
+  type: 'input' | 'inputNumber' | 'select' | 'switch' | 'radio' | 'radioGroup' | 'group' | 'button'
   placeholder?: string
   initialValue?: string
   children?: Field[]
@@ -218,6 +218,12 @@ export const CustomForm = forwardRef<CustomFormRef, CustomFormProps>((props, ref
                   <Row gutter={16}>
                     {renderFields(field.children)}
                   </Row>
+                )
+              }
+              {/* 渲染button */}
+              {
+                field.type === 'button' && (
+                  <Button icon={field.icon} disabled={field.disabled}>{field.text}</Button>
                 )
               }
             </Form.Item>
