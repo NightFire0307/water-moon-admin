@@ -16,7 +16,7 @@ function renderStatus(value: UploadStatus, record: AnyObject) {
     case UploadStatus.Uploading:
       return (
         <span>
-          {progress * 100}
+          {Math.round(progress * 100)}
           %
         </span>
       )
