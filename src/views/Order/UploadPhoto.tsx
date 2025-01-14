@@ -84,7 +84,7 @@ export function UploadPhoto() {
         { tokenProvider: fetchOssUploadToken },
       )
       // 添加到上传文件列表
-      setUploadFile(file)
+      setUploadFile(file, 'D1555')
 
       // 上传进度
       uploadTask.onProgress((progress) => {
@@ -105,6 +105,7 @@ export function UploadPhoto() {
 
       // 开始上传
       uploadTask.start()
+      setUploadFileStatus(file.uid, UploadStatus.Uploading)
     })
   }
 

@@ -216,13 +216,17 @@ export function Order() {
         }}
       />
 
-      <FloatButton
-        shape="square"
-        tooltip="任务中心"
-        badge={{ count: incompleteFileCount, color: 'red' }}
-        style={{ zIndex: 1001 }}
-        onClick={() => setTaskCenterOpen(true)}
-      />
+      {
+        !taskCenterOpen && (
+          <FloatButton
+            shape="square"
+            tooltip="任务中心"
+            badge={{ count: incompleteFileCount, color: 'red' }}
+            style={{ zIndex: 1001 }}
+            onClick={() => setTaskCenterOpen(true)}
+          />
+        )
+      }
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
     </>
   )
