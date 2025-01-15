@@ -35,7 +35,7 @@ function renderStatus(value: UploadStatus, record: AnyObject) {
 
 export function TaskCenter(props: TaskCenterProps) {
   const { open, onClose } = props
-  const { uploadQueue, cancelUploadTask, removeUploadTask } = useUploadFile()
+  const { uploadQueue, cancelUploadTask, removeUploadTask, cancelAllUploadTask, clearUploadQueue } = useUploadFile()
 
   const columns: TableColumnProps[] = [
     {
@@ -85,9 +85,9 @@ export function TaskCenter(props: TaskCenterProps) {
           刷新页面或离开当前页面会终止所有任务并清空任务记录
         </p>
         <Space>
-          <Button>全部停止</Button>
-          <Button>全部重试</Button>
-          <Button>清空记录</Button>
+          <Button onClick={cancelAllUploadTask} disabled={uploadQueue.length === 0}>全部停止</Button>
+          <Button disabled>全部重试</Button>
+          <Button onClick={clearUploadQueue} disabled={uploadQueue.length === 0}>清空记录</Button>
         </Space>
         <Table rowKey="uid" columns={columns} dataSource={uploadQueue} />
       </Flex>

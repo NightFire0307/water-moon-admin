@@ -44,8 +44,11 @@ interface UploadFileAction {
   generateUploadTask: (files: FileType[]) => void
   startUploadTask: () => void
   cancelUploadTask: (uid: string) => void
+  cancelAllUploadTask: () => void
   removeUploadTask: (uid: string) => void
   retryUploadTask: (uid: string) => void
+  retryAllUploadTask: () => void
+  clearUploadQueue: () => void
 }
 
 export const useUploadFile = create<UploadFileStore & UploadFileAction>()(
@@ -92,6 +95,11 @@ export const useUploadFile = create<UploadFileStore & UploadFileAction>()(
 
       return { uploadQueue: [...tasks] }
     }),
+    /**
+     * 1、先从待上传的队列中取出最大并发上传数的任务
+     * 2、开始上传任务
+     * 3、每个任务上传完成后会检查待上传队列中的下一个任务并开始上传
+     */
     startUploadTask: async () => {
       const { uploadQueue, maxCurrentUploads } = get()
 
@@ -158,6 +166,30 @@ export const useUploadFile = create<UploadFileStore & UploadFileAction>()(
         task.uploadTask.start()
       }
       return { uploadQueue: [...state.uploadQueue] }
+    }),
+    retryAllUploadTask: () => set((state) => {
+      // 筛选出上传失败的任务
+      const errorTasks = state.uploadQueue.filter(task => task.status === UploadStatus.Error)
+      // 重试上传失败的任务
+      errorTasks.forEach((task) => {
+        task.status = UploadStatus.Pending
+        task.uploadTask.start()
+      })
+
+      return { uploadQueue: state.uploadQueue }
+    }),
+    cancelAllUploadTask: () => set((state) => {
+      state.uploadQueue.forEach((task) => {
+        if (task.status !== UploadStatus.Done) {
+          task.uploadTask.cancel()
+          task.status = UploadStatus.Abort
+        }
+      })
+      return ({ uploadQueue: state.uploadQueue })
+    }),
+    clearUploadQueue: () => set(() => {
+      get().cancelAllUploadTask()
+      return { uploadQueue: [] }
     }),
   })), { enabled: true }),
 )
