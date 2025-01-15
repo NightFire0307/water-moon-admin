@@ -1,6 +1,6 @@
 import type { GetProp, TableColumnProps, UploadProps } from 'antd'
 import { getOssToken } from '@/apis/auth.ts'
-import { UploadQueue } from '@/utils/uploadQueue.ts'
+import { useUploadFile } from '@/store/useUploadFile.tsx'
 import { Button, Flex, notification, Space, Table, Typography, Upload } from 'antd'
 import { useRef, useState } from 'react'
 
@@ -18,6 +18,7 @@ export function UploadPhoto() {
   const [dataSource, setDataSource] = useState<UploadPhotoInfo[]>([])
   const [fileList, setFileList] = useState<FileType[]>([])
   const uploadToken = useRef<string>('')
+  const { generateUploadTask, startUploadTask, setUploadToken } = useUploadFile()
 
   const columns: TableColumnProps[] = [
     {
@@ -71,41 +72,9 @@ export function UploadPhoto() {
       description: '进度请查看任务中心',
     })
     await fetchOssUploadToken()
-    const uploadTask = UploadQueue(uploadToken.current)
-    uploadTask.start(fileList)
-
-    // fileList.forEach((file) => {
-    //   // 重命名文件
-    //   const newFileName = new File([file as FileType], `D1555/${file.name}`, { type: file.type })
-    //   const fileData: FileData = { type: 'file', data: newFileName }
-    //   const uploadTask = createDirectUploadTask(
-    //     fileData,
-    //     { tokenProvider: fetchOssUploadToken },
-    //   )
-    //   // 添加到上传文件列表
-    //   setUploadFile(file, 'D1555')
-    //
-    //   // 上传进度
-    //   uploadTask.onProgress((progress) => {
-    //     setUploadFileProgress(file.uid, progress.percent)
-    //   })
-    //
-    //   // 上传完成
-    //   uploadTask.onComplete((result, context) => {
-    //     console.log('上传完成:', result, context)
-    //     setUploadFileStatus(file.uid, UploadStatus.Done)
-    //   })
-    //
-    //   // 上传失败
-    //   uploadTask.onError((error, context) => {
-    //     console.log('上传失败:', error, context)
-    //     setUploadFileStatus(file.uid, UploadStatus.Error)
-    //   })
-    //
-    //   // 开始上传
-    //   uploadTask.start()
-    //   setUploadFileStatus(file.uid, UploadStatus.Uploading)
-    // })
+    setUploadToken(uploadToken.current)
+    generateUploadTask(fileList)
+    startUploadTask()
   }
 
   function handleRemove(key: string) {

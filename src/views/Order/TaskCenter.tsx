@@ -1,4 +1,4 @@
-import type { UploadFile } from '@/store/useUploadFile'
+import type { QueueTask } from '@/store/useUploadFile'
 import type { TableColumnProps } from 'antd'
 import type { AnyObject } from 'antd/es/_util/type'
 import { UploadStatus } from '@/store/useUploadFile'
@@ -11,7 +11,7 @@ interface TaskCenterProps {
 }
 
 function renderStatus(value: UploadStatus, record: AnyObject) {
-  const { progress } = record as UploadFile
+  const { progress } = record as QueueTask
   switch (value) {
     case UploadStatus.Uploading:
       return (
@@ -35,7 +35,7 @@ function renderStatus(value: UploadStatus, record: AnyObject) {
 
 export function TaskCenter(props: TaskCenterProps) {
   const { open, onClose } = props
-  const uploadFiles = useUploadFile(state => state.uploadFiles)
+  const { uploadQueue, cancelUploadTask, removeUploadTask } = useUploadFile()
 
   const columns: TableColumnProps[] = [
     {
@@ -47,8 +47,15 @@ export function TaskCenter(props: TaskCenterProps) {
       dataIndex: 'order_number',
     },
     {
-      title: '文件大小(MB)',
+      title: '文件大小',
       dataIndex: 'file_size',
+      render: value => (
+        <span>
+          {value}
+          {' '}
+          MB
+        </span>
+      ),
     },
     {
       title: '状态',
@@ -58,12 +65,13 @@ export function TaskCenter(props: TaskCenterProps) {
     {
       title: '操作',
       dataIndex: 'action',
-      render: () => {
+      render: (_, item) => {
+        const task = item as QueueTask
         return (
           <Space>
-            <a>停止</a>
-            <a>重试</a>
-            <a>移除</a>
+            {task.status === UploadStatus.Uploading && <a onClick={() => cancelUploadTask(task.uid)}>停止</a>}
+            {task.status === UploadStatus.Error && <a>重试</a>}
+            {task.status === UploadStatus.Done && <a onClick={() => removeUploadTask(task.uid)}>移除</a>}
           </Space>
         )
       },
@@ -81,7 +89,7 @@ export function TaskCenter(props: TaskCenterProps) {
           <Button>全部重试</Button>
           <Button>清空记录</Button>
         </Space>
-        <Table rowKey="uid" columns={columns} dataSource={uploadFiles} />
+        <Table rowKey="uid" columns={columns} dataSource={uploadQueue} />
       </Flex>
     </Drawer>
   )

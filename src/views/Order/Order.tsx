@@ -179,7 +179,7 @@ export function Order() {
 
   useEffect(() => {
     const unsubscribe = useUploadFile.subscribe(
-      state => state.uploadFiles,
+      state => state.uploadQueue,
       (uploadFiles) => {
         const count = uploadFiles.filter(file => file.status !== UploadStatus.Done).length
         setIncompleteFileCount(count)
