@@ -1,8 +1,9 @@
 import type { GetProp, TableColumnProps, UploadProps } from 'antd'
 import { getOssToken } from '@/apis/auth.ts'
 import { useUploadFile } from '@/store/useUploadFile.tsx'
+import { LockedOrder } from '@/views/Order/OrderModalForm.tsx'
 import { Button, Flex, notification, Space, Table, Typography, Upload } from 'antd'
-import { useRef, useState } from 'react'
+import { useContext, useRef, useState } from 'react'
 
 const { Link } = Typography
 
@@ -19,6 +20,7 @@ export function UploadPhoto() {
   const [fileList, setFileList] = useState<FileType[]>([])
   const uploadToken = useRef<string>('')
   const { generateUploadTask, startUploadTask, setUploadToken } = useUploadFile()
+  const lockedOrder = useContext(LockedOrder)
 
   const columns: TableColumnProps[] = [
     {
@@ -73,8 +75,9 @@ export function UploadPhoto() {
     })
     await fetchOssUploadToken()
     setUploadToken(uploadToken.current)
-    generateUploadTask(fileList)
+    generateUploadTask(fileList, lockedOrder.order_number)
     startUploadTask()
+    setFileList([])
   }
 
   function handleRemove(key: string) {

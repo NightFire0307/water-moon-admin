@@ -41,7 +41,7 @@ interface UploadFileStore {
 
 interface UploadFileAction {
   setUploadToken: (token: string) => void
-  generateUploadTask: (files: FileType[]) => void
+  generateUploadTask: (files: FileType[], order_number?: string) => void
   startUploadTask: () => void
   cancelUploadTask: (uid: string) => void
   cancelAllUploadTask: () => void
@@ -58,9 +58,11 @@ export const useUploadFile = create<UploadFileStore & UploadFileAction>()(
     currentUploads: 0,
     maxCurrentUploads: 5,
     setUploadToken: (token: string) => set(() => ({ uploadToken: token })),
-    generateUploadTask: (files: FileType[]) => set((state) => {
+    generateUploadTask: (files: FileType[], order_number: string = '') => set((state) => {
       const tasks = files.map((file) => {
-        const fileData: FileData = { type: 'file', data: file }
+        // 给文件名添加路径
+        const newFile = new File([file], `${order_number}/${file.name}`, { type: file.type })
+        const fileData: FileData = { type: 'file', data: newFile }
         const config: UploadConfig = {
           tokenProvider: () => Promise.resolve(state.uploadToken),
         }
@@ -84,7 +86,7 @@ export const useUploadFile = create<UploadFileStore & UploadFileAction>()(
 
         return {
           uid: file.uid,
-          order_number: 'D1555',
+          order_number,
           file_name: file.name,
           file_size: Math.round(file.size / 1024 / 1024 * 100) / 100,
           progress: 0,

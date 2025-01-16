@@ -7,7 +7,7 @@ import { UploadPhoto } from '@/views/Order/UploadPhoto.tsx'
 import { Button, message, Modal, Result, Space, Steps } from 'antd'
 import { createContext, useRef, useState } from 'react'
 
-export const LockedOrder = createContext(false)
+export const LockedOrder = createContext({} as CreateOrderData)
 
 interface OrderModalFormProps {
   open: boolean
@@ -16,14 +16,13 @@ interface OrderModalFormProps {
 
 export function OrderModalForm(props: OrderModalFormProps) {
   const { open, onCancel } = props
-  const [currentStep, setCurrentStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState(0)
   const [createLoading, setCreateLoading] = useState(false)
   const [submittedOrderData, setSubmittedOrderData] = useState<CreateOrderData>({} as CreateOrderData)
-  const [lockedOrder, setLockedOrder] = useState(false)
   const formRef = useRef<CreateOrderRef>(null)
 
   async function handleNext() {
-    if (currentStep === 0 && !lockedOrder) {
+    if (currentStep === 0 && Object.keys(submittedOrderData).length === 0) {
       try {
         setCreateLoading(true)
         const values = await formRef.current?.getValues()
@@ -39,7 +38,6 @@ export function OrderModalForm(props: OrderModalFormProps) {
 
         // 保存订单信息并锁定订单信息
         setSubmittedOrderData(values)
-        setLockedOrder(true)
 
         setCreateLoading(false)
         setCurrentStep(currentStep + 1)
@@ -72,6 +70,11 @@ export function OrderModalForm(props: OrderModalFormProps) {
       open={open}
       footer={null}
       onCancel={onCancel}
+      afterClose={() => {
+        setCurrentStep(0)
+        setSubmittedOrderData({} as CreateOrderData)
+        formRef.current?.resetValues()
+      }}
     >
       <Steps
         current={currentStep}
@@ -102,14 +105,18 @@ export function OrderModalForm(props: OrderModalFormProps) {
       >
         {
           currentStep === 0 && (
-            <LockedOrder.Provider value={lockedOrder}>
+            <LockedOrder.Provider value={submittedOrderData}>
               <CreateOrder ref={formRef} submitData={submittedOrderData} />
             </LockedOrder.Provider>
           )
         }
 
         {
-          currentStep === 1 && <UploadPhoto />
+          currentStep === 1 && (
+            <LockedOrder.Provider value={submittedOrderData}>
+              <UploadPhoto />
+            </LockedOrder.Provider>
+          )
         }
 
         {

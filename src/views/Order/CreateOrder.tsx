@@ -14,6 +14,7 @@ interface CreateOrderProps {
 
 export interface CreateOrderRef {
   getValues: () => Promise<CreateOrderData>
+  resetValues: () => void
 }
 
 export const CreateOrder = forwardRef<CreateOrderRef, CreateOrderProps>((props, ref) => {
@@ -21,9 +22,16 @@ export const CreateOrder = forwardRef<CreateOrderRef, CreateOrderProps>((props, 
   const [singleProducts, setSingleProducts] = useState<ProductsInfo[]>([])
   const [productOptions, setProductOptions] = useState<IProduct[]>([])
   const [singleDisabled, setSingleDisabled] = useState(true)
+  const [disabled, setDisabled] = useState(false)
   const [form] = useForm()
 
   const lockedOrder = useContext(LockedOrder)
+
+  useEffect(() => {
+    if (lockedOrder.order_number) {
+      setDisabled(true)
+    }
+  }, [lockedOrder])
 
   useImperativeHandle(ref, () => ({
     getValues: async () => {
@@ -38,6 +46,10 @@ export const CreateOrder = forwardRef<CreateOrderRef, CreateOrderProps>((props, 
       catch {
         return Promise.reject(new Error('请填写完整信息'))
       }
+    },
+    resetValues: () => {
+      form.resetFields()
+      setSingleProducts([])
     },
   }))
 
@@ -106,7 +118,7 @@ export const CreateOrder = forwardRef<CreateOrderRef, CreateOrderProps>((props, 
                 message: '请输入订单号',
               }]}
             >
-              <Input placeholder="请输入订单号" disabled={lockedOrder} />
+              <Input placeholder="请输入订单号" disabled={disabled} />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -118,7 +130,7 @@ export const CreateOrder = forwardRef<CreateOrderRef, CreateOrderProps>((props, 
                 message: '请输入客户姓名',
               }]}
             >
-              <Input placeholder="请输入客户姓名" disabled={lockedOrder} />
+              <Input placeholder="请输入客户姓名" disabled={disabled} />
             </Form.Item>
           </Col>
         </Row>
@@ -143,7 +155,7 @@ export const CreateOrder = forwardRef<CreateOrderRef, CreateOrderProps>((props, 
                 }),
               ]}
             >
-              <Input placeholder="请输入客户手机" disabled={lockedOrder} />
+              <Input placeholder="请输入客户手机" disabled={disabled} />
             </Form.Item>
           </Col>
           <Col span={8}>
@@ -155,19 +167,19 @@ export const CreateOrder = forwardRef<CreateOrderRef, CreateOrderProps>((props, 
                 message: '请输入可选张数',
               }]}
             >
-              <InputNumber min={1} addonAfter="张" placeholder="请输入可选张数" disabled={lockedOrder} />
+              <InputNumber min={1} addonAfter="张" placeholder="请输入可选张数" disabled={disabled} />
             </Form.Item>
           </Col>
           <Col span={8}>
             <Form.Item label="超选单价" name="extra_photo_price">
-              <InputNumber min={0} addonAfter="元 / 张" step={100} disabled={lockedOrder} />
+              <InputNumber min={0} addonAfter="元 / 张" step={100} disabled={disabled} />
             </Form.Item>
           </Col>
         </Row>
 
         <Space>
           <Form.Item label="套餐选择">
-            <Select style={{ width: '200px' }} placeholder="请选择套餐" disabled={lockedOrder} />
+            <Select style={{ width: '200px' }} placeholder="请选择套餐" disabled={disabled} />
           </Form.Item>
           <Form.Item>
             <Button icon={<PlusOutlined />} disabled>添加套餐</Button>
@@ -186,11 +198,11 @@ export const CreateOrder = forwardRef<CreateOrderRef, CreateOrderProps>((props, 
                   setSingleDisabled(false)
                 }
               }}
-              disabled={lockedOrder}
+              disabled={disabled}
             />
           </Form.Item>
           <Form.Item name="count">
-            <InputNumber placeholder="输入数量" disabled={lockedOrder} />
+            <InputNumber placeholder="输入数量" disabled={disabled} />
           </Form.Item>
           <Form.Item>
             <Button icon={<PlusOutlined />} disabled={singleDisabled} onClick={handleAddSingle}>添加单品</Button>

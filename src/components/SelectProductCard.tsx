@@ -2,7 +2,7 @@ import type { ProductsInfo } from '@/types/order.ts'
 import { LockedOrder } from '@/views/Order/OrderModalForm'
 import { CloseOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons'
 import { Button, Card, Divider, Flex, Space } from 'antd'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 
 interface SelectProductCardProps {
   // 套系产品
@@ -23,8 +23,14 @@ export function SelectProductCard(props: SelectProductCardProps) {
     onAddSingleCount,
     onMinusSingleCount,
   } = props
-
+  const [disabled, setDisabled] = useState(false)
   const lockedOrder = useContext(LockedOrder)
+
+  useEffect(() => {
+    if (lockedOrder.order_number) {
+      setDisabled(true)
+    }
+  }, [lockedOrder])
 
   return (
     <div>
@@ -61,10 +67,10 @@ export function SelectProductCard(props: SelectProductCardProps) {
                     <Flex justify="space-between">
                       <span>{product.name}</span>
                       <Flex gap={16} align="center">
-                        <Button icon={<MinusOutlined />} onClick={() => onMinusSingleCount(product.id, 1)} disabled={lockedOrder} />
+                        <Button icon={<MinusOutlined />} onClick={() => onMinusSingleCount(product.id, 1)} disabled={disabled} />
                         <span style={{ fontWeight: '500' }}>{product.count}</span>
-                        <Button icon={<PlusOutlined />} onClick={() => onAddSingleCount(product.id, 1)} disabled={lockedOrder} />
-                        <Button type="text" icon={<CloseOutlined />} danger onClick={() => onRemoveSingle(product.id)} disabled={lockedOrder} />
+                        <Button icon={<PlusOutlined />} onClick={() => onAddSingleCount(product.id, 1)} disabled={disabled} />
+                        <Button type="text" icon={<CloseOutlined />} danger onClick={() => onRemoveSingle(product.id)} disabled={disabled} />
                       </Flex>
                     </Flex>
                     <Divider style={{ marginTop: '12px', marginBottom: '12px' }} />
