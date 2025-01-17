@@ -76,7 +76,8 @@ export const useUploadFile = create<UploadFileStore & UploadFileAction>()(
           }))
         })
 
-        uploadTask.onComplete(() => {
+        uploadTask.onComplete((result, context) => {
+          console.log(result, context)
           set(state => ({
             uploadQueue: state.uploadQueue.map(task =>
               task.uid === file.uid ? { ...task, status: UploadStatus.Done } : task,
