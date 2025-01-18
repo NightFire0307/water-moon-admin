@@ -1,6 +1,6 @@
 import type { GetProp, TableColumnProps, UploadProps } from 'antd'
 import { getOssToken } from '@/apis/auth.ts'
-import { useUploadFile } from '@/store/useUploadFile.tsx'
+import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import { LockedOrder } from '@/views/Order/OrderModalForm.tsx'
 import { Button, Flex, notification, Space, Table, Typography, Upload } from 'antd'
 import { useContext, useRef, useState } from 'react'
@@ -19,7 +19,7 @@ export function UploadPhoto() {
   const [dataSource, setDataSource] = useState<UploadPhotoInfo[]>([])
   const [fileList, setFileList] = useState<FileType[]>([])
   const uploadToken = useRef<string>('')
-  const { generateUploadTask, startUploadTask, setUploadToken } = useUploadFile()
+  const { generateUploadTask, startUploadTask, setUploadToken } = useMinioUpload()
   const lockedOrder = useContext(LockedOrder)
 
   const columns: TableColumnProps[] = [
@@ -73,10 +73,12 @@ export function UploadPhoto() {
       message: '开始上传',
       description: '进度请查看任务中心',
     })
-    await fetchOssUploadToken()
-    setUploadToken(uploadToken.current)
-    generateUploadTask(fileList, lockedOrder.order_number)
+
+    generateUploadTask(fileList, 'D9999')
     startUploadTask()
+
+    // generateUploadTask(fileList, lockedOrder.order_number)
+    // startUploadTask()
     setFileList([])
   }
 

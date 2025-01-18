@@ -1,12 +1,13 @@
 import type { IOrder } from '@/types/order.ts'
 import type { TableColumnProps } from 'antd'
 import { getOrderList, removeOrder } from '@/apis/order.ts'
-import { UploadStatus, useUploadFile } from '@/store/useUploadFile.tsx'
+import { useMinioUpload } from '@/store/useMinioUpload.tsx'
+import { UploadStatus } from '@/store/useUploadFile.tsx'
 import { OrderStatus } from '@/types/order.ts'
 import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
 import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
-import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 
+import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 import { MoreOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Divider, Dropdown, Flex, FloatButton, message, Modal, Space, Table, Tag, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
@@ -178,7 +179,7 @@ export function Order() {
   }, [])
 
   useEffect(() => {
-    const unsubscribe = useUploadFile.subscribe(
+    const unsubscribe = useMinioUpload.subscribe(
       state => state.uploadQueue,
       (uploadFiles) => {
         const count = uploadFiles.filter(file => file.status !== UploadStatus.Done).length

@@ -16,7 +16,7 @@ interface OrderModalFormProps {
 
 export function OrderModalForm(props: OrderModalFormProps) {
   const { open, onCancel } = props
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(1)
   const [createLoading, setCreateLoading] = useState(false)
   const [submittedOrderData, setSubmittedOrderData] = useState<CreateOrderData>({} as CreateOrderData)
   const formRef = useRef<CreateOrderRef>(null)

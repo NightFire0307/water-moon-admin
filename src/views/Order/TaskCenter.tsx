@@ -1,8 +1,8 @@
 import type { QueueTask } from '@/store/useUploadFile'
 import type { TableColumnProps } from 'antd'
 import type { AnyObject } from 'antd/es/_util/type'
+import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import { UploadStatus } from '@/store/useUploadFile'
-import { useUploadFile } from '@/store/useUploadFile.tsx'
 import { Button, Drawer, Flex, Space, Table, Tag } from 'antd'
 
 interface TaskCenterProps {
@@ -35,7 +35,7 @@ function renderStatus(value: UploadStatus, record: AnyObject) {
 
 export function TaskCenter(props: TaskCenterProps) {
   const { open, onClose } = props
-  const { uploadQueue, cancelUploadTask, removeUploadTask, cancelAllUploadTask, clearUploadQueue } = useUploadFile()
+  const { uploadQueue, cancelUploadTask, removeUploadTask, cancelAllUploadTask, clearUploadQueue } = useMinioUpload()
 
   const columns: TableColumnProps[] = [
     {

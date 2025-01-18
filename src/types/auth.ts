@@ -33,5 +33,10 @@ export interface OssTokenResponse {
   uploadToken: string
 }
 
+export interface PresignedUrlResponse {
+  presignedUrl: string
+}
+
 export type LoginResponseData = Promise<Response<LoginResponse>>
 export type OssTokenResponseData = Promise<Response<OssTokenResponse>>
+export type PresignedUrlResponseData = Promise<Response<PresignedUrlResponse>>
