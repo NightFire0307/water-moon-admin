@@ -1,7 +1,23 @@
-import type { Field } from '@/components/CustomForm.tsx'
+import type { CustomFormRef, Field } from '@/components/CustomForm.tsx'
+import { getRandomShareLink } from '@/apis/link.ts'
 import { CustomForm } from '@/components/CustomForm.tsx'
+import { LockedOrder } from '@/views/Order/OrderModalForm.tsx'
+import dayjs from 'dayjs'
+import { forwardRef, useContext, useImperativeHandle, useRef } from 'react'
 
-export function ShareLink() {
+export interface ShareLinkRef {
+  generateShareUrl: () => void
+}
+
+interface ShareLinkForm {
+  access_limit: number
+  access_password: string
+  custom_password?: string
+  password_generate: 'random' | 'custom'
+  expired_at: number
+}
+
+export const ShareLink = forwardRef<ShareLinkRef>((_, ref) => {
   const fields: Field[] = [
     {
       label: '有效期',
@@ -93,9 +109,24 @@ export function ShareLink() {
       ],
     },
   ]
+  const customFormRef = useRef<CustomFormRef>(null)
+  const lockedOrder = useContext(LockedOrder)
+
+  useImperativeHandle(ref, () => ({
+    generateShareUrl: async () => {
+      const { access_password, expired_at }: ShareLinkForm = customFormRef.current?.getFormValues()
+      const { data } = await getRandomShareLink({
+        order_id: lockedOrder.id,
+        password: access_password,
+        expired_at: expired_at === 0 ? expired_at : dayjs().add(expired_at, 'day').unix(),
+      })
+      console.log(data)
+    },
+  }))
 
   return (
     <CustomForm
+      ref={customFormRef}
       initialValues={{
         expired_at: 7,
         access_limit: 0,
@@ -105,4 +136,4 @@ export function ShareLink() {
       footer={null}
     />
   )
-}
+})

@@ -9,7 +9,7 @@ export enum OrderStatus {
 }
 
 export interface ProductsInfo {
-  id: number
+  id?: number
   name: string
   count: number
 }
@@ -30,11 +30,9 @@ export interface IOrder {
   customer_phone: string
   selected_photos: number
   max_select_photos: number
+  order_products: []
   total_photos: number
   extra_photo_price: number
-  product_count: number
-  access_link: string
-  access_password: string
   status: OrderStatus
   is_deleted: boolean
   created_at: string

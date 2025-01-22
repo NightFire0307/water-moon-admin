@@ -1,5 +1,6 @@
-import type { CreateOrderData } from '@/types/order.ts'
+import type { IOrder } from '@/types/order.ts'
 import type { CreateOrderRef } from '@/views/Order/CreateOrder.tsx'
+import type { ShareLinkRef } from '@/views/Order/ShareLink.tsx'
 import { createOrder } from '@/apis/order.ts'
 import { CreateOrder } from '@/views/Order/CreateOrder.tsx'
 import { ShareLink } from '@/views/Order/ShareLink.tsx'
@@ -7,7 +8,7 @@ import { UploadPhoto } from '@/views/Order/UploadPhoto.tsx'
 import { Button, message, Modal, Result, Space, Steps } from 'antd'
 import { createContext, useRef, useState } from 'react'
 
-export const LockedOrder = createContext({} as CreateOrderData)
+export const LockedOrder = createContext({} as IOrder)
 
 interface OrderModalFormProps {
   open: boolean
@@ -16,20 +17,21 @@ interface OrderModalFormProps {
 
 export function OrderModalForm(props: OrderModalFormProps) {
   const { open, onCancel } = props
-  const [currentStep, setCurrentStep] = useState(1)
+  const [currentStep, setCurrentStep] = useState(0)
   const [createLoading, setCreateLoading] = useState(false)
-  const [submittedOrderData, setSubmittedOrderData] = useState<CreateOrderData>({} as CreateOrderData)
-  const formRef = useRef<CreateOrderRef>(null)
+  const [submittedOrderData, setSubmittedOrderData] = useState<IOrder>({} as IOrder)
+  const createOrderRef = useRef<CreateOrderRef>(null)
+  const shareLinkRef = useRef<ShareLinkRef>(null)
 
   async function handleNext() {
     if (currentStep === 0 && Object.keys(submittedOrderData).length === 0) {
       try {
         setCreateLoading(true)
-        const values = await formRef.current?.getValues()
+        const values = await createOrderRef.current?.getValues()
         if (!values)
           return message.error('获取表单数据失败')
 
-        const { code } = await createOrder(values)
+        const { code, data } = await createOrder(values)
         if (code !== 201) {
           message.error('创建订单失败')
           return
@@ -37,7 +39,7 @@ export function OrderModalForm(props: OrderModalFormProps) {
         message.success('创建订单成功')
 
         // 保存订单信息并锁定订单信息
-        setSubmittedOrderData(values)
+        setSubmittedOrderData(data)
 
         setCreateLoading(false)
         setCurrentStep(currentStep + 1)
@@ -51,6 +53,10 @@ export function OrderModalForm(props: OrderModalFormProps) {
     }
     else {
       setCurrentStep(currentStep + 1)
+    }
+
+    if (currentStep === 2) {
+      shareLinkRef.current?.generateShareUrl()
     }
   }
 
@@ -72,8 +78,8 @@ export function OrderModalForm(props: OrderModalFormProps) {
       onCancel={onCancel}
       afterClose={() => {
         setCurrentStep(0)
-        setSubmittedOrderData({} as CreateOrderData)
-        formRef.current?.resetValues()
+        setSubmittedOrderData({} as IOrder)
+        createOrderRef.current?.resetValues()
       }}
     >
       <Steps
@@ -106,7 +112,7 @@ export function OrderModalForm(props: OrderModalFormProps) {
         {
           currentStep === 0 && (
             <LockedOrder.Provider value={submittedOrderData}>
-              <CreateOrder ref={formRef} submitData={submittedOrderData} />
+              <CreateOrder ref={createOrderRef} submitData={submittedOrderData} />
             </LockedOrder.Provider>
           )
         }
@@ -120,7 +126,11 @@ export function OrderModalForm(props: OrderModalFormProps) {
         }
 
         {
-          currentStep === 2 && <ShareLink />
+          currentStep === 2 && (
+            <LockedOrder.Provider value={submittedOrderData}>
+              <ShareLink ref={shareLinkRef} />
+            </LockedOrder.Provider>
+          )
         }
 
         {

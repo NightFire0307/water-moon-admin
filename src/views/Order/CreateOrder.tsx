@@ -28,7 +28,7 @@ export const CreateOrder = forwardRef<CreateOrderRef, CreateOrderProps>((props, 
   const lockedOrder = useContext(LockedOrder)
 
   useEffect(() => {
-    if (lockedOrder.order_number) {
+    if (lockedOrder.id) {
       setDisabled(true)
     }
   }, [lockedOrder])
