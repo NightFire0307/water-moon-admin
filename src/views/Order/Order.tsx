@@ -77,7 +77,7 @@ export function Order() {
     {
       title: '链接状态',
       dataIndex: 'link_status',
-      render: () => <Tag color="red">未生成</Tag>,
+      render: value => <Tag color={value ? 'green' : 'red'}>{ value ? '已生成' : '未生成'}</Tag>,
     },
     { title: '操作', dataIndex: 'action', render: (_, record) => (
       <Space>

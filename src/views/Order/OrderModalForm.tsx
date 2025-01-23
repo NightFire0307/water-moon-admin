@@ -31,9 +31,9 @@ export function OrderModalForm(props: OrderModalFormProps) {
         if (!values)
           return message.error('获取表单数据失败')
 
-        const { code, data } = await createOrder(values)
+        const { code, data, msg } = await createOrder(values)
         if (code !== 201) {
-          message.error('创建订单失败')
+          message.error(msg)
           return
         }
         message.success('创建订单成功')
@@ -144,6 +144,7 @@ export function OrderModalForm(props: OrderModalFormProps) {
                   <div>
                     <span>链接：https://example.com</span>
                     {' '}
+                    e
                     <span>密码：123456</span>
                     <p>链接有效期为7天，访问次数不限</p>
                   </div>
