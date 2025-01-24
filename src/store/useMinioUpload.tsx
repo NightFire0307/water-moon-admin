@@ -1,7 +1,5 @@
 import type { GetProp, UploadProps } from 'antd'
 import type { AxiosRequestConfig } from 'axios'
-import type { UploadTask } from 'qiniu-js'
-import type { DirectUploadContext } from 'qiniu-js/output/@internal'
 import { getPresignedUrl } from '@/apis/auth.ts'
 import axios from 'axios'
 import { create } from 'zustand'
@@ -22,6 +20,14 @@ export enum UploadStatus {
   Pending = 'pending',
 }
 
+interface UploadTask {
+  start: () => Promise<void>
+  onProgress: (cb: (progress: { size: number, percent: number }) => void) => void
+  onComplete: (cb: (res: { fileName: string }) => void) => void
+  onError: (cb: (error: unknown) => void) => void
+  cancel: () => void
+}
+
 export interface QueueTask {
   uid: string
   order_number: string
@@ -29,7 +35,7 @@ export interface QueueTask {
   file_size: number
   progress: number
   status: UploadStatus
-  uploadTask: UploadTask<DirectUploadContext>
+  uploadTask: UploadTask
 }
 
 interface UploadFileStore {
@@ -60,7 +66,7 @@ export const useMinioUpload = create<UploadFileStore & UploadFileAction>()(
     currentUploads: 0,
     maxCurrentUploads: 5,
     setUploadToken: (token: string) => set(() => ({ uploadToken: token })),
-    generateUploadTask: (files: FileType[], order_number: string = '') => set((state) => {
+    generateUploadTask: (files: FileType[], order_number: string = '') => {
       const tasks = files.map((file) => {
         const uploadTask = createUploadTask(file, order_number)
 
@@ -92,8 +98,8 @@ export const useMinioUpload = create<UploadFileStore & UploadFileAction>()(
         }
       })
 
-      return { uploadQueue: [...tasks] }
-    }),
+      set({ uploadQueue: [...tasks] })
+    },
     /**
      * 1、先从待上传的队列中取出最大并发上传数的任务
      * 2、开始上传任务
@@ -202,6 +208,7 @@ function createUploadTask(file: FileType, order_number: string) {
   const controller = new AbortController()
   let onProgressCallback: (progress: { size: number, percent: number }) => void = () => {}
   let onCompleteCallBack: (res: { fileName: string }) => void = () => {}
+  let onErrorCallback: (error: unknown) => void = () => {}
 
   const config: AxiosRequestConfig = {
     headers: {
@@ -210,7 +217,9 @@ function createUploadTask(file: FileType, order_number: string) {
     onUploadProgress: (progressEvent) => {
       const { loaded, total } = progressEvent
       if (onProgressCallback) {
-        onProgressCallback({ size: total, percent: Math.round((loaded / total) * 100) / 100 })
+        if (total && total > 0) {
+          onProgressCallback({ size: total, percent: Math.round((loaded / total) * 100) / 100 })
+        }
       }
     },
     signal: controller.signal,
@@ -222,6 +231,10 @@ function createUploadTask(file: FileType, order_number: string) {
 
   function onComplete(cb: (res: { fileName: string }) => void) {
     onCompleteCallBack = cb
+  }
+
+  function onError(cb: (error: unknown) => void) {
+    onErrorCallback = cb
   }
 
   function cancel() {
@@ -239,6 +252,7 @@ function createUploadTask(file: FileType, order_number: string) {
       }
     }
     catch (error) {
+      onErrorCallback(error)
       console.error('Upload failed:', error)
     }
   }
@@ -247,6 +261,7 @@ function createUploadTask(file: FileType, order_number: string) {
     start,
     onProgress,
     onComplete,
+    onError,
     cancel,
   }
 }
