@@ -1,8 +1,7 @@
 import type { CustomFormRef, Field } from '@/components/CustomForm.tsx'
-import { getRandomShareLink } from '@/apis/link.ts'
 import { CustomForm } from '@/components/CustomForm.tsx'
+import { useShareLink } from '@/store/useShareLink'
 import { LockedOrder } from '@/views/Order/OrderModalForm.tsx'
-import dayjs from 'dayjs'
 import { forwardRef, useContext, useImperativeHandle, useRef } from 'react'
 
 export interface ShareLinkRef {
@@ -110,17 +109,13 @@ export const ShareLink = forwardRef<ShareLinkRef>((_, ref) => {
     },
   ]
   const customFormRef = useRef<CustomFormRef>(null)
+  const { createShareUrl } = useShareLink()
   const lockedOrder = useContext(LockedOrder)
 
   useImperativeHandle(ref, () => ({
     generateShareUrl: async () => {
       const { access_password, expired_at }: ShareLinkForm = customFormRef.current?.getFormValues()
-      const { data } = await getRandomShareLink({
-        order_id: lockedOrder.id,
-        password: access_password,
-        expired_at: expired_at === 0 ? expired_at : dayjs().add(expired_at, 'day').unix(),
-      })
-      console.log(data)
+      createShareUrl(lockedOrder.id, access_password, expired_at)
     },
   }))
 

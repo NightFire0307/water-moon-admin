@@ -2,6 +2,7 @@ import type { IOrder } from '@/types/order.ts'
 import type { CreateOrderRef } from '@/views/Order/CreateOrder.tsx'
 import type { ShareLinkRef } from '@/views/Order/ShareLink.tsx'
 import { createOrder } from '@/apis/order.ts'
+import { useShareLink } from '@/store/useShareLink.tsx'
 import { CreateOrder } from '@/views/Order/CreateOrder.tsx'
 import { ShareLink } from '@/views/Order/ShareLink.tsx'
 import { UploadPhoto } from '@/views/Order/UploadPhoto.tsx'
@@ -22,6 +23,8 @@ export function OrderModalForm(props: OrderModalFormProps) {
   const [submittedOrderData, setSubmittedOrderData] = useState<IOrder>({} as IOrder)
   const createOrderRef = useRef<CreateOrderRef>(null)
   const shareLinkRef = useRef<ShareLinkRef>(null)
+
+  const shareLinkInfo = useShareLink(state => state.shareLinkInfo)
 
   async function handleNext() {
     if (currentStep === 0 && Object.keys(submittedOrderData).length === 0) {
@@ -65,8 +68,14 @@ export function OrderModalForm(props: OrderModalFormProps) {
   }
 
   // 复制链接到剪贴板
-  function handleCopyLink() {
-    // TODO: 复制链接到剪贴板
+  async function handleCopyLink() {
+    try {
+      await navigator.clipboard.writeText(`https://localhost/s/${shareLinkInfo.share_url}`)
+      message.success('复制链接成功')
+    }
+    catch {
+      message.error('复制链接失败，请手动复制')
+    }
   }
 
   return (
@@ -142,10 +151,11 @@ export function OrderModalForm(props: OrderModalFormProps) {
                 <div>
                   <p>您可以复制下面的链接，发送给客户，让客户查看照片</p>
                   <div>
-                    <span>链接：https://example.com</span>
+                    <span>{`链接：https://localhost/s/${shareLinkInfo.share_url}`}</span>
                     {' '}
-                    e
-                    <span>密码：123456</span>
+                    <span>
+                      {`密码：${shareLinkInfo.share_password}`}
+                    </span>
                     <p>链接有效期为7天，访问次数不限</p>
                   </div>
                 </div>
