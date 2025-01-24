@@ -2,10 +2,11 @@ import type { Response } from '@/types/common.ts'
 import type { CreateOrderData, IOrder, OrderResponse } from '@/types/order.ts'
 import request from '@/utils/request.ts'
 
-export function getOrderList(): OrderResponse {
+export function getOrderList(params = {}): OrderResponse {
   return request({
     url: '/api/admin/orders',
     method: 'GET',
+    params,
   })
 }
 

@@ -1,3 +1,4 @@
+import type { Pagination } from '@/types/common.ts'
 import type { IOrder } from '@/types/order.ts'
 import type { TableColumnProps } from 'antd'
 import { getOrderList, removeOrder } from '@/apis/order.ts'
@@ -5,8 +6,8 @@ import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import { UploadStatus } from '@/store/useUploadFile.tsx'
 import { OrderStatus } from '@/types/order.ts'
 import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
-import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
 
+import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
 import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 import { MoreOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Divider, Dropdown, Flex, FloatButton, message, Modal, Space, Table, Tag, Tooltip } from 'antd'
@@ -22,6 +23,11 @@ enum OrderAction {
 
 export function Order() {
   const [dataSource, setDataSource] = useState<IOrder[]>([])
+  const [pageInfo, setPageInfo] = useState<Pagination>({
+    pageSize: 10,
+    current: 1,
+    total: 0,
+  })
   const [modalVisible, SetModalVisible] = useState(false)
   const [taskCenterOpen, setTaskCenterOpen] = useState(false)
   const [incompleteFileCount, setIncompleteFileCount] = useState(0)
@@ -147,13 +153,14 @@ export function Order() {
     }
   }
 
-  function handleQuery(values: any) {
-    console.log(values)
-  }
-
-  async function fetchOrderList() {
-    const { data } = await getOrderList()
+  async function fetchOrderList(params = {}) {
+    const { data } = await getOrderList(params)
     setDataSource(data.list)
+    setPageInfo({
+      pageSize: data.pageSize,
+      current: data.current,
+      total: data.total,
+    })
   }
 
   // function handleBeforeUnload(event: BeforeUnloadEvent) {
@@ -192,7 +199,7 @@ export function Order() {
 
   return (
     <>
-      <OrderQueryForm onQuery={handleQuery} onReset={() => fetchOrderList()} />
+      <OrderQueryForm onQuery={params => fetchOrderList(params)} onReset={() => fetchOrderList()} />
       <Divider />
       <Flex justify="flex-end" gap={4}>
         <Button
@@ -208,7 +215,17 @@ export function Order() {
           <Button icon={<RedoOutlined rotate={-90} />} type="text" />
         </Tooltip>
       </Flex>
-      <Table rowKey="id" dataSource={dataSource} columns={columns} style={{ marginTop: '14px' }} bordered />
+      <Table
+        rowKey="id"
+        dataSource={dataSource}
+        columns={columns}
+        style={{ marginTop: '14px' }}
+        pagination={{
+          ...pageInfo,
+          onChange: (current, pageSize) => fetchOrderList({ current, pageSize }),
+        }}
+        bordered
+      />
       <OrderModalForm
         open={modalVisible}
         onCancel={() => {
