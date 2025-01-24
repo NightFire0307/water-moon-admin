@@ -10,6 +10,13 @@ export function getOrderList(params = {}): OrderResponse {
   })
 }
 
+export function getOrderDetailById(id: number) {
+  return request({
+    url: `/api/admin/orders/${id}`,
+    method: 'GET',
+  })
+}
+
 export function createOrder(data: CreateOrderData): Promise<Response<IOrder>> {
   return request({
     url: '/api/admin/orders',
