@@ -1,6 +1,6 @@
 import type { Response } from '@/types/common.ts'
 
-export interface Link {
+export interface ILink {
   id: number
   share_url: string
   share_password: string
@@ -10,4 +10,4 @@ export interface Link {
   created_by: number
 }
 
-export type LinkResponseData = Promise<Response<Link>>
+export type LinkResponseData = Promise<Response<ILink>>

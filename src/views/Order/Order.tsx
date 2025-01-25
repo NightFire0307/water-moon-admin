@@ -5,8 +5,9 @@ import { getOrderList, removeOrder } from '@/apis/order.ts'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import { UploadStatus } from '@/store/useUploadFile.tsx'
 import { OrderStatus } from '@/types/order.ts'
-import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
 
+import { OrderDetail } from '@/views/Order/OrderDetail.tsx'
+import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
 import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
 import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 import { MoreOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
@@ -30,6 +31,8 @@ export function Order() {
   })
   const [modalVisible, SetModalVisible] = useState(false)
   const [taskCenterOpen, setTaskCenterOpen] = useState(false)
+  const [orderDetailOpen, setOrderDetailOpen] = useState(false)
+  const [orderDetailId, setOrderDetailId] = useState(0)
   const [incompleteFileCount, setIncompleteFileCount] = useState(0)
 
   const columns: TableColumnProps[] = [
@@ -87,7 +90,13 @@ export function Order() {
     },
     { title: '操作', dataIndex: 'action', render: (_, record) => (
       <Space>
-        <a>详情</a>
+        <a onClick={() => {
+          setOrderDetailId((record as IOrder).id)
+          setOrderDetailOpen(true)
+        }}
+        >
+          详情
+        </a>
         <a>照片管理</a>
         <Dropdown
           menu={{
@@ -246,6 +255,7 @@ export function Order() {
         )
       }
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
+      <OrderDetail order_id={orderDetailId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
     </>
   )
 }
