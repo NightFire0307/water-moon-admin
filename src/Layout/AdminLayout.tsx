@@ -33,12 +33,12 @@ function AdminLayout() {
     setBreadcrumb(breadcrumbItems)
 
     // 设置选中的菜单项
-    const selectKey: string = matches[matches.length - 1].pathname.split('/').pop() || ''
+    const selectKey: string = matches[matches.length - 1].pathname.split('/').pop() ?? ''
     setSelectedKeys([selectKey])
 
     // 设置展开的菜单项
-    const openKey: string = matches[matches.length - 2].pathname.split('/').pop() || ''
-    setOpenKeys([openKey])
+    // const openKey: string = matches[matches.length - 2].pathname.split('/').pop() ?? ''
+    // setOpenKeys([openKey])
   }, [matches])
 
   const menuItems: MenuItem[] = [

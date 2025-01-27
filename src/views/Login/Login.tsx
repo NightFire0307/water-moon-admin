@@ -24,7 +24,7 @@ export function Login() {
       if (accessToken && refreshToken) {
         message.success('登录成功')
         setTimeout(() => {
-          navigate('/product')
+          navigate('/')
         }, 1000)
       }
     }

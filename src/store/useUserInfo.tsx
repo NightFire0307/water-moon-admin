@@ -10,6 +10,7 @@ interface UserInfoStore {
 interface UserInfoAction {
   updateToken: (accessToken: string, refreshToken: string) => Promise<void>
   loadToken: () => Promise<void>
+  clearToken: () => void
 }
 
 export const useUserInfo = create<UserInfoStore & UserInfoAction>()(
@@ -40,6 +41,11 @@ export const useUserInfo = create<UserInfoStore & UserInfoAction>()(
       catch (err) {
         console.error(err)
       }
+    },
+    clearToken: () => {
+      set({ accessToken: '', refreshToken: '' })
+      localforage.removeItem('accessToken')
+      localforage.removeItem('refreshToken')
     },
   }), {
     name: 'userInfo',

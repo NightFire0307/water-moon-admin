@@ -1,3 +1,4 @@
+import type { AxiosError } from 'axios'
 import { message } from 'antd'
 import axios from 'axios'
 import localforage from 'localforage'
@@ -38,8 +39,16 @@ service.interceptors.response.use(
   (response) => {
     return response.data
   },
-  (error) => {
-    message.error(`接口请求错误：${error.code}`)
+  (error: AxiosError) => {
+    if (error.status === 401) {
+      message.error('登录过期，请重新登录')
+      useUserInfo.getState().clearToken()
+      window.location.href = '/login'
+    }
+    else {
+      message.error(`接口请求错误：${error.code}`)
+    }
+
     return Promise.reject(error)
   },
 )
