@@ -8,6 +8,7 @@ export enum OrderStatus {
   IN_PROGRESS = 1,
   SUBMITTED = 2,
   EXPIRED = 3,
+  FINISHED = 4,
 }
 
 export interface ProductsInfo {

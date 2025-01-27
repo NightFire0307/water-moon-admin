@@ -31,7 +31,15 @@ export function OrderDetail(props: OrderDetailProps) {
           {data.extra_photo_price}
         </span>
       ) },
-      { label: '订单状态', children: data.status },
+      { label: '订单状态', children: (
+        {
+          0: <Tag color="blue">待选片</Tag>,
+          1: <Tag color="gold">选片中</Tag>,
+          2: <Tag color="orange">选片完成</Tag>,
+          3: <Tag color="red">订单异常</Tag>,
+          4: <Tag color="green">已完成</Tag>,
+        }[data.status]
+      ) },
       {
         label: '产品信息',
         children: data.order_products.map((product) => {

@@ -47,30 +47,36 @@ export function Order() {
       title: '订单状态',
       dataIndex: 'status',
       render: (value) => {
-        let status: 'success' | 'processing' | 'default' | 'error' | 'warning' = 'default'
+        let status: 'default' | 'processing' = 'default'
+        let color = 'gray'
         let text = ''
         switch (value) {
           case OrderStatus.NOT_STARTED:
-            status = 'default'
-            text = '选片未开始'
+            color = 'blue'
+            text = '待选片'
             break
           case OrderStatus.IN_PROGRESS:
             status = 'processing'
-            text = '选片进行中'
+            color = 'gold'
+            text = '选片中'
             break
           case OrderStatus.SUBMITTED:
-            status = 'success'
-            text = '选片已完成'
+            color = 'orange'
+            text = '选片完成'
             break
           case OrderStatus.EXPIRED:
-            status = 'error'
-            text = '链接已过期'
+            color = 'red'
+            text = '订单异常'
+            break
+          case OrderStatus.FINISHED:
+            color = 'green'
+            text = '订单完成'
             break
           default:
-            status = 'warning'
+            color = 'warning'
             text = '未知'
         }
-        return <Badge status={status} text={text} />
+        return <Badge status={status} color={color} text={text} />
       },
     },
     {
