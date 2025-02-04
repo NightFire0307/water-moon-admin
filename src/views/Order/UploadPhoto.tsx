@@ -1,9 +1,8 @@
 import type { GetProp, TableColumnProps, UploadProps } from 'antd'
-import { getOssToken } from '@/apis/auth.ts'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import { LockedOrder } from '@/views/Order/OrderModalForm.tsx'
 import { Button, Flex, notification, Space, Table, Typography, Upload } from 'antd'
-import { useContext, useRef, useState } from 'react'
+import { useContext, useState } from 'react'
 
 const { Link } = Typography
 
@@ -18,7 +17,6 @@ interface UploadPhotoInfo {
 export function UploadPhoto() {
   const [dataSource, setDataSource] = useState<UploadPhotoInfo[]>([])
   const [fileList, setFileList] = useState<FileType[]>([])
-  const uploadToken = useRef<string>('')
   const { generateUploadTask, startUploadTask, setUploadToken } = useMinioUpload()
   const lockedOrder = useContext(LockedOrder)
 
@@ -91,15 +89,6 @@ export function UploadPhoto() {
   function handleAllClear() {
     setFileList([])
     setDataSource([])
-  }
-
-  // 获取上传凭证
-  async function fetchOssUploadToken() {
-    if (uploadToken.current)
-      return uploadToken.current
-    const { data } = await getOssToken()
-    uploadToken.current = data.uploadToken
-    return uploadToken.current
   }
 
   return (

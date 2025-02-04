@@ -9,3 +9,5 @@ export interface Pagination {
   pageSize: number
   total: number
 }
+
+export type PaginationParams = Partial<Omit<Pagination, 'total'>>
