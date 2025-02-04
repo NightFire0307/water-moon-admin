@@ -106,7 +106,7 @@ function AdminLayout() {
         <Header style={{ background: '#fff', padding: 0 }}>
           这是头部
         </Header>
-        <Content style={{ margin: '0 16px' }}>
+        <Content style={{ padding: '0 16px', position: 'relative', overflowX: 'hidden' }}>
           <Breadcrumb items={breadcrumb} style={{ margin: '16px 0' }}>
           </Breadcrumb>
           <div className={styles.content}>
