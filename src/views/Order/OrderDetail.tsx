@@ -68,12 +68,15 @@ export function OrderDetail(props: OrderDetailProps) {
   }
 
   useEffect(() => {
-    fetchOrderDetail()
-  }, [order_id])
+    if (open) {
+      fetchOrderDetail()
+    }
+  }, [open, order_id])
 
   return (
     <Modal open={open} centered width={1000} footer={null} onCancel={onClose}>
       <Descriptions
+        size="small"
         title="订单详情"
         items={items}
         column={{ xs: 1, sm: 2, md: 3, lg: 3, xl: 4, xxl: 4 }}

@@ -9,6 +9,7 @@ import { OrderStatus } from '@/types/order.ts'
 import { OrderDetail } from '@/views/Order/OrderDetail.tsx'
 import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
 import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
+import { PhotoMgr } from '@/views/Order/PhotoMgr.tsx'
 import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 import { MoreOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Divider, Dropdown, Flex, FloatButton, message, Modal, Space, Table, Tag, Tooltip } from 'antd'
@@ -32,7 +33,8 @@ export function Order() {
   const [modalVisible, SetModalVisible] = useState(false)
   const [taskCenterOpen, setTaskCenterOpen] = useState(false)
   const [orderDetailOpen, setOrderDetailOpen] = useState(false)
-  const [orderDetailId, setOrderDetailId] = useState(0)
+  const [photoMgrOpen, setPhotoMgrOpen] = useState(false)
+  const [selectOrderId, setSelectOrderId] = useState(0)
   const [incompleteFileCount, setIncompleteFileCount] = useState(0)
 
   const columns: TableColumnProps[] = [
@@ -97,19 +99,26 @@ export function Order() {
     { title: '操作', dataIndex: 'action', render: (_, record) => (
       <Space>
         <a onClick={() => {
-          setOrderDetailId((record as IOrder).id)
+          setSelectOrderId((record as IOrder).id)
           setOrderDetailOpen(true)
         }}
         >
           详情
         </a>
-        <a>照片管理</a>
+        <a onClick={(e) => {
+          e.preventDefault()
+          setPhotoMgrOpen(true)
+          setSelectOrderId((record as IOrder).id)
+        }}
+        >
+          照片管理
+        </a>
         <Dropdown
           menu={{
             items: [
               {
                 key: OrderAction.VIEW_LINK,
-                label: '查看链接',
+                label: '链接管理',
               },
               {
                 key: OrderAction.RESET,
@@ -261,7 +270,8 @@ export function Order() {
         )
       }
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
-      <OrderDetail order_id={orderDetailId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
+      <OrderDetail order_id={selectOrderId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
+      <PhotoMgr open={photoMgrOpen} orderId={selectOrderId} onClose={() => setPhotoMgrOpen(false)} />
     </>
   )
 }
