@@ -2,6 +2,7 @@ import type { Pagination, Response } from '@/types/common.ts'
 
 export interface IPhoto {
   id: number
+  name: string
   oss_url: string
   is_recommend: boolean
   is_selected: boolean

@@ -1,7 +1,15 @@
 import type { IPhoto } from '@/types/photo.ts'
-import { BorderOutlined, CheckSquareOutlined, DeleteOutlined, StarFilled, StarOutlined } from '@ant-design/icons'
-import { Button, Checkbox, Divider, Flex, Image, Popconfirm, Space } from 'antd'
-import { useState } from 'react'
+import {
+  BorderOutlined,
+  CheckSquareOutlined,
+  ClearOutlined,
+  DeleteOutlined,
+  StarFilled,
+  StarOutlined,
+} from '@ant-design/icons'
+import { Button, Checkbox, Divider, Flex, Image, message, Popconfirm, Space } from 'antd'
+import cs from 'classnames'
+import { useEffect, useState } from 'react'
 import styles from './PhotoPreview.module.less'
 
 interface CustomMaskProps {
@@ -18,7 +26,7 @@ function CustomMask(props: CustomMaskProps) {
   const { isRecommend, photoId, isSelect, onRecommend, onUnRecommend, onRemove, onSelect } = props
 
   return (
-    <div className={styles['custom-mask']}>
+    <div className={styles['custom-mask-content']}>
       <Checkbox
         checked={isSelect}
         onChange={() => onSelect(photoId)}
@@ -40,15 +48,31 @@ function CustomMask(props: CustomMaskProps) {
 
 export function PhotosPreview() {
   const [selectedPhotos, setSelectedPhotos] = useState<number[]>([])
+  const [photosList, setPhotoList] = useState<IPhoto[]>([])
 
-  const [photosList, setPhotoList] = useState<IPhoto[]>(Array.from({ length: 50 }).map((_, index) => ({
-    id: index + 1,
-    oss_url: '/src/assets/placeholder.svg',
-    is_recommend: false,
-    is_selected: false,
-    created_at: '',
-    updated_at: '',
-  })))
+  useEffect(() => {
+    fetchPhotos().then((data) => {
+      setPhotoList(data)
+    })
+    console.log('模拟数据')
+  }, [])
+
+  function fetchPhotos() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const data = Array.from({ length: 20 }).map((_, index) => ({
+          id: index + 1,
+          name: `photo-${index + 1}.jpg`,
+          oss_url: '/src/assets/placeholder.svg',
+          is_recommend: false,
+          is_selected: false,
+          created_at: '',
+          updated_at: '',
+        }))
+        resolve(data)
+      }, 10)
+    })
+  }
 
   function handleSelect(photoId: number) {
     setSelectedPhotos((prev) => {
@@ -69,22 +93,38 @@ export function PhotosPreview() {
     })
   }
 
-  function handleRecommend(photoId: number) {
+  function handleRecommend(photoId: number | number[]) {
     setPhotoList((prev) => {
-      const photo = photosList.find(photo => photo.id === photoId)
-      if (photo) {
-        photo.is_recommend = true
+      const ids = Array.isArray(photoId) ? photoId : [photoId]
+      if (ids.length === 0) {
+        message.info('请选择要标记的照片')
+        return [...prev]
       }
+
+      ids.forEach((id) => {
+        const photo = prev.find(photo => photo.id === id)
+        if (photo) {
+          photo.is_recommend = true
+        }
+      })
       return [...prev]
     })
   }
 
-  function handleUnRecommend(photoId: number) {
+  function handleUnRecommend(photoId: number | number[]) {
     setPhotoList((prev) => {
-      const photo = photosList.find(photo => photo.id === photoId)
-      if (photo) {
-        photo.is_recommend = false
+      const ids = Array.isArray(photoId) ? photoId : [photoId]
+      if (ids.length === 0) {
+        message.info('请选择要取消标记的照片')
+        return [...prev]
       }
+
+      ids.forEach((id) => {
+        const photo = prev.find(photo => photo.id === id)
+        if (photo) {
+          photo.is_recommend = false
+        }
+      })
       return [...prev]
     })
   }
@@ -93,6 +133,18 @@ export function PhotosPreview() {
     setPhotoList((prev) => {
       return prev.filter(photo => photo.id !== photoId)
     })
+
+    setSelectedPhotos((prev) => {
+      return prev.filter(id => id !== photoId)
+    })
+  }
+
+  function handleRemoveSelect() {
+    setPhotoList((prev) => {
+      return prev.filter(photo => !selectedPhotos.includes(photo.id))
+    })
+
+    setSelectedPhotos([])
   }
 
   return (
@@ -107,23 +159,24 @@ export function PhotosPreview() {
               selectedPhotos.length === photosList.length ? '取消全选' : '全选'
             }
           </Button>
-          <Button color="gold" icon={<StarOutlined />}>标记精选</Button>
+          <Button icon={<ClearOutlined />} onClick={() => setSelectedPhotos([])}>清空选中</Button>
+          <Button color="gold" variant="solid" icon={<StarFilled />} onClick={() => handleRecommend(selectedPhotos)}>标记精选</Button>
+          <Button color="gold" variant="outlined" icon={<StarOutlined />} onClick={() => handleUnRecommend(selectedPhotos)}>取消精选</Button>
         </Space>
-        <Button icon={<DeleteOutlined />} danger>删除</Button>
+        <Popconfirm placement="left" title={`确定删除选中的${selectedPhotos.length}张照片吗？`} onConfirm={handleRemoveSelect} okText="确定" cancelText="取消">
+          <Button icon={<DeleteOutlined />} danger disabled={selectedPhotos.length === 0}>删除</Button>
+        </Popconfirm>
       </Flex>
       <Divider />
       <div className={styles['photos-preview']}>
         {
           photosList.map(photo => (
             <div
-              style={{
-                display: 'inline-block',
-                position: 'relative',
-                border: selectedPhotos.includes(photo.id) ? '2px solid #597ef7' : 'none',
-              }}
+              className={cs(styles['photos-preview-item'], selectedPhotos.includes(photo.id) && styles.select)}
               key={photo.id}
             >
               <Image
+                style={{ borderRadius: '8px' }}
                 src={photo.oss_url}
                 alt="placeholder"
                 preview={{
@@ -138,11 +191,15 @@ export function PhotosPreview() {
                       onRemove={handleRemove}
                     />
                   ),
+                  maskClassName: styles['custom-mask'],
                 }}
               />
               {
                 photo.is_recommend && <StarFilled style={{ color: 'gold', position: 'absolute', top: '8px', right: '8px' }} />
               }
+              <span style={{ fontWeight: 500, textAlign: 'center' }}>
+                { photo.name }
+              </span>
             </div>
           ))
         }

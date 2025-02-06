@@ -33,8 +33,9 @@ export function PhotoMgr(props: PhotoMgrProps) {
       styles={{
         body: { overflow: 'hidden' },
       }}
+      destroyOnClose
     >
-      <PhotosPreview photoList={[]} />
+      <PhotosPreview />
     </Drawer>
   )
 }
