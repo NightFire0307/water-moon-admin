@@ -1,6 +1,8 @@
+import type { IPhoto } from '@/types/photo.ts'
 import type { GetProp, UploadProps } from 'antd'
 import type { AxiosRequestConfig } from 'axios'
-import { getPresignedUrl } from '@/apis/auth.ts'
+import { getPresignedPolicy } from '@/apis/auth.ts'
+import { savePhotos } from '@/apis/photo.ts'
 import axios from 'axios'
 import { create } from 'zustand'
 import { devtools, subscribeWithSelector } from 'zustand/middleware'
@@ -30,6 +32,8 @@ interface UploadTask {
 
 export interface QueueTask {
   uid: string
+  // 上传完成后的URL
+  url?: string
   order_number: string
   file_name: string
   file_size: number
@@ -39,6 +43,7 @@ export interface QueueTask {
 }
 
 interface UploadFileStore {
+  fileList: FileType[]
   uploadQueue: QueueTask[]
   uploadToken: string
   // 当前上传数
@@ -49,7 +54,7 @@ interface UploadFileStore {
 
 interface UploadFileAction {
   setUploadToken: (token: string) => void
-  generateUploadTask: (files: FileType[], order_number?: string) => void
+  generateUploadTask: (files: FileType, order_number?: string, onUploadComplete?: (list: IPhoto[]) => void) => void
   startUploadTask: () => void
   cancelUploadTask: (uid: string) => void
   cancelAllUploadTask: () => void
@@ -61,117 +66,148 @@ interface UploadFileAction {
 
 export const useMinioUpload = create<UploadFileStore & UploadFileAction>()(
   devtools(subscribeWithSelector((set, get) => ({
+    fileList: [],
     uploadQueue: [],
     uploadToken: '',
     currentUploads: 0,
     maxCurrentUploads: 5,
     setUploadToken: (token: string) => set(() => ({ uploadToken: token })),
-    generateUploadTask: (files: FileType[], order_number: string = '') => {
-      const tasks = files.map((file) => {
-        const uploadTask = createUploadTask(file, order_number)
+    generateUploadTask: (file: FileType, order_number = '', onUploadComplete) => {
+      // 创建上传任务
+      const uploadTask = createUploadTask(file, order_number)
 
-        uploadTask.onProgress(({ percent }) => {
-          set(state => ({
-            uploadQueue: state.uploadQueue.map(task =>
-              task.uid === file.uid ? { ...task, progress: percent } : task,
-            ),
-          }))
-        })
+      // 进度回调
+      uploadTask.onProgress(({ percent }) => {
+        set(state => ({
+          uploadQueue: state.uploadQueue.map(task =>
+            task.uid === file.uid ? { ...task, progress: percent } : task,
+          ),
+        }))
+      })
 
-        uploadTask.onComplete(({ fileName }) => {
-          console.log(fileName)
-          set(state => ({
-            uploadQueue: state.uploadQueue.map(task =>
-              task.uid === file.uid ? { ...task, status: UploadStatus.Done } : task,
-            ),
-          }))
-        })
+      // 上传完成回调
+      uploadTask.onComplete(async ({ fileName, size }) => {
+        set(state => ({
+          uploadQueue: state.uploadQueue.map(task =>
+            task.uid === file.uid ? { ...task, status: UploadStatus.Done } : task,
+          ),
+        }))
 
-        return {
+        // 存储上传成功的文件
+        const { data } = await savePhotos(31, [{ file_name: fileName, file_size: size }])
+
+        // 执行上传完成回调
+        onUploadComplete && onUploadComplete(data)
+      })
+
+      set((state) => {
+        const newTask: QueueTask = {
           uid: file.uid,
           order_number,
           file_name: file.name,
-          file_size: Math.round(file.size / 1024 / 1024 * 100) / 100,
+          file_size: Math.round((file.size / 1024 / 1024) * 100) / 100,
           progress: 0,
           status: UploadStatus.Pending,
           uploadTask,
         }
+        return { uploadQueue: [...state.uploadQueue, newTask] }
       })
 
-      set({ uploadQueue: [...tasks] })
+      // 无论当前是否有空闲通道，都尝试启动上传任务
+      get().startUploadTask()
     },
     /**
      * 1、先从待上传的队列中取出最大并发上传数的任务
      * 2、开始上传任务
      * 3、每个任务上传完成后会检查待上传队列中的下一个任务并开始上传
      */
-    startUploadTask: async () => {
-      const { uploadQueue, maxCurrentUploads } = get()
+    startUploadTask: () => {
+      const { uploadQueue, maxCurrentUploads, currentUploads } = get()
 
-      // 开始上传任务
-      const runTask = async (task: QueueTask) => {
-        // 上传中的任务数量+1 并更新任务状态
-        set(state => ({
-          currentUploads: state.currentUploads + 1,
-          uploadQueue: state.uploadQueue.map(t => t.uid === task.uid ? { ...t, status: UploadStatus.Uploading } : t),
-        }))
-
-        try {
-          // 开始OSS上传
-          await task.uploadTask.start()
-          // 上传完成后更新任务状态
-          set(state => ({
-            uploadQueue: state.uploadQueue.map(t => t.uid === task.uid ? { ...t, status: UploadStatus.Done } : t),
-          }))
-        }
-        catch {
-          // 上传失败后更新任务状态
-          set(state => ({
-            uploadQueue: state.uploadQueue.map(t => t.uid === task.uid ? { ...t, status: UploadStatus.Error } : t),
-          }))
-        }
-        finally {
-          // 上传完成或失败后当前上传任务数量-1
-          set(state => ({ currentUploads: state.currentUploads - 1 }))
-          // 上传完成或失败后继续上传下一个任务
-          const nextTask = get().uploadQueue.find(t => t.status === UploadStatus.Pending)
-          // 如果有待上传的任务则继续上传
-          if (nextTask) {
-            runTask(nextTask)
-          }
-        }
+      // 如果当前上传任务数已达到最大并发数，则直接返回
+      if (currentUploads >= maxCurrentUploads) {
+        return
       }
 
       // 从队列中取出待上传的任务
       const pendingTasks = uploadQueue.filter(task => task.status === UploadStatus.Pending)
       // 取出最大并发上传数的任务
-      const initialTasks = pendingTasks.slice(0, maxCurrentUploads)
+      const initialTasks = pendingTasks.slice(0, maxCurrentUploads - currentUploads)
 
+      const runTask = async (task: QueueTask) => {
+        // 更新任务状态为上传中
+        set(state => ({
+          currentUploads: state.currentUploads + 1,
+          uploadQueue: state.uploadQueue.map(t =>
+            t.uid === task.uid ? { ...t, status: UploadStatus.Uploading } : t,
+          ),
+        }))
+
+        try {
+          // 开始上传任务
+          await task.uploadTask.start()
+          // 更新任务状态为完成
+          set(state => ({
+            uploadQueue: state.uploadQueue.map(t =>
+              t.uid === task.uid ? { ...t, status: UploadStatus.Done } : t,
+            ),
+          }))
+        }
+        catch (error) {
+          // 更新任务状态为失败
+          set(state => ({
+            uploadQueue: state.uploadQueue.map(t =>
+              t.uid === task.uid ? { ...t, status: UploadStatus.Error } : t,
+            ),
+          }))
+        }
+        finally {
+          // 更新当前上传任务数
+          set(state => ({ currentUploads: state.currentUploads - 1 }))
+          // 继续上传下一个任务
+          get().startUploadTask()
+        }
+      }
+
+      // 开始上传任务
       initialTasks.forEach(runTask)
     },
-    cancelUploadTask: (uid: string) => set((state) => {
-      const task = findTaskByUid(state.uploadQueue, uid)
-      if (task && task.status !== UploadStatus.Done) {
-        task.uploadTask.cancel()
-        task.status = UploadStatus.Abort
-      }
-      return { uploadQueue: [...state.uploadQueue] }
-    }),
-    removeUploadTask: (uid: string) => set((state) => {
-      const task = findTaskByUid(state.uploadQueue, uid)
-      if (task) {
-        task.uploadTask.cancel()
-      }
-      return { uploadQueue: state.uploadQueue.filter(task => task.uid !== uid) }
-    }),
-    retryUploadTask: (uid: string) => set((state) => {
-      const task = findTaskByUid(state.uploadQueue, uid)
-      if (task) {
-        task.status = UploadStatus.Pending
-        task.uploadTask.start()
-      }
-      return { uploadQueue: [...state.uploadQueue] }
-    }),
+    cancelUploadTask: (uid: string) =>
+      set((state) => {
+        const task = findTaskByUid(state.uploadQueue, uid)
+        if (task && task.status === UploadStatus.Uploading) {
+          task.uploadTask.cancel()
+          task.status = UploadStatus.Abort
+          return { currentUploads: state.currentUploads - 1, uploadQueue: [...state.uploadQueue] }
+        }
+        return state
+      }),
+    removeUploadTask: (uid: string) =>
+      set((state) => {
+        const task = findTaskByUid(state.uploadQueue, uid)
+        if (task) {
+          if (task.status === UploadStatus.Uploading) {
+            task.uploadTask.cancel()
+            return { currentUploads: state.currentUploads - 1, uploadQueue: state.uploadQueue.filter(t => t.uid !== uid) }
+          }
+          return { uploadQueue: state.uploadQueue.filter(t => t.uid !== uid) }
+        }
+        return state
+      }),
+    retryUploadTask: (uid: string) => {
+      // 重置任务状态为等待上传
+      set((state) => {
+        const task = findTaskByUid(state.uploadQueue, uid)
+        if (task) {
+          task.status = UploadStatus.Pending
+          return { uploadQueue: [...state.uploadQueue] }
+        }
+        return state
+      })
+
+      // 触发上传任务
+      get().startUploadTask()
+    },
     retryAllUploadTask: () => set((state) => {
       // 筛选出上传失败的任务
       const errorTasks = state.uploadQueue.filter(task => task.status === UploadStatus.Error)
@@ -192,10 +228,11 @@ export const useMinioUpload = create<UploadFileStore & UploadFileAction>()(
       })
       return ({ uploadQueue: state.uploadQueue })
     }),
-    clearUploadQueue: () => set(() => {
-      get().cancelAllUploadTask()
-      return { uploadQueue: [] }
-    }),
+    clearUploadQueue: () =>
+      set(() => {
+        get().cancelAllUploadTask()
+        return { uploadQueue: [], currentUploads: 0 }
+      }),
   })), { enabled: true }),
 )
 
@@ -207,7 +244,7 @@ export const useMinioUpload = create<UploadFileStore & UploadFileAction>()(
 function createUploadTask(file: FileType, order_number: string) {
   const controller = new AbortController()
   let onProgressCallback: (progress: { size: number, percent: number }) => void = () => {}
-  let onCompleteCallBack: (res: { fileName: string }) => void = () => {}
+  let onCompleteCallBack: (res: { fileName: string, size: number }) => void = () => {}
   let onErrorCallback: (error: unknown) => void = () => {}
 
   const config: AxiosRequestConfig = {
@@ -229,7 +266,7 @@ function createUploadTask(file: FileType, order_number: string) {
     onProgressCallback = cb
   }
 
-  function onComplete(cb: (res: { fileName: string }) => void) {
+  function onComplete(cb: (res: { fileName: string, size: number }) => void) {
     onCompleteCallBack = cb
   }
 
@@ -243,16 +280,26 @@ function createUploadTask(file: FileType, order_number: string) {
 
   async function start() {
     try {
-      const { data } = await getPresignedUrl({ uid: file.uid, name: file.name, order_number })
-      await axios.put(data.presignedUrl, file, config)
+      const { data } = await getPresignedPolicy({ order_number, file_name: file.name })
+      const { formData, postURL } = data
+
+      const formDataWithFiles = new FormData()
+      Object.keys(formData).forEach((key) => {
+        formDataWithFiles.append(key, formData[key])
+      })
+      formDataWithFiles.append('file', file)
+
+      await axios.post(postURL, formDataWithFiles, config)
       if (onCompleteCallBack) {
-        onCompleteCallBack({
-          fileName: `${file.name}-${file.uid}`,
-        })
+        onCompleteCallBack({ fileName: file.name, size: file.size })
+        onCompleteCallBack = () => {} // 防止重复调用
       }
     }
     catch (error) {
-      onErrorCallback(error)
+      if (onErrorCallback) {
+        onErrorCallback(error)
+        onErrorCallback = () => {} // 防止重复调用
+      }
       console.error('Upload failed:', error)
     }
   }
@@ -266,10 +313,6 @@ function createUploadTask(file: FileType, order_number: string) {
   }
 }
 
-function findTaskByUid(uploadQueue: QueueTask[], uid: string): QueueTask {
-  const task = uploadQueue.find(task => task.uid === uid)
-  if (!task) {
-    throw new Error(`Task with uid ${uid} not found`)
-  }
-  return task
+function findTaskByUid(uploadQueue: QueueTask[], uid: string): QueueTask | undefined {
+  return uploadQueue.find(task => task.uid === uid)
 }

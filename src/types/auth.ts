@@ -37,6 +37,20 @@ export interface PresignedUrlResponse {
   presignedUrl: string
 }
 
+export interface PresignedPolicyResponse {
+  postURL: string
+  formData: {
+    ContentType: string
+    bucket: string
+    policy: string
+    x_amz_algorithm: string
+    x_amz_credential: string
+    x_amz_date: string
+    x_amz_signature: string
+  }
+}
+
 export type LoginResponseData = Promise<Response<LoginResponse>>
 export type OssTokenResponseData = Promise<Response<OssTokenResponse>>
 export type PresignedUrlResponseData = Promise<Response<PresignedUrlResponse>>
+export type PresignedPolicyResponseData = Promise<Response<PresignedPolicyResponse>>

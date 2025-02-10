@@ -5,7 +5,7 @@ import { createDirectUploadTask } from 'qiniu-js'
 import { create } from 'zustand'
 import { devtools, subscribeWithSelector } from 'zustand/middleware'
 
-type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0]
+export type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0]
 
 export enum UploadStatus {
   // 上传中
@@ -26,6 +26,7 @@ export interface QueueTask {
   file_name: string
   file_size: number
   progress: number
+  src: string
   status: UploadStatus
   uploadTask: UploadTask<DirectUploadContext>
 }

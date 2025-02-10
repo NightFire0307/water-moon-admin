@@ -1,4 +1,5 @@
 import type { PaginationParams } from '@/types/common.ts'
+import type { PhotosResponse } from '@/types/photo.ts'
 import request from '@/utils/request'
 
 interface GetPhotosByOrderIdParams extends PaginationParams {
@@ -10,5 +11,13 @@ export function getPhotosByOrderId(params: GetPhotosByOrderIdParams) {
     url: `/api/admin/photos`,
     method: 'get',
     params,
+  })
+}
+
+export function savePhotos(orderId: number, data: { file_name: string, file_size: number }[]): PhotosResponse {
+  return request({
+    url: `/api/admin/photos/${orderId}`,
+    method: 'post',
+    data,
   })
 }

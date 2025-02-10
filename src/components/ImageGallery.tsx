@@ -1,4 +1,7 @@
 import type { IPhoto } from '@/types/photo.ts'
+import type { UploadProps } from 'antd'
+import { getPhotosByOrderId } from '@/apis/photo.ts'
+import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import {
   BorderOutlined,
   CheckSquareOutlined,
@@ -6,11 +9,12 @@ import {
   DeleteOutlined,
   StarFilled,
   StarOutlined,
+  UploadOutlined,
 } from '@ant-design/icons'
-import { Button, Checkbox, Divider, Flex, Image, message, Popconfirm, Space } from 'antd'
+import { Button, Checkbox, ConfigProvider, Divider, Flex, Image, message, Popconfirm, Progress, Space, Upload } from 'antd'
 import cs from 'classnames'
 import { useEffect, useState } from 'react'
-import styles from './PhotoPreview.module.less'
+import styles from './ImageGallery.module.less'
 
 interface CustomMaskProps {
   isRecommend: boolean
@@ -46,32 +50,57 @@ function CustomMask(props: CustomMaskProps) {
   )
 }
 
-export function PhotosPreview() {
+// 上传进度
+function UploadProgress(props: { percent: number, fileName: string }) {
+  const { percent, fileName } = props
+
+  return (
+    <div className={styles['upload-progress-wrapper']}>
+      <div className={styles['upload-progress']}>
+        <ConfigProvider theme={{
+          components: {
+            Progress: {
+              circleTextColor: '#fff',
+            },
+          },
+        }}
+        >
+          <Progress percent={percent * 100} type="circle" />
+        </ConfigProvider>
+      </div>
+      <div className={styles['upload-text']}>{fileName}</div>
+    </div>
+  )
+}
+
+interface ImageGalleryProps {
+  orderId: number
+}
+
+export function ImageGallery(props: ImageGalleryProps) {
+  const { orderId } = props
   const [selectedPhotos, setSelectedPhotos] = useState<number[]>([])
   const [photosList, setPhotoList] = useState<IPhoto[]>([])
+  const { generateUploadTask, uploadQueue } = useMinioUpload()
 
   useEffect(() => {
-    fetchPhotos().then((data) => {
-      setPhotoList(data)
-    })
-    console.log('模拟数据')
-  }, [])
+    fetchPhotos()
+  }, [orderId])
 
-  function fetchPhotos() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const data = Array.from({ length: 20 }).map((_, index) => ({
-          id: index + 1,
-          name: `photo-${index + 1}.jpg`,
-          oss_url: '/src/assets/placeholder.svg',
-          is_recommend: false,
-          is_selected: false,
-          created_at: '',
-          updated_at: '',
-        }))
-        resolve(data)
-      }, 10)
-    })
+  const uploadProps: UploadProps = {
+    // action: postData.postURL,
+    // data: postData.formData,
+    multiple: true,
+    showUploadList: false,
+    beforeUpload: (file) => {
+      generateUploadTask(file, '', handleUploadComplete)
+      return false
+    },
+  }
+
+  async function fetchPhotos() {
+    const { data } = await getPhotosByOrderId({ orderId })
+    setPhotoList(data.list)
   }
 
   function handleSelect(photoId: number) {
@@ -147,6 +176,10 @@ export function PhotosPreview() {
     setSelectedPhotos([])
   }
 
+  function handleUploadComplete(fileList: IPhoto[]) {
+    console.log(fileList)
+  }
+
   return (
     <>
       <Flex justify="space-between">
@@ -154,31 +187,43 @@ export function PhotosPreview() {
           <Button
             icon={selectedPhotos.length === photosList.length ? <CheckSquareOutlined /> : <BorderOutlined />}
             onClick={handleSelectAll}
+            disabled={photosList.length === 0}
           >
             {
-              selectedPhotos.length === photosList.length ? '取消全选' : '全选'
+              selectedPhotos.length === photosList.length && photosList.length !== 0 ? '取消全选' : '全选'
             }
           </Button>
           <Button icon={<ClearOutlined />} onClick={() => setSelectedPhotos([])}>清空选中</Button>
           <Button color="gold" variant="solid" icon={<StarFilled />} onClick={() => handleRecommend(selectedPhotos)}>标记精选</Button>
           <Button color="gold" variant="outlined" icon={<StarOutlined />} onClick={() => handleUnRecommend(selectedPhotos)}>取消精选</Button>
+          <Popconfirm placement="left" title={`确定删除选中的${selectedPhotos.length}张照片吗？`} onConfirm={handleRemoveSelect} okText="确定" cancelText="取消">
+            <Button icon={<DeleteOutlined />} danger disabled={selectedPhotos.length === 0}>删除</Button>
+          </Popconfirm>
         </Space>
-        <Popconfirm placement="left" title={`确定删除选中的${selectedPhotos.length}张照片吗？`} onConfirm={handleRemoveSelect} okText="确定" cancelText="取消">
-          <Button icon={<DeleteOutlined />} danger disabled={selectedPhotos.length === 0}>删除</Button>
-        </Popconfirm>
+        <Space>
+          <Upload {...uploadProps}>
+            <Button type="primary" icon={<UploadOutlined />}>上传照片</Button>
+          </Upload>
+        </Space>
       </Flex>
       <Divider />
       <div className={styles['photos-preview']}>
         {
+          uploadQueue.map(task => (
+            <UploadProgress percent={task.progress} fileName={task.file_name} key={task.uid} />
+          ))
+        }
+        {
           photosList.map(photo => (
             <div
               className={cs(styles['photos-preview-item'], selectedPhotos.includes(photo.id) && styles.select)}
-              key={photo.id}
+              key={photo.name}
             >
               <Image
-                style={{ borderRadius: '8px' }}
+                style={{ borderRadius: '8px', objectFit: 'contain' }}
                 src={photo.oss_url}
                 alt="placeholder"
+                height="100%"
                 preview={{
                   mask: (
                     <CustomMask
