@@ -75,10 +75,11 @@ function UploadProgress(props: { percent: number, fileName: string }) {
 
 interface ImageGalleryProps {
   orderId: number
+  orderNumber: string
 }
 
 export function ImageGallery(props: ImageGalleryProps) {
-  const { orderId } = props
+  const { orderId, orderNumber } = props
   const [selectedPhotos, setSelectedPhotos] = useState<number[]>([])
   const [photosList, setPhotoList] = useState<IPhoto[]>([])
   const { generateUploadTask, uploadQueue } = useMinioUpload()
@@ -93,7 +94,7 @@ export function ImageGallery(props: ImageGalleryProps) {
     multiple: true,
     showUploadList: false,
     beforeUpload: (file) => {
-      generateUploadTask(file, '', handleUploadComplete)
+      generateUploadTask(file, orderNumber, handleUploadComplete)
       return false
     },
   }

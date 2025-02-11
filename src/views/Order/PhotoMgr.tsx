@@ -3,12 +3,12 @@ import { Drawer } from 'antd'
 
 interface PhotoMgrProps {
   open: boolean
-  orderId: number
+  selectOrder: { orderId: number, orderNumber: string }
   onClose: () => void
 }
 
 export function PhotoMgr(props: PhotoMgrProps) {
-  const { open, orderId, onClose } = props
+  const { open, selectOrder, onClose } = props
 
   return (
     <Drawer
@@ -22,7 +22,7 @@ export function PhotoMgr(props: PhotoMgrProps) {
       }}
       destroyOnClose
     >
-      <ImageGallery orderId={orderId} />
+      <ImageGallery orderId={selectOrder.orderId} orderNumber={selectOrder.orderNumber} />
     </Drawer>
   )
 }

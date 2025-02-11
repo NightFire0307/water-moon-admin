@@ -54,7 +54,7 @@ interface UploadFileStore {
 
 interface UploadFileAction {
   setUploadToken: (token: string) => void
-  generateUploadTask: (files: FileType, order_number?: string, onUploadComplete?: (list: IPhoto[]) => void) => void
+  generateUploadTask: (files: FileType, order_number: string, onUploadComplete?: (list: IPhoto[]) => void) => void
   startUploadTask: () => void
   cancelUploadTask: (uid: string) => void
   cancelAllUploadTask: () => void
@@ -72,7 +72,7 @@ export const useMinioUpload = create<UploadFileStore & UploadFileAction>()(
     currentUploads: 0,
     maxCurrentUploads: 5,
     setUploadToken: (token: string) => set(() => ({ uploadToken: token })),
-    generateUploadTask: (file: FileType, order_number = '', onUploadComplete) => {
+    generateUploadTask: (file: FileType, order_number, onUploadComplete) => {
       // 创建上传任务
       const uploadTask = createUploadTask(file, order_number)
 

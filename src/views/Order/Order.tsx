@@ -23,6 +23,11 @@ enum OrderAction {
   DELETE = 'delete',
 }
 
+export interface ISelectOrder {
+  orderId: number
+  orderNumber: string
+}
+
 export function Order() {
   const [dataSource, setDataSource] = useState<IOrder[]>([])
   const [pageInfo, setPageInfo] = useState<Pagination>({
@@ -34,7 +39,10 @@ export function Order() {
   const [taskCenterOpen, setTaskCenterOpen] = useState(false)
   const [orderDetailOpen, setOrderDetailOpen] = useState(false)
   const [photoMgrOpen, setPhotoMgrOpen] = useState(false)
-  const [selectOrderId, setSelectOrderId] = useState(0)
+  const [selectOrder, setSelectOrder] = useState<ISelectOrder>({
+    orderId: 0,
+    orderNumber: '',
+  })
   const [incompleteFileCount, setIncompleteFileCount] = useState(0)
 
   const columns: TableColumnProps[] = [
@@ -99,7 +107,8 @@ export function Order() {
     { title: '操作', dataIndex: 'action', render: (_, record) => (
       <Space>
         <a onClick={() => {
-          setSelectOrderId((record as IOrder).id)
+          const { id, order_number } = record as IOrder
+          setSelectOrder({ orderId: id, orderNumber: order_number })
           setOrderDetailOpen(true)
         }}
         >
@@ -107,8 +116,9 @@ export function Order() {
         </a>
         <a onClick={(e) => {
           e.preventDefault()
+          const { id, order_number } = record as IOrder
+          setSelectOrder({ orderId: id, orderNumber: order_number })
           setPhotoMgrOpen(true)
-          setSelectOrderId((record as IOrder).id)
         }}
         >
           照片管理
@@ -270,8 +280,8 @@ export function Order() {
         )
       }
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
-      <OrderDetail order_id={selectOrderId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
-      <PhotoMgr open={photoMgrOpen} orderId={selectOrderId} onClose={() => setPhotoMgrOpen(false)} />
+      <OrderDetail selectOrder={selectOrder} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
+      <PhotoMgr open={photoMgrOpen} selectOrder={selectOrder} onClose={() => setPhotoMgrOpen(false)} />
     </>
   )
 }
