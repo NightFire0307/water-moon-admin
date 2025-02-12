@@ -1,3 +1,4 @@
+import type { PhotoWithUid } from '@/store/useMinioUpload.tsx'
 import type { IPhoto } from '@/types/photo.ts'
 import type { UploadProps } from 'antd'
 import { getPhotosByOrderId } from '@/apis/photo.ts'
@@ -82,7 +83,7 @@ export function ImageGallery(props: ImageGalleryProps) {
   const { orderId, orderNumber } = props
   const [selectedPhotos, setSelectedPhotos] = useState<number[]>([])
   const [photosList, setPhotoList] = useState<IPhoto[]>([])
-  const { generateUploadTask, uploadQueue } = useMinioUpload()
+  const { generateUploadTask, removeUploadTask, uploadQueue } = useMinioUpload()
 
   useEffect(() => {
     fetchPhotos()
@@ -94,7 +95,7 @@ export function ImageGallery(props: ImageGalleryProps) {
     multiple: true,
     showUploadList: false,
     beforeUpload: (file) => {
-      generateUploadTask(file, orderNumber, handleUploadComplete)
+      generateUploadTask(file, { orderId, orderNumber }, { onUploadComplete: handleUploadComplete })
       return false
     },
   }
@@ -177,8 +178,9 @@ export function ImageGallery(props: ImageGalleryProps) {
     setSelectedPhotos([])
   }
 
-  function handleUploadComplete(fileList: IPhoto[]) {
-    console.log(fileList)
+  function handleUploadComplete(fileList: PhotoWithUid[]) {
+    setPhotoList(prev => [...prev, ...fileList])
+    fileList.forEach(file => removeUploadTask(file.uid))
   }
 
   return (
@@ -211,7 +213,7 @@ export function ImageGallery(props: ImageGalleryProps) {
       <div className={styles['photos-preview']}>
         {
           uploadQueue.map(task => (
-            <UploadProgress percent={task.progress} fileName={task.file_name} key={task.uid} />
+            <UploadProgress percent={task.progress} fileName={task.fileName} key={task.uid} />
           ))
         }
         {
@@ -224,7 +226,7 @@ export function ImageGallery(props: ImageGalleryProps) {
                 style={{ borderRadius: '8px', objectFit: 'contain' }}
                 src={photo.oss_url}
                 alt="placeholder"
-                height="100%"
+                height={250}
                 preview={{
                   mask: (
                     <CustomMask

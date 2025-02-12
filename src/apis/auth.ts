@@ -16,7 +16,7 @@ export function getPresignedUrl(params: { uid: string, name: string, order_numbe
   })
 }
 
-export function getPresignedPolicy(params: { order_number: string, file_name: string }): PresignedPolicyResponseData {
+export function getPresignedPolicy(params: { orderNumber: string, fileName: string }): PresignedPolicyResponseData {
   return request({
     url: '/api/auth/admin/oss-token',
     method: 'GET',
