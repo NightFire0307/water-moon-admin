@@ -21,3 +21,11 @@ export function savePhotos(orderId: number, data: { file_name: string, file_size
     data,
   })
 }
+
+export function removePhotos(orderId: number, data: { photoIds: number[] }) {
+  return request({
+    url: `/api/admin/photos/${orderId}`,
+    method: 'delete',
+    data,
+  })
+}

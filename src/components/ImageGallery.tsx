@@ -1,7 +1,7 @@
 import type { PhotoWithUid } from '@/store/useMinioUpload.tsx'
 import type { IPhoto } from '@/types/photo.ts'
 import type { UploadProps } from 'antd'
-import { getPhotosByOrderId } from '@/apis/photo.ts'
+import { getPhotosByOrderId, removePhotos } from '@/apis/photo.ts'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import {
   BorderOutlined,
@@ -101,7 +101,7 @@ export function ImageGallery(props: ImageGalleryProps) {
   }
 
   async function fetchPhotos() {
-    const { data } = await getPhotosByOrderId({ orderId })
+    const { data } = await getPhotosByOrderId({ orderId, pageSize: 20 })
     setPhotoList(data.list)
   }
 
@@ -170,12 +170,8 @@ export function ImageGallery(props: ImageGalleryProps) {
     })
   }
 
-  function handleRemoveSelect() {
-    setPhotoList((prev) => {
-      return prev.filter(photo => !selectedPhotos.includes(photo.id))
-    })
-
-    setSelectedPhotos([])
+  async function handleRemoveSelect() {
+    await removePhotos(orderId, { photoIds: selectedPhotos })
   }
 
   function handleUploadComplete(fileList: PhotoWithUid[]) {
