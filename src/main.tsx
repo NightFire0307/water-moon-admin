@@ -5,6 +5,7 @@ import { RouterProvider } from 'react-router'
 import { router } from './router'
 import './assets/normalize.less'
 import 'dayjs/locale/zh-cn'
+import '@ant-design/v5-patch-for-react-19'
 
 createRoot(document.getElementById('root')!).render(
   <ConfigProvider locale={zhCN}>
