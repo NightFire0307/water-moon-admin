@@ -175,8 +175,9 @@ export function ImageGallery(props: ImageGalleryProps) {
   }
 
   function handleUploadComplete(fileList: PhotoWithUid[]) {
-    setPhotoList(prev => [...prev, ...fileList])
-    fileList.forEach(file => removeUploadTask(file.uid))
+    console.log(fileList)
+    // setPhotoList(prev => [...prev, ...fileList])
+    // fileList.forEach(file => removeUploadTask(file.uid))
   }
 
   return (
@@ -216,14 +217,15 @@ export function ImageGallery(props: ImageGalleryProps) {
           photosList.map(photo => (
             <div
               className={cs(styles['photos-preview-item'], selectedPhotos.includes(photo.id) && styles.select)}
-              key={photo.name}
+              key={photo.id}
             >
               <Image
                 style={{ borderRadius: '8px', objectFit: 'contain' }}
-                src={photo.oss_url}
+                src={photo.thumbnail_url}
                 alt="placeholder"
                 height={250}
                 preview={{
+                  src: photo.original_url,
                   mask: (
                     <CustomMask
                       photoId={photo.id}
@@ -242,7 +244,7 @@ export function ImageGallery(props: ImageGalleryProps) {
                 photo.is_recommend && <StarFilled style={{ color: 'gold', position: 'absolute', top: '8px', right: '8px' }} />
               }
               <span style={{ fontWeight: 500, textAlign: 'center' }}>
-                { photo.name }
+                { photo.file_name }
               </span>
             </div>
           ))

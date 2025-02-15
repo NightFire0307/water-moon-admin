@@ -2,9 +2,7 @@ import type { IPhoto } from '@/types/photo.ts'
 import type { ISelectOrder } from '@/views/Order/Order.tsx'
 import type { GetProp, UploadProps } from 'antd'
 import type { AxiosRequestConfig } from 'axios'
-import { getPresignedPolicy } from '@/apis/auth.ts'
-import { savePhotos } from '@/apis/photo.ts'
-import axios from 'axios'
+import request from '@/utils/request.ts'
 import { create } from 'zustand'
 import { devtools, subscribeWithSelector } from 'zustand/middleware'
 
@@ -83,7 +81,7 @@ export const useMinioUpload = create<UploadFileStore & UploadFileAction>()(
       const { orderId, orderNumber } = selectOrder
       const { onUploadComplete } = options
       // 创建上传任务
-      const uploadTask = createUploadTask(file, orderNumber)
+      const uploadTask = createUploadTask(file, orderId)
 
       // 进度回调
       uploadTask.onProgress(({ percent }) => {
@@ -95,18 +93,15 @@ export const useMinioUpload = create<UploadFileStore & UploadFileAction>()(
       })
 
       // 上传完成回调
-      uploadTask.onComplete(async ({ uid, fileName, size }) => {
+      uploadTask.onComplete(async (res) => {
         set(state => ({
           uploadQueue: state.uploadQueue.map(task =>
             task.uid === file.uid ? { ...task, status: UploadStatus.Done } : task,
           ),
         }))
 
-        // 存储上传成功的文件
-        const { data } = await savePhotos(orderId, [{ file_name: fileName, file_size: size }])
-
         // 执行上传完成回调
-        onUploadComplete && onUploadComplete(data.map((photo: IPhoto) => ({ ...photo, uid })))
+        onUploadComplete && onUploadComplete(res)
       })
 
       set((state) => {
@@ -249,9 +244,9 @@ export const useMinioUpload = create<UploadFileStore & UploadFileAction>()(
 /**
  * 创建单个上传任务
  * @param file
- * @param orderNumber
+ * @param orderId
  */
-function createUploadTask(file: FileType, orderNumber: string) {
+function createUploadTask(file: FileType, orderId: number) {
   const controller = new AbortController()
   let onProgressCallback: (progress: { size: number, percent: number }) => void = () => {}
   let onCompleteCallBack: (res: { uid: string, fileName: string, size: number }) => void = () => {}
@@ -290,16 +285,14 @@ function createUploadTask(file: FileType, orderNumber: string) {
 
   async function start() {
     try {
-      const { data } = await getPresignedPolicy({ orderNumber, fileName: file.name })
-      const { formData, postURL } = data
-
-      const formDataWithFiles = new FormData()
-      Object.keys(formData).forEach((key) => {
-        formDataWithFiles.append(key, (formData as { [key: string]: string })[key])
+      const formData = new FormData()
+      formData.append('file', file)
+      await request({
+        url: `/api/admin/photos/upload/${orderId}`,
+        method: 'POST',
+        data: formData,
+        ...config,
       })
-      formDataWithFiles.append('file', file)
-
-      await axios.post(postURL, formDataWithFiles, config)
       if (onCompleteCallBack) {
         onCompleteCallBack({ uid: file.uid, fileName: file.name, size: file.size })
         onCompleteCallBack = () => {} // 防止重复调用

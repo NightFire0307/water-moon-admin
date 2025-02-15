@@ -24,7 +24,6 @@ service.interceptors.request.use(
     // 设置请求头部 Authorization
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`
-      config.headers['Content-Type'] = 'application/json'
     }
     return config
   },
