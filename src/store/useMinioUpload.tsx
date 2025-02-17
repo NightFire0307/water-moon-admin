@@ -54,7 +54,7 @@ interface UploadFileStore {
 export type PhotoWithUid = IPhoto & { uid: string }
 
 interface GenerateUploadTaskOptions {
-  onUploadComplete?: (list: PhotoWithUid[]) => void
+  onUploadComplete?: (res: { uid: string, fileName: string, size: number }) => void
 }
 
 interface UploadFileAction {
@@ -286,6 +286,7 @@ function createUploadTask(file: FileType, orderId: number) {
   async function start() {
     try {
       const formData = new FormData()
+      formData.append('uid', file.uid)
       formData.append('file', file)
       await request({
         url: `/api/admin/photos/upload/${orderId}`,

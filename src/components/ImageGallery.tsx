@@ -172,6 +172,7 @@ export function ImageGallery(props: ImageGalleryProps) {
 
   async function handleRemoveSelect() {
     await removePhotos(orderId, { photoIds: selectedPhotos })
+    await fetchPhotos()
   }
 
   function handleUploadComplete(fileList: PhotoWithUid[]) {
@@ -179,6 +180,29 @@ export function ImageGallery(props: ImageGalleryProps) {
     // setPhotoList(prev => [...prev, ...fileList])
     // fileList.forEach(file => removeUploadTask(file.uid))
   }
+
+  useEffect(() => {
+    const eventSource = new EventSource('http://localhost:3000/admin/photos/completions')
+    eventSource.onmessage = (event) => {
+      const data = JSON.parse(event.data) as IPhoto
+      console.log(data)
+
+      // 更新照片列表
+      setPhotoList(prev => [data, ...prev])
+      // 移除上传队列
+      data.uid && removeUploadTask(data.uid)
+    }
+
+    eventSource.onerror = (error) => {
+      console.log('sse error', error)
+      eventSource.close()
+    }
+
+    return () => {
+      eventSource.close()
+      console.log('sse关闭')
+    }
+  }, [])
 
   return (
     <>

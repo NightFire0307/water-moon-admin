@@ -2,6 +2,7 @@ import type { Response } from '@/types/common.ts'
 
 export interface IPhoto {
   id: number
+  uid?: string
   file_name: string
   original_url: string
   thumbnail_url: string
