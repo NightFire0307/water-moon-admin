@@ -1,7 +1,6 @@
-import type { PhotoWithUid } from '@/store/useMinioUpload.tsx'
 import type { IPhoto } from '@/types/photo.ts'
 import type { UploadProps } from 'antd'
-import { getPhotosByOrderId, removePhotos } from '@/apis/photo.ts'
+import { getPhotosByOrderId, removePhotos, updatePhotosRecommend } from '@/apis/photo.ts'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import {
   BorderOutlined,
@@ -13,6 +12,7 @@ import {
   UploadOutlined,
 } from '@ant-design/icons'
 import { Button, Checkbox, ConfigProvider, Divider, Flex, Image, message, Popconfirm, Progress, Space, Upload } from 'antd'
+
 import cs from 'classnames'
 import { useEffect, useState } from 'react'
 import styles from './ImageGallery.module.less'
@@ -23,12 +23,11 @@ interface CustomMaskProps {
   photoId: number
   onSelect: (photoId: number) => void
   onRemove: (photoId: number) => void
-  onRecommend: (photoId: number) => void
-  onUnRecommend: (photoId: number) => void
+  onRecommend: (photoId: number, recommend: boolean) => void
 }
 
 function CustomMask(props: CustomMaskProps) {
-  const { isRecommend, photoId, isSelect, onRecommend, onUnRecommend, onRemove, onSelect } = props
+  const { isRecommend, photoId, isSelect, onRecommend, onRemove, onSelect } = props
 
   return (
     <div className={styles['custom-mask-content']}>
@@ -40,8 +39,8 @@ function CustomMask(props: CustomMaskProps) {
       <div className={styles['star-group']} onClick={e => e.stopPropagation()}>
         {
           isRecommend
-            ? <Button type="text" icon={<StarOutlined />} shape="circle" style={{ color: 'gold' }} onClick={() => onUnRecommend(photoId)} />
-            : <Button type="text" icon={<StarFilled />} shape="circle" style={{ color: 'gold' }} onClick={() => onRecommend(photoId)} />
+            ? <Button type="text" icon={<StarOutlined />} shape="circle" style={{ color: 'gold' }} onClick={() => onRecommend(photoId, false)} />
+            : <Button type="text" icon={<StarFilled />} shape="circle" style={{ color: 'gold' }} onClick={() => onRecommend(photoId, true)} />
         }
         <Popconfirm title="确定删除这张照片吗？" onConfirm={() => onRemove(photoId)} okText="确定" cancelText="取消">
           <Button type="text" icon={<DeleteOutlined />} shape="circle" danger />
@@ -124,58 +123,20 @@ export function ImageGallery(props: ImageGalleryProps) {
     })
   }
 
-  function handleRecommend(photoId: number | number[]) {
-    setPhotoList((prev) => {
-      const ids = Array.isArray(photoId) ? photoId : [photoId]
-      if (ids.length === 0) {
-        message.info('请选择要标记的照片')
-        return [...prev]
-      }
-
-      ids.forEach((id) => {
-        const photo = prev.find(photo => photo.id === id)
-        if (photo) {
-          photo.is_recommend = true
-        }
-      })
-      return [...prev]
-    })
+  async function handleUpdateRecommend(photoId: number | number[], isRecommended: boolean) {
+    const { msg } = await updatePhotosRecommend(orderId, { photoIds: Array.isArray(photoId) ? photoId : [photoId], isRecommended })
+    await fetchPhotos()
+    message.success(msg)
+    setSelectedPhotos([])
   }
 
-  function handleUnRecommend(photoId: number | number[]) {
-    setPhotoList((prev) => {
-      const ids = Array.isArray(photoId) ? photoId : [photoId]
-      if (ids.length === 0) {
-        message.info('请选择要取消标记的照片')
-        return [...prev]
-      }
-
-      ids.forEach((id) => {
-        const photo = prev.find(photo => photo.id === id)
-        if (photo) {
-          photo.is_recommend = false
-        }
-      })
-      return [...prev]
-    })
-  }
-
-  function handleRemove(photoId: number) {
-    setPhotoList((prev) => {
-      return prev.filter(photo => photo.id !== photoId)
-    })
-
-    setSelectedPhotos((prev) => {
-      return prev.filter(id => id !== photoId)
-    })
-  }
-
-  async function handleRemoveSelect() {
-    await removePhotos(orderId, { photoIds: selectedPhotos })
+  async function handleRemove(photoIds: number | number[]) {
+    const ids = Array.isArray(photoIds) ? photoIds : [photoIds]
+    await removePhotos(orderId, { photoIds: ids })
     await fetchPhotos()
   }
 
-  function handleUploadComplete(fileList: PhotoWithUid[]) {
+  function handleUploadComplete(fileList: any) {
     console.log(fileList)
     // setPhotoList(prev => [...prev, ...fileList])
     // fileList.forEach(file => removeUploadTask(file.uid))
@@ -218,9 +179,9 @@ export function ImageGallery(props: ImageGalleryProps) {
             }
           </Button>
           <Button icon={<ClearOutlined />} onClick={() => setSelectedPhotos([])}>清空选中</Button>
-          <Button color="gold" variant="solid" icon={<StarFilled />} onClick={() => handleRecommend(selectedPhotos)}>标记精选</Button>
-          <Button color="gold" variant="outlined" icon={<StarOutlined />} onClick={() => handleUnRecommend(selectedPhotos)}>取消精选</Button>
-          <Popconfirm placement="left" title={`确定删除选中的${selectedPhotos.length}张照片吗？`} onConfirm={handleRemoveSelect} okText="确定" cancelText="取消">
+          <Button color="gold" variant="solid" icon={<StarFilled />} onClick={() => handleUpdateRecommend(selectedPhotos, true)}>标记精选</Button>
+          <Button color="gold" variant="outlined" icon={<StarOutlined />} onClick={() => handleUpdateRecommend(selectedPhotos, false)}>取消精选</Button>
+          <Popconfirm placement="left" title={`确定删除选中的${selectedPhotos.length}张照片吗？`} onConfirm={() => handleRemove(selectedPhotos)} okText="确定" cancelText="取消">
             <Button icon={<DeleteOutlined />} danger disabled={selectedPhotos.length === 0}>删除</Button>
           </Popconfirm>
         </Space>
@@ -256,8 +217,7 @@ export function ImageGallery(props: ImageGalleryProps) {
                       isSelect={selectedPhotos.includes(photo.id)}
                       isRecommend={photo.is_recommend}
                       onSelect={handleSelect}
-                      onRecommend={handleRecommend}
-                      onUnRecommend={handleUnRecommend}
+                      onRecommend={handleUpdateRecommend}
                       onRemove={handleRemove}
                     />
                   ),

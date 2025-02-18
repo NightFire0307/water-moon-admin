@@ -1,4 +1,4 @@
-import type { PaginationParams } from '@/types/common.ts'
+import type { PaginationParams, Response } from '@/types/common.ts'
 import type { PhotosResponse } from '@/types/photo.ts'
 import request from '@/utils/request'
 
@@ -11,6 +11,14 @@ export function getPhotosByOrderId(params: GetPhotosByOrderIdParams) {
     url: `/api/admin/photos`,
     method: 'get',
     params,
+  })
+}
+
+export function updatePhotosRecommend(orderId: number, data: { photoIds: number[], isRecommended: boolean }): Promise<Response<number[]>> {
+  return request({
+    url: `/api/admin/photos/recommend/${orderId}`,
+    method: 'put',
+    data,
   })
 }
 
