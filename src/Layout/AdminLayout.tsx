@@ -1,4 +1,5 @@
 import type { MenuProps } from 'antd'
+import UserMenu from '@/components/UserMenu.tsx'
 import {
   LeftOutlined,
   RightOutlined,
@@ -14,6 +15,7 @@ import styles from './AdminLayout.module.less'
 type MenuItem = Required<MenuProps>['items'][number]
 type ItemType = { title: string }[]
 interface MatchType { title: string }
+
 const { Header, Sider, Content } = Layout
 
 function AdminLayout() {
@@ -103,8 +105,8 @@ function AdminLayout() {
         </button>
       </Sider>
       <Layout>
-        <Header style={{ background: '#fff', padding: 0 }}>
-          这是头部
+        <Header className={styles['header-wrapper']}>
+          <UserMenu />
         </Header>
         <Content style={{ padding: '0 16px', position: 'relative', overflowX: 'hidden' }}>
           <Breadcrumb items={breadcrumb} style={{ margin: '16px 0' }}>

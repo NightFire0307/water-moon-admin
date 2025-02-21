@@ -8,16 +8,16 @@ interface UserInfoStore {
 }
 
 interface UserInfoAction {
-  updateToken: (accessToken: string, refreshToken: string) => Promise<void>
+  saveToken: (accessToken: string, refreshToken: string) => Promise<void>
   loadToken: () => Promise<void>
-  clearToken: () => void
+  clearToken: () => Promise<void>
 }
 
 export const useUserInfo = create<UserInfoStore & UserInfoAction>()(
   devtools(set => ({
     accessToken: '',
     refreshToken: '',
-    updateToken: async (accessToken: string, refreshToken: string) => {
+    saveToken: async (accessToken: string, refreshToken: string) => {
       // 更新本地 Token
       try {
         await localforage.setItem('accessToken', accessToken)
@@ -42,10 +42,10 @@ export const useUserInfo = create<UserInfoStore & UserInfoAction>()(
         console.error(err)
       }
     },
-    clearToken: () => {
+    clearToken: async () => {
       set({ accessToken: '', refreshToken: '' })
-      localforage.removeItem('accessToken')
-      localforage.removeItem('refreshToken')
+      await localforage.removeItem('accessToken')
+      await localforage.removeItem('refreshToken')
     },
   }), {
     name: 'userInfo',

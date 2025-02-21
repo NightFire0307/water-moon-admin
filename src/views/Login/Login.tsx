@@ -1,15 +1,15 @@
+import { login } from '@/apis/login.ts'
+import { useUserInfo } from '@/store/useUserInfo.tsx'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input, message } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { login } from '../../apis/login.ts'
-import { useUserInfo } from '../../store/useUserInfo.tsx'
 import styles from './Login.module.less'
 
 export function Login() {
   const [loading, setLoading] = useState(false)
-  const updateToken = useUserInfo(state => state.updateToken)
+  const saveToken = useUserInfo(state => state.saveToken)
   const navigate = useNavigate()
   const [form] = useForm()
 
@@ -19,7 +19,7 @@ export function Login() {
     try {
       const { data } = await login(values)
       const { accessToken, refreshToken } = data
-      updateToken(accessToken, refreshToken)
+      await saveToken(accessToken, refreshToken)
 
       if (accessToken && refreshToken) {
         message.success('登录成功')
