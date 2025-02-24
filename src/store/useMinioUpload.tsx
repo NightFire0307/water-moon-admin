@@ -59,7 +59,7 @@ interface GenerateUploadTaskOptions {
 
 interface UploadFileAction {
   setUploadToken: (token: string) => void
-  generateUploadTask: (files: FileType, selectOrder: ISelectOrder, options: GenerateUploadTaskOptions) => void
+  generateUploadTask: (files: FileType, selectOrder: ISelectOrder, options?: GenerateUploadTaskOptions) => void
   startUploadTask: () => void
   cancelUploadTask: (uid: string) => void
   cancelAllUploadTask: () => void
@@ -79,7 +79,7 @@ export const useMinioUpload = create<UploadFileStore & UploadFileAction>()(
     setUploadToken: (token: string) => set(() => ({ uploadToken: token })),
     generateUploadTask: (file: FileType, selectOrder, options) => {
       const { orderId, orderNumber } = selectOrder
-      const { onUploadComplete } = options
+      const { onUploadComplete } = options || {}
       // 创建上传任务
       const uploadTask = createUploadTask(file, orderId)
 
