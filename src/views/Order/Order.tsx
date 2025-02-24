@@ -13,6 +13,7 @@ import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 import { MoreOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Divider, Dropdown, Flex, FloatButton, message, Modal, Space, Table, Tag, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const { confirm } = Modal
 
@@ -44,6 +45,7 @@ export function Order() {
     orderNumber: '',
   })
   const [incompleteFileCount, setIncompleteFileCount] = useState(0)
+  const navigate = useNavigate()
 
   const columns: TableColumnProps[] = [
     {
@@ -75,8 +77,8 @@ export function Order() {
             text = '选片完成'
             break
           case OrderStatus.CANCEL:
-            color = 'red'
-            text = '订单异常'
+            color = 'gray'
+            text = '订单取消'
             break
           case OrderStatus.FINISHED:
             color = 'green'
@@ -221,6 +223,9 @@ export function Order() {
             })
           },
         })
+        break
+      case OrderAction.VIEW_SELECT_RESULT:
+        navigate(`/selection/${id}`)
         break
       default:
         break

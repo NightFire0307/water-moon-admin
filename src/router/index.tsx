@@ -1,4 +1,5 @@
 import { Order } from '@/views/Order/Order.tsx'
+import { SelectionResult } from '@/views/Order/SelectionResult.tsx'
 import { createBrowserRouter } from 'react-router'
 import App from '../App.tsx'
 import { ProtectedRoute } from '../components/ProtectedRoute.tsx'
@@ -42,7 +43,7 @@ export const router = createBrowserRouter([
           },
           {
             path: ':orderId',
-            element: <div>选片结果页面</div>,
+            element: <SelectionResult />,
             handle: {
               title: '选片结果',
             },
