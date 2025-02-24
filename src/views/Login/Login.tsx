@@ -18,10 +18,10 @@ export function Login() {
     const values = form.getFieldsValue()
     try {
       const { data } = await login(values)
-      const { accessToken, refreshToken } = data
-      await saveToken(accessToken, refreshToken)
+      const { accessToken } = data
+      await saveToken(accessToken)
 
-      if (accessToken && refreshToken) {
+      if (accessToken) {
         message.success('登录成功')
         setTimeout(() => {
           navigate('/')

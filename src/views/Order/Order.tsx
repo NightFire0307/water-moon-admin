@@ -1,11 +1,10 @@
 import type { Pagination } from '@/types/common.ts'
 import type { IOrder } from '@/types/order.ts'
 import type { TableColumnProps } from 'antd'
-import { getOrderList, removeOrder } from '@/apis/order.ts'
+import { getOrderList, removeOrder, resetOrderStatus } from '@/apis/order.ts'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import { UploadStatus } from '@/store/useUploadFile.tsx'
 import { OrderStatus } from '@/types/order.ts'
-
 import { OrderDetail } from '@/views/Order/OrderDetail.tsx'
 import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
 import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
@@ -21,6 +20,7 @@ enum OrderAction {
   VIEW_LINK = 'view_link',
   RESET = 'reset',
   DELETE = 'delete',
+  VIEW_SELECT_RESULT = 'view_select_result',
 }
 
 export interface ISelectOrder {
@@ -74,7 +74,7 @@ export function Order() {
             color = 'orange'
             text = '选片完成'
             break
-          case OrderStatus.EXPIRED:
+          case OrderStatus.CANCEL:
             color = 'red'
             text = '订单异常'
             break
@@ -133,6 +133,12 @@ export function Order() {
               {
                 key: OrderAction.RESET,
                 label: '重置状态',
+                disabled: [OrderStatus.NOT_STARTED, OrderStatus.CANCEL, OrderStatus.FINISHED].includes((record as IOrder).status),
+              },
+              {
+                key: OrderAction.VIEW_SELECT_RESULT,
+                label: '查看选片结果',
+                disabled: ![OrderStatus.SUBMITTED, OrderStatus.FINISHED].includes((record as IOrder).status),
               },
               {
                 key: OrderAction.DELETE,
@@ -155,35 +161,69 @@ export function Order() {
   ]
 
   function handleMenuClick(key: string, id: number) {
-    if (key === OrderAction.DELETE) {
-      confirm({
-        title: '您确定要删除这个订单吗？',
-        content: '删除后无法恢复',
-        okText: '确定',
-        okType: 'danger',
-        cancelText: '取消',
-        centered: true,
-        onOk() {
-          return new Promise((resolve, reject) => {
-            (async () => {
-              try {
-                const { code } = await removeOrder(id)
-                if (code === 200) {
-                  message.success('删除成功')
-                  await fetchOrderList()
-                  resolve(null)
+    switch (key) {
+      case OrderAction.DELETE:
+        confirm({
+          title: '您确定要删除这个订单吗？',
+          content: '删除后无法恢复',
+          okText: '确定',
+          okType: 'danger',
+          cancelText: '取消',
+          centered: true,
+          onOk() {
+            return new Promise((resolve, reject) => {
+              (async () => {
+                try {
+                  const { code } = await removeOrder(id)
+                  if (code === 200) {
+                    message.success('删除成功')
+                    await fetchOrderList()
+                    resolve(null)
+                  }
+                  else {
+                    reject(new Error('删除失败'))
+                  }
                 }
-                else {
+                catch {
                   reject(new Error('删除失败'))
                 }
-              }
-              catch {
-                reject(new Error('删除失败'))
-              }
-            })()
-          })
-        },
-      })
+              })()
+            })
+          },
+        })
+        break
+      case OrderAction.RESET:
+        confirm({
+          title: '您确定要重置这个订单吗？',
+          content: (
+            <div>
+
+              {' '}
+              <strong>待选片</strong>
+            </div>
+          ),
+          okText: '确定',
+          okType: 'danger',
+          cancelText: '取消',
+          centered: true,
+          onOk() {
+            return new Promise((resolve, reject) => {
+              (async () => {
+                try {
+                  const { msg } = await resetOrderStatus(id, { status: 0 })
+                  message.success(msg)
+                  resolve(null)
+                }
+                catch (e) {
+                  reject(new Error('重置失败'))
+                }
+              })()
+            })
+          },
+        })
+        break
+      default:
+        break
     }
   }
 
@@ -196,24 +236,6 @@ export function Order() {
       total: data.total,
     })
   }
-
-  // function handleBeforeUnload(event: BeforeUnloadEvent) {
-  //   console.log('beforeunload')
-  //   event.preventDefault()
-  //   confirm({
-  //     title: '确定要离开吗？',
-  //     content: '离开后未完成的操作将会丢失',
-  //     okText: '确定',
-  //     cancelText: '取消',
-  //     onOk() {
-  //       console.log('离开')
-  //     },
-  //     onCancel() {
-  //       console.log('取消')
-  //       event.preventDefault()
-  //     },
-  //   })
-  // }
 
   useEffect(() => {
     fetchOrderList()
@@ -246,7 +268,7 @@ export function Order() {
           新 建
         </Button>
         <Tooltip title="刷新">
-          <Button icon={<RedoOutlined rotate={-90} />} type="text" />
+          <Button icon={<RedoOutlined rotate={-90} />} type="text" onClick={() => fetchOrderList()} />
         </Tooltip>
       </Flex>
       <Table

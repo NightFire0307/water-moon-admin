@@ -25,7 +25,6 @@ export interface UserInfo {
 
 export interface LoginResponse {
   accessToken: string
-  refreshToken: string
   userInfo: UserInfo
 }
 

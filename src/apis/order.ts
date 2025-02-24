@@ -31,3 +31,11 @@ export function removeOrder(id: number): Promise<Response<string>> {
     method: 'DELETE',
   })
 }
+
+export function resetOrderStatus(id: number, data: { status: number }): Promise<Response<number>> {
+  return request({
+    url: `/api/admin/orders/${id}`,
+    method: 'patch',
+    data,
+  })
+}

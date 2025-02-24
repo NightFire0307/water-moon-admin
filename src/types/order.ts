@@ -7,7 +7,7 @@ export enum OrderStatus {
   NOT_STARTED = 0,
   IN_PROGRESS = 1,
   SUBMITTED = 2,
-  EXPIRED = 3,
+  CANCEL = 3,
   FINISHED = 4,
 }
 

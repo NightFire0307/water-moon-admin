@@ -40,6 +40,13 @@ export const router = createBrowserRouter([
               title: '订单列表',
             },
           },
+          {
+            path: ':orderId',
+            element: <div>选片结果页面</div>,
+            handle: {
+              title: '选片结果',
+            },
+          },
         ],
       },
       {
