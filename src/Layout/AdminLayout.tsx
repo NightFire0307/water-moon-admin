@@ -3,6 +3,8 @@ import UserMenu from '@/components/UserMenu.tsx'
 import {
   LeftOutlined,
   RightOutlined,
+  SafetyCertificateOutlined,
+  SettingOutlined,
   UploadOutlined,
   UserOutlined,
   VideoCameraOutlined,
@@ -45,14 +47,14 @@ function AdminLayout() {
 
   const menuItems: MenuItem[] = [
     {
-      key: 'system',
+      key: 'user',
       icon: <UserOutlined />,
-      label: '系统管理',
-      children: [
-        { key: 'user', label: '用户列表' },
-        { key: 'role', label: '角色列表' },
-        { key: 'permission', label: '权限列表' },
-      ],
+      label: '用户管理',
+    },
+    {
+      key: 'role',
+      icon: <SafetyCertificateOutlined />,
+      label: '角色管理',
     },
     {
       key: 'selection',
@@ -70,6 +72,11 @@ function AdminLayout() {
         { key: 'list', label: '产品列表' },
         { key: 'type', label: '产品类型' },
       ],
+    },
+    {
+      key: 'system_setting',
+      icon: <SettingOutlined />,
+      label: '系统设置',
     },
   ]
 

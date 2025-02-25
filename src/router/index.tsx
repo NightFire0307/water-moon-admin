@@ -1,5 +1,8 @@
 import { Order } from '@/views/Order/Order.tsx'
 import { SelectionResult } from '@/views/Order/SelectionResult.tsx'
+import Role from '@/views/Role/Role.tsx'
+import SystemSetting from '@/views/SystemSetting/SystemSetting.tsx'
+import User from '@/views/User/User.tsx'
 import { createBrowserRouter } from 'react-router'
 import App from '../App.tsx'
 import { ProtectedRoute } from '../components/ProtectedRoute.tsx'
@@ -26,6 +29,20 @@ export const router = createBrowserRouter([
         element: <Dashboard />,
         handle: {
           title: '仪表盘',
+        },
+      },
+      {
+        path: 'user',
+        element: <User />,
+        handle: {
+          title: '用户管理',
+        },
+      },
+      {
+        path: 'role',
+        element: <Role />,
+        handle: {
+          title: '角色管理',
         },
       },
       {
@@ -71,6 +88,13 @@ export const router = createBrowserRouter([
             },
           },
         ],
+      },
+      {
+        path: 'system_setting',
+        element: <SystemSetting />,
+        handle: {
+          title: '系统设置',
+        },
       },
     ],
   },
