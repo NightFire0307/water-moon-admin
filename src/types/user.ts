@@ -5,7 +5,7 @@ export interface IUser {
   username: string
   nickname: string
   phone: string
-  roles: []
+  roles: { role_id: number, name: string }[]
   isAdmin: boolean
   isFrozen: boolean
   createTime: string

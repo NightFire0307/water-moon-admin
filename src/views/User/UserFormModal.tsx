@@ -1,23 +1,51 @@
 import type { IUser } from '@/types/user.ts'
-import { Col, Form, Input, Modal, Row, Select, Switch } from 'antd'
-import { useEffect } from 'react'
+import { getRoleList } from '@/apis/role.ts'
+import { Col, Form, Input, message, Modal, Row, Select, Switch } from 'antd'
+import { useEffect, useState } from 'react'
 
 export interface UserFormModalProps {
   open: boolean
   mode: 'create' | 'edit'
   initialValues?: IUser
+  onSubmit: (values: IUser) => void
   onClose: () => void
 }
 
 function UserFormModal(props: UserFormModalProps) {
-  const { open, mode, onClose, initialValues } = props
+  const { open, mode, onSubmit, onClose, initialValues } = props
+  const [options, setOptions] = useState<[]>([])
   const [form] = Form.useForm()
 
   useEffect(() => {
     if (mode === 'edit' && initialValues) {
-      form.setFieldsValue(initialValues)
+      // 提取Roles
+      const roles = initialValues.roles.map(role => role.role_id)
+      form.setFieldsValue({ ...initialValues, roles })
     }
   }, [open, initialValues])
+
+  useEffect(() => {
+    fetchRole()
+  }, [])
+
+  async function fetchRole() {
+    const { data } = await getRoleList({})
+    setOptions(data)
+  }
+
+  async function handleSubmit() {
+    try {
+      await form.validateFields()
+      const values = form.getFieldsValue()
+      console.log(values)
+      onSubmit(values)
+      handleCancel()
+    }
+    catch (e) {
+      console.log(e)
+      message.error('请检查表单是否填写完整')
+    }
+  }
 
   function handleCancel() {
     form.resetFields()
@@ -25,36 +53,45 @@ function UserFormModal(props: UserFormModalProps) {
   }
 
   return (
-    <Modal open={open} title={mode === 'create' ? '新增用户' : '编辑用户'} onCancel={handleCancel}>
+    <Modal
+      open={open}
+      title={mode === 'create' ? '新增用户' : '编辑用户'}
+      onOk={handleSubmit}
+      onCancel={handleCancel}
+    >
       <Form form={form}>
         <Row gutter={8}>
           <Col>
-            <Form.Item name="username" label="用户名">
+            <Form.Item name="username" label="用户名" required>
               <Input placeholder="请输入用户名" />
             </Form.Item>
           </Col>
           <Col>
-            <Form.Item name="phone" label="手机号">
+            <Form.Item name="phone" label="手机号" required>
               <Input placeholder="请输入手机号" />
             </Form.Item>
           </Col>
         </Row>
 
-        <Row gutter={8}>
-          <Col>
-            <Form.Item name="password" label="密码">
-              <Input placeholder="请输入密码" />
-            </Form.Item>
-          </Col>
-          <Col>
-            <Form.Item name="confirmPassword" label="确认密码">
-              <Input placeholder="请再次输入密码" />
-            </Form.Item>
-          </Col>
-        </Row>
+        {
+          mode === 'create' && (
+            <Row gutter={8}>
+              <Col>
+                <Form.Item name="password" label="密码" required>
+                  <Input.Password placeholder="请输入密码" />
+                </Form.Item>
+              </Col>
+              <Col>
+                <Form.Item name="confirmPassword" label="确认密码" required>
+                  <Input.Password placeholder="请再次输入密码" />
+                </Form.Item>
+              </Col>
+            </Row>
+          )
+        }
 
         <Form.Item name="roles" label="用户角色">
-          <Select placeholder="请选择角色" mode="multiple" />
+          <Select options={options} placeholder="请选择角色" mode="multiple" fieldNames={{ label: 'name', value: 'role_id' }} />
         </Form.Item>
 
         <Row gutter={8}>

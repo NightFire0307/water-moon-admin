@@ -5,11 +5,12 @@ import { getUserList, resetUserPassword } from '@/apis/user.ts'
 import UserFormModal from '@/views/User/UserFormModal.tsx'
 import UserResetPwdModal from '@/views/User/UserResetPwdModal.tsx'
 import { DeleteOutlined, EditOutlined, MoreOutlined, SearchOutlined, UserAddOutlined } from '@ant-design/icons'
-import { Button, Dropdown, Flex, Form, Input, message, Space, Switch, Table, Tag } from 'antd'
+import { Button, Dropdown, Flex, Form, Input, message, Popconfirm, Space, Switch, Table, Tag } from 'antd'
+
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 
-type IUserFormModal = Omit<UserFormModalProps, 'onClose'>
+type IUserFormModal = Omit<UserFormModalProps, 'onClose' | 'onSubmit'>
 
 interface ActionProps {
   onEdit: () => void
@@ -53,7 +54,9 @@ function Action(props: ActionProps) {
   return (
     <Space>
       <Button type="link" icon={<EditOutlined />} onClick={onEdit}>编辑</Button>
-      <Button type="link" icon={<DeleteOutlined />} danger onClick={onDelete}>删除</Button>
+      <Popconfirm title="确定删除该用户吗？" onConfirm={onDelete}>
+        <Button type="link" icon={<DeleteOutlined />} danger>删除</Button>
+      </Popconfirm>
       <Dropdown menu={{ items: moreActionItems, onClick: handleMoreAction }}>
         <Button type="text" icon={<MoreOutlined />} />
       </Dropdown>
@@ -148,6 +151,7 @@ function User() {
         open={userFormModal.open}
         mode={userFormModal.mode}
         initialValues={userFormModal.initialValues}
+        onSubmit={() => {}}
         onClose={() => setUserFormModal({ open: false, mode: 'create' })}
       />
       <UserResetPwdModal
