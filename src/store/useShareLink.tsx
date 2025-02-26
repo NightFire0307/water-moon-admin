@@ -1,4 +1,4 @@
-import { getRandomShareLink } from '@/apis/link.ts'
+import { generateShareLink } from '@/apis/link.ts'
 import dayjs from 'dayjs'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
@@ -25,7 +25,7 @@ export const useShareLink = create<ShareLinkState & ShareLinkAction>()(
       expired_at: '',
     },
     createShareUrl: async (order_id, access_password, expired_at) => {
-      const { data } = await getRandomShareLink({
+      const { data } = await generateShareLink({
         order_id,
         password: access_password,
         expired_at: expired_at === 0 ? expired_at : dayjs().add(expired_at, 'day').unix(),

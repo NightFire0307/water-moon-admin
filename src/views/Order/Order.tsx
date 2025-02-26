@@ -1,6 +1,7 @@
 import type { Pagination } from '@/types/common.ts'
 import type { IOrder } from '@/types/order.ts'
 import type { TableColumnProps } from 'antd'
+import type { ReactNode } from 'react'
 import { getOrderList, removeOrder, resetOrderStatus } from '@/apis/order.ts'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import { UploadStatus } from '@/store/useUploadFile.tsx'
@@ -9,6 +10,7 @@ import { OrderDetail } from '@/views/Order/OrderDetail.tsx'
 import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
 import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
 import { PhotoMgr } from '@/views/Order/PhotoMgr.tsx'
+import { ShareLinkModal } from '@/views/Order/ShareLinkModal.tsx'
 import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 import { MoreOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Divider, Dropdown, Flex, FloatButton, message, Modal, Space, Table, Tag, Tooltip } from 'antd'
@@ -18,15 +20,27 @@ import { useNavigate } from 'react-router-dom'
 const { confirm } = Modal
 
 enum OrderAction {
-  VIEW_LINK = 'view_link',
+  VIEW_DETAIL = 'view_detail',
+  SHARE_LINK = 'share_link',
   RESET = 'reset',
   DELETE = 'delete',
   VIEW_SELECT_RESULT = 'view_select_result',
 }
 
-export interface ISelectOrder {
-  orderId: number
-  orderNumber: string
+function showConfirmDialog(title: string, content: ReactNode, onOk: () => Promise<void>) {
+  confirm({
+    title,
+    content,
+    okText: '确定',
+    okType: 'danger',
+    cancelText: '取消',
+    centered: true,
+    onOk() {
+      return new Promise((resolve, reject) => {
+        onOk().then(resolve).catch(reject)
+      })
+    },
+  })
 }
 
 export function Order() {
@@ -40,11 +54,10 @@ export function Order() {
   const [taskCenterOpen, setTaskCenterOpen] = useState(false)
   const [orderDetailOpen, setOrderDetailOpen] = useState(false)
   const [photoMgrOpen, setPhotoMgrOpen] = useState(false)
-  const [selectOrder, setSelectOrder] = useState<ISelectOrder>({
-    orderId: 0,
-    orderNumber: '',
-  })
+  const [curOrderId, setCurOrderId] = useState<number>(-1)
+  const [curOrderNumber, setCurOrderNumber] = useState('')
   const [incompleteFileCount, setIncompleteFileCount] = useState(0)
+  const [shareLinkMgrOpen, setShareLinkMgrOpen] = useState(false)
   const navigate = useNavigate()
 
   const columns: TableColumnProps[] = [
@@ -60,8 +73,8 @@ export function Order() {
       dataIndex: 'status',
       render: (value) => {
         let status: 'default' | 'processing' = 'default'
-        let color = 'gray'
-        let text = ''
+        let color: string
+        let text: string
         switch (value) {
           case OrderStatus.NOT_STARTED:
             color = 'blue'
@@ -108,18 +121,14 @@ export function Order() {
     },
     { title: '操作', dataIndex: 'action', render: (_, record) => (
       <Space>
-        <a onClick={() => {
-          const { id, order_number } = record as IOrder
-          setSelectOrder({ orderId: id, orderNumber: order_number })
-          setOrderDetailOpen(true)
-        }}
-        >
-          详情
+        <a onClick={() => {}}>
+          编辑
         </a>
         <a onClick={(e) => {
           e.preventDefault()
           const { id, order_number } = record as IOrder
-          setSelectOrder({ orderId: id, orderNumber: order_number })
+          setCurOrderId(id)
+          setCurOrderNumber(order_number)
           setPhotoMgrOpen(true)
         }}
         >
@@ -129,8 +138,12 @@ export function Order() {
           menu={{
             items: [
               {
-                key: OrderAction.VIEW_LINK,
-                label: '链接管理',
+                key: OrderAction.VIEW_DETAIL,
+                label: '查看详情',
+              },
+              {
+                key: OrderAction.SHARE_LINK,
+                label: '分享链接',
               },
               {
                 key: OrderAction.RESET,
@@ -139,7 +152,7 @@ export function Order() {
               },
               {
                 key: OrderAction.VIEW_SELECT_RESULT,
-                label: '查看选片结果',
+                label: '查看结果',
                 disabled: ![OrderStatus.SUBMITTED, OrderStatus.FINISHED].includes((record as IOrder).status),
               },
               {
@@ -149,7 +162,7 @@ export function Order() {
               },
             ],
             onClick: ({ key }) => {
-              const id = (record as IOrder).id
+              const { id } = record as IOrder
               handleMenuClick(key, id)
             },
           }}
@@ -165,67 +178,52 @@ export function Order() {
   function handleMenuClick(key: string, id: number) {
     switch (key) {
       case OrderAction.DELETE:
-        confirm({
-          title: '您确定要删除这个订单吗？',
-          content: '删除后无法恢复',
-          okText: '确定',
-          okType: 'danger',
-          cancelText: '取消',
-          centered: true,
-          onOk() {
-            return new Promise((resolve, reject) => {
-              (async () => {
-                try {
-                  const { code } = await removeOrder(id)
-                  if (code === 200) {
-                    message.success('删除成功')
-                    await fetchOrderList()
-                    resolve(null)
-                  }
-                  else {
-                    reject(new Error('删除失败'))
-                  }
+        showConfirmDialog('您确定要删除这个订单吗？', '删除后无法恢复', async () => {
+          return new Promise((resolve, reject) => {
+            (async () => {
+              try {
+                const { code } = await removeOrder(id)
+                if (code === 200) {
+                  message.success('删除成功')
+                  await fetchOrderList()
+                  resolve()
                 }
-                catch {
+                else {
                   reject(new Error('删除失败'))
                 }
-              })()
-            })
-          },
+              }
+              catch {
+                reject(new Error('删除失败'))
+              }
+            })()
+          })
         })
         break
       case OrderAction.RESET:
-        confirm({
-          title: '您确定要重置这个订单吗？',
-          content: (
-            <div>
-
-              {' '}
-              <strong>待选片</strong>
-            </div>
-          ),
-          okText: '确定',
-          okType: 'danger',
-          cancelText: '取消',
-          centered: true,
-          onOk() {
-            return new Promise((resolve, reject) => {
-              (async () => {
-                try {
-                  const { msg } = await resetOrderStatus(id, { status: 0 })
-                  message.success(msg)
-                  resolve(null)
-                }
-                catch (e) {
-                  reject(new Error('重置失败'))
-                }
-              })()
-            })
-          },
+        showConfirmDialog('您确定要重置这个订单吗？', '', async () => {
+          return new Promise((resolve, reject) => {
+            (async () => {
+              try {
+                const { msg } = await resetOrderStatus(id, { status: 0 })
+                message.success(msg)
+                resolve()
+              }
+              catch {
+                reject(new Error('重置失败'))
+              }
+            })()
+          })
         })
         break
       case OrderAction.VIEW_SELECT_RESULT:
         navigate(`/selection/${id}`)
+        break
+      case OrderAction.SHARE_LINK:
+        setShareLinkMgrOpen(true)
+        break
+      case OrderAction.VIEW_DETAIL:
+        setCurOrderId(id)
+        setOrderDetailOpen(true)
         break
       default:
         break
@@ -244,7 +242,7 @@ export function Order() {
 
   useEffect(() => {
     fetchOrderList()
-  }, [])
+  }, [pageInfo.current, pageInfo.pageSize])
 
   useEffect(() => {
     const unsubscribe = useMinioUpload.subscribe(
@@ -307,8 +305,9 @@ export function Order() {
         )
       }
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
-      <OrderDetail selectOrder={selectOrder} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
-      <PhotoMgr open={photoMgrOpen} selectOrder={selectOrder} onClose={() => setPhotoMgrOpen(false)} />
+      <OrderDetail orderId={curOrderId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
+      <PhotoMgr open={photoMgrOpen} orderId={curOrderId} orderNumber={curOrderNumber} onClose={() => setPhotoMgrOpen(false)} />
+      <ShareLinkModal open={shareLinkMgrOpen} onClose={() => setShareLinkMgrOpen(false)} />
     </>
   )
 }

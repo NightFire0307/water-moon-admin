@@ -7,7 +7,7 @@ interface ShareLinkData {
   expired_at: number
 }
 
-export function getRandomShareLink(data: ShareLinkData): LinkResponseData {
+export function generateShareLink(data: ShareLinkData): LinkResponseData {
   return request({
     url: '/api/admin/order/link',
     method: 'post',

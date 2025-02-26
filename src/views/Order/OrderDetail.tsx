@@ -1,4 +1,3 @@
-import type { ISelectOrder } from '@/views/Order/Order.tsx'
 import type { DescriptionsProps } from 'antd'
 import { getOrderDetailById } from '@/apis/order.ts'
 import { formatDate } from '@/utils/formatDate.ts'
@@ -6,14 +5,13 @@ import { Descriptions, Modal, Tag } from 'antd'
 import { useEffect, useState } from 'react'
 
 interface OrderDetailProps {
-  selectOrder: ISelectOrder
+  orderId: number
   open: boolean
   onClose?: () => void
 }
 
 export function OrderDetail(props: OrderDetailProps) {
-  const { selectOrder, open, onClose } = props
-  const { orderId } = selectOrder
+  const { orderId, open, onClose } = props
   const [items, setItems] = useState<DescriptionsProps['items']>([])
 
   async function fetchOrderDetail() {
