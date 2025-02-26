@@ -1,10 +1,12 @@
 import { generateShareLink } from '@/apis/link.ts'
 import { CheckCircleOutlined } from '@ant-design/icons'
 import { Button, Flex, Form, Input, message, Modal, Radio, Select, Space } from 'antd'
+import dayjs from 'dayjs'
 import { useReducer } from 'react'
 
 interface ShareLinkMgrProps {
   open: boolean
+  orderId: number
   onClose: () => void
 }
 
@@ -90,7 +92,7 @@ function reducer(state: State, action: Action) {
   }
 }
 
-export function ShareLinkModal({ open, onClose }: ShareLinkMgrProps) {
+export function ShareLinkModal({ open, orderId, onClose }: ShareLinkMgrProps) {
   const [state, dispatch] = useReducer(reducer, initialState)
   const [form] = Form.useForm()
   const initialValues: ShareLinkMgrFormValues = {
@@ -102,9 +104,10 @@ export function ShareLinkModal({ open, onClose }: ShareLinkMgrProps) {
   const handleCreateLink = async () => {
     try {
       const values = form.getFieldsValue()
+      // TODO 生成分享链接
       const { data } = await generateShareLink({
-        order_id: 17,
-        expired_at: values.expire === 'forever' ? 0 : 1,
+        order_id: orderId,
+        expired_at: values.expire === 'forever' ? 0 : dayjs().add(values.custom_expire, 'day').unix(),
       })
       dispatch({ type: 'SET_LINK_INFO', payload: { share_url: data.share_url, share_password: data.share_password } })
     }
@@ -148,7 +151,7 @@ export function ShareLinkModal({ open, onClose }: ShareLinkMgrProps) {
                 </Radio.Group>
               </Form.Item>
               {state.limitedCount && (
-                <Form.Item name="limit_times" label="限制次数" wrapperCol={{ span: 6 }}>
+                <Form.Item name="custom_access_limit" label="限制次数" wrapperCol={{ span: 6 }}>
                   <Select placeholder="请选择次数">
                     {Array.from({ length: 10 }, (_, i) => (
                       <Select.Option key={i + 1} value={i + 1}>

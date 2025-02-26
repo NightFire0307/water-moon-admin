@@ -219,6 +219,7 @@ export function Order() {
         navigate(`/selection/${id}`)
         break
       case OrderAction.SHARE_LINK:
+        setCurOrderId(id)
         setShareLinkMgrOpen(true)
         break
       case OrderAction.VIEW_DETAIL:
@@ -307,7 +308,7 @@ export function Order() {
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
       <OrderDetail orderId={curOrderId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
       <PhotoMgr open={photoMgrOpen} orderId={curOrderId} orderNumber={curOrderNumber} onClose={() => setPhotoMgrOpen(false)} />
-      <ShareLinkModal open={shareLinkMgrOpen} onClose={() => setShareLinkMgrOpen(false)} />
+      <ShareLinkModal open={shareLinkMgrOpen} orderId={curOrderId} onClose={() => setShareLinkMgrOpen(false)} />
     </>
   )
 }
