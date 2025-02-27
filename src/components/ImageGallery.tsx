@@ -153,47 +153,49 @@ export function ImageGallery(props: ImageGalleryProps) {
         </Space>
       </Flex>
       <Divider />
-      <div className={styles['photos-preview']}>
-        {
-          uploadQueue.map(task => (
-            <UploadProgress percent={task.progress} fileName={task.fileName} key={task.uid} />
-          ))
-        }
-        {
-          photosList.map(photo => (
-            <div
-              className={cs(styles['photos-preview-item'], selectedPhotos.includes(photo.id) && styles.select)}
-              key={photo.id}
-            >
-              <Image
-                style={{ borderRadius: '8px', objectFit: 'contain' }}
-                src={photo.thumbnail_url}
-                alt="placeholder"
-                height={250}
-                preview={{
-                  src: photo.original_url,
-                  mask: (
-                    <CustomMask
-                      photoId={photo.id}
-                      isSelect={selectedPhotos.includes(photo.id)}
-                      isRecommend={photo.is_recommend}
-                      onSelect={handleSelect}
-                      onRecommend={handleUpdateRecommend}
-                      onRemove={handleRemove}
-                    />
-                  ),
-                  maskClassName: styles['custom-mask'],
-                }}
-              />
-              {
-                photo.is_recommend && <StarFilled style={{ color: 'gold', position: 'absolute', top: '8px', right: '8px' }} />
-              }
-              <span style={{ fontWeight: 500, textAlign: 'center' }}>
-                { photo.file_name }
-              </span>
-            </div>
-          ))
-        }
+      <div style={{ height: 'calc(100% - 82px)', overflowY: 'auto' }}>
+        <div className={styles['photos-preview']}>
+          {
+            uploadQueue.map(task => (
+              <UploadProgress percent={task.progress} fileName={task.fileName} key={task.uid} />
+            ))
+          }
+          {
+            photosList.map(photo => (
+              <div
+                className={cs(styles['photos-preview-item'], selectedPhotos.includes(photo.id) && styles.select)}
+                key={photo.id}
+              >
+                <Image
+                  style={{ borderRadius: '8px', objectFit: 'contain' }}
+                  src={photo.thumbnail_url}
+                  alt="placeholder"
+                  height={250}
+                  preview={{
+                    src: photo.original_url,
+                    mask: (
+                      <CustomMask
+                        photoId={photo.id}
+                        isSelect={selectedPhotos.includes(photo.id)}
+                        isRecommend={photo.is_recommend}
+                        onSelect={handleSelect}
+                        onRecommend={handleUpdateRecommend}
+                        onRemove={handleRemove}
+                      />
+                    ),
+                    maskClassName: styles['custom-mask'],
+                  }}
+                />
+                {
+                  photo.is_recommend && <StarFilled style={{ color: 'gold', position: 'absolute', top: '8px', right: '8px' }} />
+                }
+                <span style={{ fontWeight: 500, textAlign: 'center' }}>
+                  { photo.file_name }
+                </span>
+              </div>
+            ))
+          }
+        </div>
       </div>
     </>
   )
