@@ -72,6 +72,14 @@ export function createProductType(data: { name: string }): Promise<Response<stri
   })
 }
 
+export function updateProductType(id: number, data: { name: string }): Promise<Response<string>> {
+  return request({
+    url: `/api/admin/product/type/${id}`,
+    method: 'PUT',
+    data,
+  })
+}
+
 export function deleteProductType(id: number): Promise<Response<string>> {
   return request({
     url: `/api/admin/product/type/${id}`,

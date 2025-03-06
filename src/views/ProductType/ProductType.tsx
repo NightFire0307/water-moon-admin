@@ -1,8 +1,14 @@
 import type { IProductType } from '@/types/product.ts'
 import type { TableColumnsType } from 'antd'
-import { createProductType, deleteProductType, getProductTypes, queryProductByName } from '@/apis/product.ts'
+import {
+  createProductType,
+  deleteProductType,
+  getProductTypes,
+  queryProductByName,
+} from '@/apis/product.ts'
 import { formatDate } from '@/utils/formatDate.ts'
-import { Button, Divider, Form, Input, message, Modal, Popconfirm, Space, Table } from 'antd'
+import { ProductTypeModalForm } from '@/views/ProductType/ProductTypeModalForm.tsx'
+import { Button, Divider, Form, Input, message, Popconfirm, Space, Table } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { useEffect, useState } from 'react'
 
@@ -46,10 +52,9 @@ function ProductQueryForm(props: IProductQueryForm) {
 
 export function ProductType() {
   const [dataSource, setDataSource] = useState<IProductType[]>([])
-  const [modalTitle, setModalTitle] = useState<string>('默认标题')
-  const [modalVisible, setModalVisible] = useState<boolean>(false)
-  const [confirmLoading, setConfirmLoading] = useState<boolean>(false)
-  const [form] = useForm()
+  const [mode, setMode] = useState<'create' | 'edit'>('create')
+  const [modalVisible, setModalVisible] = useState(false)
+  const [initialData, setInitialData] = useState<{ id: number, name: string }>({})
 
   const columns: TableColumnsType<IProductType> = [
     {
@@ -75,7 +80,13 @@ export function ProductType() {
       render: (value: IProductType) => {
         return (
           <Space size="large">
-            <a onClick={() => handleEdit(value.name)}>编辑</a>
+            <a onClick={() => {
+              setMode('edit')
+              setModalVisible(true)
+            }}
+            >
+              编辑
+            </a>
             <Popconfirm
               title="确定删除吗？"
               onConfirm={() => handleDelete(value.id)}
@@ -93,33 +104,15 @@ export function ProductType() {
 
   async function handleQuery(name: string) {
     const { data } = await queryProductByName(name)
-
     setDataSource(data.list)
   }
 
-  async function handleOk() {
-    try {
-      setConfirmLoading(true)
-      const values: { name: string } = form.getFieldsValue()
-      const { code, msg } = await createProductType(values)
-
-      if (code === 409) {
-        message.warning(msg)
-      }
-      else {
-        message.success(msg)
-        setModalVisible(false)
-        await fetchProductTypes()
-      }
-    }
-    catch {
-      message.error('操作失败')
-    }
-    finally {
-      setConfirmLoading(false)
-      form.resetFields()
-    }
+  async function handleCreate(value) {
+    const { msg } = await createProductType(value)
+    message.success(msg)
   }
+
+  function handleUpdate() {}
 
   async function handleDelete(id: number) {
     try {
@@ -130,12 +123,6 @@ export function ProductType() {
     catch {
       message.error('删除失败')
     }
-  }
-
-  function handleEdit(name: string) {
-    form.setFieldValue('name', name)
-    setModalTitle('编辑')
-    setModalVisible(true)
   }
 
   async function fetchProductTypes() {
@@ -156,24 +143,24 @@ export function ProductType() {
     <>
       <ProductQueryForm onQuery={handleQuery} onReset={fetchProductTypes} />
       <Divider />
-      <Button type="primary" onClick={() => setModalVisible(true)}>新增</Button>
-      <Table rowKey="id" columns={columns} dataSource={dataSource} style={{ marginTop: '24px' }} />
-      <Modal
-        title={modalTitle}
-        open={modalVisible}
-        onOk={handleOk}
-        onCancel={() => {
-          setModalVisible(false)
+      <Button
+        type="primary"
+        onClick={() => {
+          setMode('create')
+          setModalVisible(true)
         }}
-        confirmLoading={confirmLoading}
-        centered
       >
-        <Form form={form}>
-          <Form.Item label="类型名称" name="name" rules={[{ required: true, message: '需要一个类型名称' }]}>
-            <Input placeholder="请输入类型名称" />
-          </Form.Item>
-        </Form>
-      </Modal>
+        新增
+      </Button>
+      <Table rowKey="id" columns={columns} dataSource={dataSource} style={{ marginTop: '24px' }} />
+      <ProductTypeModalForm
+        mode={mode}
+        open={modalVisible}
+        initialData={initialData}
+        onCreate={handleCreate}
+        onUpdate={handleUpdate}
+        onClose={() => setModalVisible(false)}
+      />
     </>
   )
 }
