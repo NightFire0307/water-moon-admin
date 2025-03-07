@@ -1,4 +1,4 @@
-import type { Response } from '../types/common.ts'
+import type { PaginationParams, Response } from '../types/common.ts'
 import type { IProduct, ProductResponse, ProductTypeResponse } from '../types/product.ts'
 import request from '../utils/request.ts'
 
@@ -57,9 +57,18 @@ export function queryProductByName(name: string): ProductTypeResponse {
   })
 }
 
-export function getProductTypes(): ProductTypeResponse {
+export function getProductTypes(params: PaginationParams): ProductTypeResponse {
   return request({
     url: '/api/admin/product/type',
+    method: 'GET',
+    params,
+  })
+}
+
+// 获取产品类型详情
+export function getProductTypeById(id: number) {
+  return request({
+    url: `/api/admin/product/type/${id}`,
     method: 'GET',
   })
 }
@@ -84,5 +93,13 @@ export function deleteProductType(id: number): Promise<Response<string>> {
   return request({
     url: `/api/admin/product/type/${id}`,
     method: 'DELETE',
+  })
+}
+
+export function batchDeleteProductType(data: { ids: number[] }): Promise<Response<string>> {
+  return request({
+    url: '/api/admin/product/type',
+    method: 'DELETE',
+    data,
   })
 }

@@ -1,13 +1,19 @@
 import type { IProductType } from '@/types/product.ts'
 import type { TableColumnsType } from 'antd'
 import {
+  batchDeleteProductType,
   createProductType,
   deleteProductType,
+  getProductTypeById,
   getProductTypes,
   queryProductByName,
+  updateProductType,
 } from '@/apis/product.ts'
+import usePagination from '@/hooks/usePagination.ts'
+import useTableSelection from '@/hooks/useTableSelection.ts'
 import { formatDate } from '@/utils/formatDate.ts'
 import { ProductTypeModalForm } from '@/views/ProductType/ProductTypeModalForm.tsx'
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
 import { Button, Divider, Form, Input, message, Popconfirm, Space, Table } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { useEffect, useState } from 'react'
@@ -22,10 +28,8 @@ function ProductQueryForm(props: IProductQueryForm) {
   const { onQuery, onReset } = props
 
   function handleQuery() {
-    const values = form.getFieldValue('name')
-    if (!values)
-      return
-    onQuery(values)
+    const name = form.getFieldValue('name')
+    onQuery(name || '')
   }
 
   return (
@@ -54,7 +58,9 @@ export function ProductType() {
   const [dataSource, setDataSource] = useState<IProductType[]>([])
   const [mode, setMode] = useState<'create' | 'edit'>('create')
   const [modalVisible, setModalVisible] = useState(false)
-  const [initialData, setInitialData] = useState<{ id: number, name: string }>({})
+  const [initialData, setInitialData] = useState<{ id: number, name: string } | undefined>(undefined)
+  const { rowSelection, selectedRows } = useTableSelection({ type: 'checkbox' })
+  const { pagination, setTotal, current, pageSize } = usePagination()
 
   const columns: TableColumnsType<IProductType> = [
     {
@@ -62,7 +68,7 @@ export function ProductType() {
       dataIndex: 'id',
     },
     {
-      title: '产品名称',
+      title: '产品类型名称',
       dataIndex: 'name',
     },
     {
@@ -80,13 +86,18 @@ export function ProductType() {
       render: (value: IProductType) => {
         return (
           <Space size="large">
-            <a onClick={() => {
-              setMode('edit')
-              setModalVisible(true)
-            }}
+            <Button
+              onClick={async () => {
+                setMode('edit')
+                setModalVisible(true)
+                const { data } = await getProductTypeById(value.id)
+                setInitialData(data)
+              }}
+              type="link"
+              icon={<EditOutlined />}
             >
               编辑
-            </a>
+            </Button>
             <Popconfirm
               title="确定删除吗？"
               onConfirm={() => handleDelete(value.id)}
@@ -94,7 +105,7 @@ export function ProductType() {
                 message.info('取消删除')
               }}
             >
-              <a style={{ color: '#f5222d' }}>删除</a>
+              <Button type="link" danger icon={<DeleteOutlined />}>删除</Button>
             </Popconfirm>
           </Space>
         )
@@ -107,59 +118,84 @@ export function ProductType() {
     setDataSource(data.list)
   }
 
-  async function handleCreate(value) {
+  async function handleCreate(value: { name: string }) {
     const { msg } = await createProductType(value)
     message.success(msg)
+    fetchProductTypes()
   }
 
-  function handleUpdate() {}
+  async function handleUpdate(id: number, data: { name: string }) {
+    const { msg } = await updateProductType(id, data)
+    message.success(msg)
+    fetchProductTypes()
+  }
 
   async function handleDelete(id: number) {
-    try {
-      const { msg } = await deleteProductType(id)
-      message.success(msg)
-      await fetchProductTypes()
-    }
-    catch {
-      message.error('删除失败')
-    }
+    const { msg } = await deleteProductType(id)
+    message.success(msg)
+    await fetchProductTypes()
   }
 
-  async function fetchProductTypes() {
+  async function fetchProductTypes(current = pagination.current, pageSize = pagination.pageSize) {
     try {
-      const { data } = await getProductTypes()
+      const { data } = await getProductTypes({ current, pageSize })
       setDataSource(data.list)
+      setTotal(data.total)
     }
     catch {
       message.error('获取产品类型失败')
     }
   }
 
-  useEffect(() => {
+  async function handleBatchDelete() {
+    const ids = selectedRows.map(item => item.id)
+    const { msg } = await batchDeleteProductType({ ids })
+    message.success(msg)
     fetchProductTypes()
-  }, [])
+  }
+
+  useEffect(() => {
+    fetchProductTypes(current, pageSize)
+  }, [current, pageSize])
 
   return (
     <>
       <ProductQueryForm onQuery={handleQuery} onReset={fetchProductTypes} />
       <Divider />
-      <Button
-        type="primary"
-        onClick={() => {
-          setMode('create')
-          setModalVisible(true)
-        }}
-      >
-        新增
-      </Button>
-      <Table rowKey="id" columns={columns} dataSource={dataSource} style={{ marginTop: '24px' }} />
+      <Space>
+        <Button
+          type="primary"
+          onClick={() => {
+            setMode('create')
+            setModalVisible(true)
+          }}
+        >
+          新增
+        </Button>
+        <Popconfirm title="确定删除吗？" onConfirm={handleBatchDelete} onCancel={() => message.info('取消删除')}>
+          <Button type="primary" danger disabled={selectedRows.length === 0}>
+            批量删除
+          </Button>
+        </Popconfirm>
+      </Space>
+      <Table
+        rowKey="id"
+        columns={columns}
+        dataSource={dataSource}
+        rowSelection={rowSelection}
+        pagination={pagination}
+        style={{ marginTop: '24px' }}
+      />
       <ProductTypeModalForm
         mode={mode}
         open={modalVisible}
         initialData={initialData}
         onCreate={handleCreate}
         onUpdate={handleUpdate}
-        onClose={() => setModalVisible(false)}
+        onClose={() => {
+          setModalVisible(false)
+          setInitialData(undefined)
+        }}
       />
     </>
   )

@@ -6,7 +6,7 @@ interface ProductTypeModalFormProps {
   open: boolean
   initialData?: { id: number, name: string }
   onCreate: (values: { name: string }) => void
-  onUpdate: (values: { id: number, name: string }) => void
+  onUpdate: (id: number, data: { name: string }) => void
   onClose: () => void
 }
 
@@ -23,10 +23,16 @@ export function ProductTypeModalForm(props: ProductTypeModalFormProps) {
       onCreate({ name: form.getFieldValue('name') })
     }
     else if (mode === 'edit' && initialData) {
-      onUpdate({ id: initialData.id, ...form.getFieldsValue() })
+      onUpdate(initialData.id, { name: form.getFieldValue('name') })
     }
 
+    handleCancel()
     setConfirmLoading(false)
+  }
+
+  function handleCancel() {
+    form.resetFields()
+    onClose()
   }
 
   useEffect(() => {
@@ -40,10 +46,7 @@ export function ProductTypeModalForm(props: ProductTypeModalFormProps) {
       title={mode === 'create' ? '新增产品类型' : '编辑产品类型'}
       open={open}
       onOk={handleSubmit}
-      onCancel={() => {
-        form.resetFields()
-        onClose()
-      }}
+      onCancel={handleCancel}
       confirmLoading={confirmLoading}
       centered
     >
