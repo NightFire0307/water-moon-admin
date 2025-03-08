@@ -3,6 +3,7 @@ import type { IOrder } from '@/types/order.ts'
 import type { TableColumnProps } from 'antd'
 import type { ReactNode } from 'react'
 import { getOrderList, removeOrder, resetOrderStatus } from '@/apis/order.ts'
+import useTableSelection from '@/hooks/useTableSelection.ts'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import { UploadStatus } from '@/store/useUploadFile.tsx'
 import { OrderStatus } from '@/types/order.ts'
@@ -58,6 +59,7 @@ export function Order() {
   const [curOrderNumber, setCurOrderNumber] = useState('')
   const [incompleteFileCount, setIncompleteFileCount] = useState(0)
   const [shareLinkMgrOpen, setShareLinkMgrOpen] = useState(false)
+  const { rowSelection } = useTableSelection({ type: 'checkbox' })
   const navigate = useNavigate()
 
   const columns: TableColumnProps[] = [
@@ -269,7 +271,7 @@ export function Order() {
             SetModalVisible(true)
           }}
         >
-          新 建
+          新建订单
         </Button>
         <Tooltip title="刷新">
           <Button icon={<RedoOutlined rotate={-90} />} type="text" onClick={() => fetchOrderList()} />
@@ -280,11 +282,11 @@ export function Order() {
         dataSource={dataSource}
         columns={columns}
         style={{ marginTop: '14px' }}
+        rowSelection={rowSelection}
         pagination={{
           ...pageInfo,
           onChange: (current, pageSize) => fetchOrderList({ current, pageSize }),
         }}
-        bordered
       />
       <OrderModalForm
         open={modalVisible}
