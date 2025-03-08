@@ -60,7 +60,7 @@ export function ProductType() {
   const [modalVisible, setModalVisible] = useState(false)
   const [initialData, setInitialData] = useState<{ id: number, name: string } | undefined>(undefined)
   const { rowSelection, selectedRows } = useTableSelection({ type: 'checkbox' })
-  const { pagination, setTotal, current, pageSize } = usePagination()
+  const { pagination, setTotal, current, pageSize, reset } = usePagination()
 
   const columns: TableColumnsType<IProductType> = [
     {
@@ -116,6 +116,7 @@ export function ProductType() {
   async function handleQuery(name: string) {
     const { data } = await queryProductByName(name)
     setDataSource(data.list)
+    setTotal(data.total)
   }
 
   async function handleCreate(value: { name: string }) {
@@ -160,7 +161,13 @@ export function ProductType() {
 
   return (
     <>
-      <ProductQueryForm onQuery={handleQuery} onReset={fetchProductTypes} />
+      <ProductQueryForm
+        onQuery={handleQuery}
+        onReset={() => {
+          fetchProductTypes(1, pagination.pageSize)
+          reset()
+        }}
+      />
       <Divider />
       <Space>
         <Button
