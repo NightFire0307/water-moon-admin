@@ -3,7 +3,7 @@ import type { Pagination, Response } from './common'
 export interface IProduct {
   id: number
   name: string
-  type: IProductType
+  type: string
   createdAt: string
   updatedAt: string
 }

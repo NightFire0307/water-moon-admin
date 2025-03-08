@@ -59,6 +59,7 @@ interface CustomFormProps {
   layout?: 'vertical' | 'horizontal' | 'inline'
   submitButtonText?: string // 提交按钮文案
   cancelButtonText?: string // 取消按钮文案
+  hideCancelButton?: boolean // 是否隐藏取消按钮
   onSubmit?: (values: any) => void
   onReset?: () => void
   footer?: ReactNode
@@ -79,6 +80,7 @@ export const CustomForm = forwardRef<CustomFormRef, CustomFormProps>((props, ref
     layout = 'horizontal',
     submitButtonText = '提交',
     cancelButtonText = '重置',
+    hideCancelButton = false,
     onSubmit,
     onReset,
     footer,
@@ -259,13 +261,17 @@ export const CustomForm = forwardRef<CustomFormRef, CustomFormProps>((props, ref
               <Form.Item>
                 <Space>
                   <Button type="primary" htmlType="submit">{submitButtonText}</Button>
-                  <Button onClick={() => {
-                    form.resetFields()
-                    onReset && onReset()
-                  }}
-                  >
-                    {cancelButtonText}
-                  </Button>
+                  {
+                    !hideCancelButton && (
+                      <Button onClick={() => {
+                        form.resetFields()
+                        onReset && onReset()
+                      }}
+                      >
+                        {cancelButtonText}
+                      </Button>
+                    )
+                  }
                 </Space>
               </Form.Item>
             )

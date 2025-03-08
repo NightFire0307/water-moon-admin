@@ -1,5 +1,4 @@
-import type { IProductType } from '@/types/product.ts'
-import type { ProductFormRef } from '../../components/CustomForm.tsx'
+import type { CustomFormRef } from '@/components/CustomForm.tsx'
 import { CustomForm } from '@/components/CustomForm.tsx'
 import { Button, Modal, Space } from 'antd'
 import { useEffect, useRef, useState } from 'react'
@@ -8,7 +7,7 @@ interface ProductModalFormProps {
   mode: 'create' | 'edit'
   open: boolean
   initialData?: { id: number, name: string, productTypeId: number }
-  productTypeOptions: IProductType[]
+  productTypeOptions: { label: string, value: number }[]
   onClose: () => void
   onCreate: (values: any) => void
   onUpdate: (id: number, values: any) => void
@@ -16,7 +15,7 @@ interface ProductModalFormProps {
 
 export function ProductModalForm(props: ProductModalFormProps) {
   const { mode, open, onClose, productTypeOptions, onCreate, onUpdate, initialData } = props
-  const formRef = useRef<ProductFormRef>(null)
+  const formRef = useRef<CustomFormRef>(null)
   const [confirmLoading, setConfirmLoading] = useState(false)
 
   function handleSubmit(values: { name: string, productTypeId: number }) {
@@ -64,7 +63,6 @@ export function ProductModalForm(props: ProductModalFormProps) {
             type: 'select',
             placeholder: '请选择产品类型',
             options: productTypeOptions,
-            filedNames: { label: 'name', value: 'id' },
           },
         ]}
         footer={(
@@ -73,6 +71,7 @@ export function ProductModalForm(props: ProductModalFormProps) {
             <Button type="primary" htmlType="submit">创建</Button>
           </Space>
         )}
+        hideCancelButton
         onSubmit={handleSubmit}
       />
     </Modal>

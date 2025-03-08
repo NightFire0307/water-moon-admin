@@ -2,7 +2,7 @@ import type { PaginationParams, Response } from '../types/common.ts'
 import type { IProduct, ProductResponse, ProductTypeResponse } from '../types/product.ts'
 import request from '../utils/request.ts'
 
-export interface ProductQueryParams {
+export interface ProductQueryParams extends PaginationParams {
   name?: string
   productType?: number
 }
