@@ -1,15 +1,15 @@
 import type { MenuProps } from 'antd'
+import PanelLeftClose from '@/assets/icons/panel-left-close.svg?react'
+import PanelLeftOpen from '@/assets/icons/panel-left-open.svg?react'
 import UserMenu from '@/components/UserMenu.tsx'
 import {
-  LeftOutlined,
-  RightOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
   UploadOutlined,
   UserOutlined,
   VideoCameraOutlined,
 } from '@ant-design/icons'
-import { Breadcrumb, Layout, Menu } from 'antd'
+import { Breadcrumb, Button, Flex, Layout, Menu } from 'antd'
 import { useEffect, useState } from 'react'
 import { Outlet, useMatches, useNavigate } from 'react-router-dom'
 import styles from './AdminLayout.module.less'
@@ -92,32 +92,33 @@ function AdminLayout() {
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider style={{ position: 'relative' }} width={250} collapsedWidth={65} trigger={null} collapsible collapsed={collapsed} theme="light">
-        <div className={styles.logoWrapper}>
-          <div className={styles.logo}>LOGO</div>
-        </div>
+        <Flex vertical>
+          <div className={styles.logoWrapper}>
+            <div className={styles.logo}>LOGO</div>
+          </div>
 
-        <Menu
-          mode="inline"
-          selectedKeys={selectedKeys}
-          openKeys={openKeys}
-          items={menuItems}
-          onClick={handleMenuClick}
-          onOpenChange={openKey => setOpenKeys(openKey)}
-        />
+          <div className={styles.menuWrapper}>
+            <Menu
+              style={{ height: '100%' }}
+              mode="inline"
+              selectedKeys={selectedKeys}
+              openKeys={openKeys}
+              items={menuItems}
+              onClick={handleMenuClick}
+              onOpenChange={openKey => setOpenKeys(openKey)}
+            />
 
-        <button className={styles.collapseButton} onClick={toggle}>
-          {
-            collapsed ? <RightOutlined /> : <LeftOutlined />
-          }
-        </button>
+          </div>
+
+          <UserMenu collapsed={collapsed} />
+        </Flex>
       </Sider>
       <Layout>
         <Header className={styles['header-wrapper']}>
-          <UserMenu />
+          <Button type="text" icon={!collapsed ? <PanelLeftClose /> : <PanelLeftOpen />} onClick={toggle} />
+          <Breadcrumb items={breadcrumb} style={{ margin: '16px 0', fontWeight: 600 }} />
         </Header>
-        <Content style={{ padding: '0 16px', position: 'relative', overflowX: 'hidden' }}>
-          <Breadcrumb items={breadcrumb} style={{ margin: '16px 0' }}>
-          </Breadcrumb>
+        <Content style={{ position: 'relative', overflowX: 'hidden' }}>
           <div className={styles.content}>
             <Outlet />
           </div>

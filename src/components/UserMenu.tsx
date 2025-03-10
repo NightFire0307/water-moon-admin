@@ -1,9 +1,14 @@
 import type { MenuProps } from 'antd'
+import ChevronsUpDown from '@/assets/icons/chevrons-up-down.svg?react'
 import { useUserInfo } from '@/store/useUserInfo.tsx'
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons'
-import { Avatar, Dropdown } from 'antd'
+import { Avatar, Dropdown, Flex } from 'antd'
 import { useNavigate } from 'react-router-dom'
 import styles from './UserMenu.module.less'
+
+interface UserMenuProps {
+  collapsed: boolean
+}
 
 enum UserMenuKey {
   Setting = 'setting',
@@ -26,7 +31,7 @@ const userMenuItems: MenuProps['items'] = [
   },
 ]
 
-function UserMenu() {
+function UserMenu({ collapsed }: UserMenuProps) {
   const userStore = useUserInfo()
   const navigate = useNavigate()
 
@@ -44,12 +49,23 @@ function UserMenu() {
   }
 
   return (
-    <Dropdown menu={{ items: userMenuItems, onClick: handleUserMenuClick }}>
-      <div className={styles['user-menu']}>
-        <Avatar style={{ backgroundColor: '#1677ff' }} icon={<UserOutlined />} />
-        <div>Admin</div>
-      </div>
-    </Dropdown>
+    <div className={styles['user-info']}>
+      <Dropdown menu={{ items: userMenuItems, onClick: handleUserMenuClick }} trigger={['click']} placement="top">
+        <Flex justify="space-between" align="center" gap={8} className={styles['user-info-content']}>
+          <Avatar style={{ backgroundColor: '#1677ff', minWidth: '24px' }} icon={<UserOutlined />} size={24} />
+          {
+            !collapsed && (
+              <>
+                <div style={{ fontWeight: 600, flexShrink: 0 }}>Wk Admin</div>
+                <ChevronsUpDown color="#9f9fa9" style={{ marginLeft: 'auto' }} />
+              </>
+            )
+          }
+
+        </Flex>
+      </Dropdown>
+    </div>
+
   )
 }
 

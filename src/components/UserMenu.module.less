@@ -1,7 +1,21 @@
-.user-menu {
+.user-info {
+  box-sizing: border-box;
+  border-top: 1px solid #efefef;
+  border-right: 1px solid #efefef;
   display: flex;
   align-items: center;
-  gap: 8px;
-  user-select: none;
-  cursor: pointer;
+  height: 50px;
+  padding: 8px 16px;
+
+  &-content {
+    width: 100%;
+    padding: 8px;
+    border-radius: 8px;
+    transition: .3s ease;
+    user-select: none;
+  }
+
+  &-content:hover {
+    background-color: #efefef;
+  }
 }
