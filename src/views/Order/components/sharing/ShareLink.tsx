@@ -1,7 +1,7 @@
 import type { CustomFormRef, Field } from '@/components/CustomForm.tsx'
 import { CustomForm } from '@/components/CustomForm.tsx'
 import { useShareLink } from '@/store/useShareLink.tsx'
-import { LockedOrder } from '@/views/Order/components/forms/OrderModalForm.tsx'
+import { LockedOrder } from '@/views/Order/components/forms/OrderModalStepForm.tsx'
 import { forwardRef, useContext, useImperativeHandle, useRef } from 'react'
 
 export interface ShareLinkRef {

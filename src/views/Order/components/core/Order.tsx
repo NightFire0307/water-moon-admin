@@ -172,13 +172,6 @@ export function Order() {
         rowSelection={rowSelection}
         pagination={pagination}
       />
-      <OrderModalForm
-        open={modalVisible}
-        onCancel={() => {
-          SetModalVisible(false)
-          fetchOrderList()
-        }}
-      />
 
       {
         !taskCenterOpen && (
@@ -191,6 +184,7 @@ export function Order() {
           />
         )
       }
+      <OrderModalForm />
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
       <OrderDetail orderId={curOrderId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
       <PhotoMgrModal open={photoMgrOpen} orderId={curOrderId} onClose={() => setPhotoMgrOpen(false)} />

@@ -1,184 +1,211 @@
-import type { IOrder } from '@/types/order.ts'
-import type { CreateOrderRef } from '@/views/Order/components/forms/SteppedOrderForm.tsx'
-import type { ShareLinkRef } from '@/views/Order/components/sharing/ShareLink.tsx'
-import { createOrder } from '@/apis/order.ts'
-import { useShareLink } from '@/store/useShareLink.tsx'
-import { SteppedOrderForm } from '@/views/Order/components/forms/SteppedOrderForm.tsx'
-import { ShareLink } from '@/views/Order/components/sharing/ShareLink.tsx'
-import { UploadPhoto } from '@/views/Order/UploadPhoto.tsx'
-import { Button, message, Modal, Result, Space, Steps } from 'antd'
-import { createContext, useRef, useState } from 'react'
+import type { InputRef, TableProps } from 'antd'
+import type { FC, PropsWithChildren, ReactNode } from 'react'
+import IconTrash from '@/assets/icons/trash.svg?react'
+import { PlusOutlined } from '@ant-design/icons'
+import { Button, Card, Col, Divider, Flex, Form, Input, InputNumber, Modal, Row, Select, Table } from 'antd'
 
-export const LockedOrder = createContext({} as IOrder)
+import { useRef, useState } from 'react'
 
-interface OrderModalFormProps {
-  open: boolean
-  onCancel: () => void
+interface Item {
+  key: number
+  name: string
+  type: string
+  count: number
 }
 
-export function OrderModalForm(props: OrderModalFormProps) {
-  const { open, onCancel } = props
-  const [currentStep, setCurrentStep] = useState(0)
-  const [createLoading, setCreateLoading] = useState(false)
-  const [submittedOrderData, setSubmittedOrderData] = useState<IOrder>({} as IOrder)
-  const createOrderRef = useRef<CreateOrderRef>(null)
-  const shareLinkRef = useRef<ShareLinkRef>(null)
+interface EditableCellProps {
+  title: ReactNode
+  editable?: boolean
+  dataIndex?: keyof Item
+  record: Item
+  handleSave: (record: Item) => void
+}
 
-  const shareLinkInfo = useShareLink(state => state.shareLinkInfo)
+const EditableCell: FC<PropsWithChildren<EditableCellProps>> = ({
+  title,
+  editable,
+  children,
+  dataIndex,
+  record,
+  handleSave,
+  ...restProps
+}) => {
+  const inputRef = useRef<InputRef>(null)
 
-  async function handleNext() {
-    if (currentStep === 0 && Object.keys(submittedOrderData).length === 0) {
-      try {
-        setCreateLoading(true)
-        const values = await createOrderRef.current?.getValues()
-        if (!values)
-          return message.error('获取表单数据失败')
-
-        const { code, data, msg } = await createOrder(values)
-        if (code !== 201) {
-          message.error(msg)
-          return
-        }
-        message.success('创建订单成功')
-
-        // 保存订单信息并锁定订单信息
-        setSubmittedOrderData(data)
-
-        setCreateLoading(false)
-        setCurrentStep(currentStep + 1)
-      }
-      catch {
-        message.error('表单校验失败，请检查')
-      }
-      finally {
-        setCreateLoading(false)
-      }
-    }
-    else {
-      setCurrentStep(currentStep + 1)
-    }
-
-    if (currentStep === 2) {
-      shareLinkRef.current?.generateShareUrl()
-    }
-  }
-
-  function handlePrev() {
-    setCurrentStep(currentStep - 1)
-  }
-
-  // 复制链接到剪贴板
-  async function handleCopyLink() {
+  const save = async () => {
     try {
-      await navigator.clipboard.writeText(`https://localhost/s/${shareLinkInfo.share_url}`)
-      message.success('复制链接成功')
+      const value = inputRef.current?.input?.value
+      handleSave({ ...record, [dataIndex]: value })
     }
-    catch {
-      message.error('复制链接失败，请手动复制')
+    catch (errInfo) {
+      console.log('Save failed:', errInfo)
     }
   }
 
   return (
-    <Modal
-      width={800}
-      title="创建选片订单"
-      open={open}
-      footer={null}
-      onCancel={onCancel}
-      afterClose={() => {
-        setCurrentStep(0)
-        setSubmittedOrderData({} as IOrder)
-        createOrderRef.current?.resetValues()
-      }}
-    >
-      <Steps
-        current={currentStep}
-        items={[
-          {
-            title: '创建订单',
-          },
-          {
-            title: '上传照片',
-          },
-          {
-            title: '链接设置',
-          },
-          {
-            title: '完成',
-          },
-        ]}
-        style={{
-          marginTop: '16px',
-        }}
-      >
-      </Steps>
-
-      <div style={{
-        marginTop: '16px',
-        marginBottom: '16px',
-      }}
-      >
-        {
-          currentStep === 0 && (
-            <LockedOrder.Provider value={submittedOrderData}>
-              <SteppedOrderForm ref={createOrderRef} submitData={submittedOrderData} />
-            </LockedOrder.Provider>
-          )
-        }
-
-        {
-          currentStep === 1 && (
-            <LockedOrder.Provider value={submittedOrderData}>
-              <UploadPhoto />
-            </LockedOrder.Provider>
-          )
-        }
-
-        {
-          currentStep === 2 && (
-            <LockedOrder.Provider value={submittedOrderData}>
-              <ShareLink ref={shareLinkRef} />
-            </LockedOrder.Provider>
-          )
-        }
-
-        {
-          currentStep === 3 && (
-            <Result
-              status="success"
-              title="创建成功"
-              subTitle={(
-                <div>
-                  <p>您可以复制下面的链接，发送给客户，让客户查看照片</p>
-                  <div>
-                    <span>{`链接：https://localhost/s/${shareLinkInfo.share_url}`}</span>
-                    {' '}
-                    <span>
-                      {`密码：${shareLinkInfo.share_password}`}
-                    </span>
-                    <p>链接有效期为7天，访问次数不限</p>
-                  </div>
-                </div>
-              )}
-              extra={[
-                <Button type="primary" onClick={handleCopyLink}>复制链接</Button>,
-              ]}
+    <td {...restProps}>
+      {editable
+        ? (
+            <InputNumber
+              defaultValue={record[dataIndex]}
+              min={0}
+              onPressEnter={save}
+              onBlur={save}
             />
           )
-        }
-      </div>
+        : (
+            children
+          )}
+    </td>
+  )
+}
 
-      <Space>
-        {
-          currentStep > 0 && <Button onClick={handlePrev}>上一步</Button>
-        }
-        {
-          currentStep < 3 && <Button type="primary" onClick={handleNext} loading={createLoading}>下一步</Button>
-        }
-        {
-          currentStep === 3 && <Button type="primary" onClick={onCancel}>完成</Button>
-        }
-      </Space>
+export function OrderModalForm() {
+  const [dataSource, setDataSource] = useState<Item[]>([
+    {
+      key: 1,
+      name: '套餐1',
+      type: '套餐',
+      count: 1,
+    },
+    {
+      key: 2,
+      name: '单品1',
+      type: '单品',
+      count: 2,
+    },
+  ])
+
+  const handleSave = (row: Item) => {
+    const newData = [...dataSource]
+    const index = newData.findIndex(item => row.key === item.key)
+    const item = newData[index]
+    newData.splice(index, 1, { ...item, ...row })
+    setDataSource(newData)
+  }
+
+  const columns: TableProps<Item>['columns'] = [
+    {
+      title: '产品名称',
+      dataIndex: 'name',
+    },
+    {
+      title: '产品类型',
+      dataIndex: 'type',
+    },
+    {
+      title: '数量',
+      dataIndex: 'count',
+      editable: true,
+    },
+    {
+      title: '操作',
+      render: () => (
+        <Button type="text" icon={<IconTrash />} danger />
+      ),
+    },
+  ]
+
+  const components = {
+    body: {
+      cell: EditableCell,
+    },
+  }
+
+  const mergedColumns = columns.map((col) => {
+    if (!col.editable) {
+      return col
+    }
+
+    return {
+      ...col,
+      onCell: (record: Item) => ({
+        record,
+        editable: col.editable,
+        dataIndex: col.dataIndex,
+        title: col.title,
+        handleSave,
+      }),
+    }
+  })
+
+  return (
+    <Modal open={true} title="创建订单" width={900}>
+      <Form layout="vertical">
+        <Row gutter={16}>
+          <Col span={8}>
+            <Form.Item label="订单号" required>
+              <Input placeholder="请输入订单号" />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item label="客户姓名" required>
+              <Input placeholder="请输入客户姓名" />
+            </Form.Item>
+          </Col>
+          <Col span={8}>
+            <Form.Item
+              label="客户手机"
+              rules={[
+                {
+                  required: true,
+                  message: '请输入客户手机',
+                },
+                () => ({
+                  validator(_, value) {
+                    if (!value || /^1[3-9]\d{9}$/.test(value)) {
+                      return Promise.resolve()
+                    }
+                    return Promise.reject(new Error('请输入正确的手机号码'))
+                  },
+                }),
+              ]}
+            >
+              <Input placeholder="请输入客户手机" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item label="可选精修张数">
+              <InputNumber defaultValue={0} min={0} style={{ width: '100%' }} />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="超选单价">
+              <InputNumber defaultValue={0} min={0} step={50} style={{ width: '100%' }} addonAfter="￥" />
+            </Form.Item>
+          </Col>
+        </Row>
+        <Divider>添加产品</Divider>
+        <Row gutter={16}>
+          <Col span={12}>
+            <Card title="添加套餐">
+              <Flex gap={8}>
+                <Select placeholder="选择套餐" style={{ flex: 1 }} />
+                <Button type="primary" icon={<PlusOutlined />} />
+              </Flex>
+            </Card>
+          </Col>
+          <Col span={12}>
+            <Card title="添加单品">
+              <Flex gap={8}>
+                <Select placeholder="选择套餐" style={{ flex: 1 }} />
+                <InputNumber min={1} defaultValue={1} />
+                <Button type="primary" icon={<PlusOutlined />} />
+              </Flex>
+            </Card>
+          </Col>
+        </Row>
+        <Divider>已添加产品</Divider>
+        <Table
+          columns={mergedColumns}
+          dataSource={dataSource}
+          components={components}
+          bordered={false}
+        />
+      </Form>
     </Modal>
   )
 }
