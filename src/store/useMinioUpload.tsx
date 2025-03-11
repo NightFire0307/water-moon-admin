@@ -1,5 +1,5 @@
 import type { IPhoto } from '@/types/photo.ts'
-import type { ISelectOrder } from '@/views/Order/Order.tsx'
+import type { ISelectOrder } from '@/views/Order/components/core/Order.tsx'
 import type { GetProp, UploadProps } from 'antd'
 import type { AxiosRequestConfig } from 'axios'
 import request from '@/utils/request.ts'

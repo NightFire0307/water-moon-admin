@@ -46,7 +46,7 @@ function ShareLinkInfo({ linkInfo }: ShareLinkInfoProps) {
             <Button
               type="primary"
               style={{ width: '100%' }}
-              onClick={() => copyToClipboard(`http://127.0.0.1/s/${linkInfo.share_url}?pwd=${linkInfo.share_password}`)}
+              onClick={() => copyToClipboard(`http://127.0.0.1:5173/share/init/?surl=${linkInfo.share_url}&pwd=${linkInfo.share_password}`)}
             >
               复制链接及密码
             </Button>
@@ -92,7 +92,7 @@ function reducer(state: State, action: Action) {
   }
 }
 
-export function ShareLinkModal({ open, orderId, onClose }: ShareLinkMgrProps) {
+export function ShareLinkMgrModal({ open, orderId, onClose }: ShareLinkMgrProps) {
   const [state, dispatch] = useReducer(reducer, initialState)
   const [form] = Form.useForm()
   const initialValues: ShareLinkMgrFormValues = {

@@ -1,8 +1,8 @@
 import type { CreateOrderData, ProductsInfo } from '@/types/order.ts'
 import type { IProduct } from '@/types/product.ts'
 import { getProductList } from '@/apis/product.ts'
-import { SelectProductCard } from '@/components/SelectProductCard.tsx'
-import { LockedOrder } from '@/views/Order/OrderModalForm.tsx'
+import { LockedOrder } from '@/views/Order/components/forms/OrderModalForm.tsx'
+import { SelectProductCard } from '@/views/Order/SelectProductCard.tsx'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Col, Form, Input, InputNumber, Row, Select, Space } from 'antd'
 import { useForm } from 'antd/es/form/Form'
@@ -17,7 +17,7 @@ export interface CreateOrderRef {
   resetValues: () => void
 }
 
-export const CreateOrder = forwardRef<CreateOrderRef, CreateOrderProps>((props, ref) => {
+export const SteppedOrderForm = forwardRef<CreateOrderRef, CreateOrderProps>((props, ref) => {
   const { submitData } = props
   const [singleProducts, setSingleProducts] = useState<ProductsInfo[]>([])
   const [productOptions, setProductOptions] = useState<IProduct[]>([])

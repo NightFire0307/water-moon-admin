@@ -1,4 +1,4 @@
-import { Order } from '@/views/Order/Order.tsx'
+import { Order } from '@/views/Order/components/core/Order.tsx'
 import { SelectionResult } from '@/views/Order/SelectionResult.tsx'
 import Role from '@/views/Role/Role.tsx'
 import SystemSetting from '@/views/SystemSetting/SystemSetting.tsx'

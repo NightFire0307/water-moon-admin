@@ -1,4 +1,4 @@
-import styles from '@/components/ImageGallery.module.less'
+import styles from '@/components/ImageGallery/ImageGallery.module.less'
 import { DeleteOutlined, StarFilled, StarOutlined } from '@ant-design/icons'
 import { Button, Checkbox, Popconfirm } from 'antd'
 

@@ -1,10 +1,10 @@
 import type { IOrder } from '@/types/order.ts'
-import type { CreateOrderRef } from '@/views/Order/CreateOrder.tsx'
-import type { ShareLinkRef } from '@/views/Order/ShareLink.tsx'
+import type { CreateOrderRef } from '@/views/Order/components/forms/SteppedOrderForm.tsx'
+import type { ShareLinkRef } from '@/views/Order/components/sharing/ShareLink.tsx'
 import { createOrder } from '@/apis/order.ts'
 import { useShareLink } from '@/store/useShareLink.tsx'
-import { CreateOrder } from '@/views/Order/CreateOrder.tsx'
-import { ShareLink } from '@/views/Order/ShareLink.tsx'
+import { SteppedOrderForm } from '@/views/Order/components/forms/SteppedOrderForm.tsx'
+import { ShareLink } from '@/views/Order/components/sharing/ShareLink.tsx'
 import { UploadPhoto } from '@/views/Order/UploadPhoto.tsx'
 import { Button, message, Modal, Result, Space, Steps } from 'antd'
 import { createContext, useRef, useState } from 'react'
@@ -121,7 +121,7 @@ export function OrderModalForm(props: OrderModalFormProps) {
         {
           currentStep === 0 && (
             <LockedOrder.Provider value={submittedOrderData}>
-              <CreateOrder ref={createOrderRef} submitData={submittedOrderData} />
+              <SteppedOrderForm ref={createOrderRef} submitData={submittedOrderData} />
             </LockedOrder.Provider>
           )
         }

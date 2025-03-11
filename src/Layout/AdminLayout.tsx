@@ -1,7 +1,7 @@
 import type { MenuProps } from 'antd'
 import PanelLeftClose from '@/assets/icons/panel-left-close.svg?react'
 import PanelLeftOpen from '@/assets/icons/panel-left-open.svg?react'
-import UserMenu from '@/components/UserMenu.tsx'
+import UserMenu from '@/components/UserMenu/UserMenu.tsx'
 import {
   SafetyCertificateOutlined,
   SettingOutlined,

@@ -1,5 +1,5 @@
 import type { ProductsInfo } from '@/types/order.ts'
-import { LockedOrder } from '@/views/Order/OrderModalForm'
+import { LockedOrder } from '@/views/Order/components/forms/OrderModalForm.tsx'
 import { CloseOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons'
 import { Button, Card, Divider, Flex, Space } from 'antd'
 import { useContext, useEffect, useState } from 'react'

@@ -1,6 +1,5 @@
 import type { IOrder } from '@/types/order.ts'
 import type { TableColumnProps } from 'antd'
-import type { ReactNode } from 'react'
 import { getOrderList, removeOrder } from '@/apis/order.ts'
 import usePagination from '@/hooks/usePagination.ts'
 import useTableSelection from '@/hooks/useTableSelection.ts'
@@ -8,33 +7,15 @@ import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import { UploadStatus } from '@/store/useUploadFile.tsx'
 import { OrderStatus } from '@/types/order.ts'
 import { ActionButtons } from '@/views/Order/ActionButtons.tsx'
-import { OrderDetail } from '@/views/Order/OrderDetail.tsx'
-import { OrderModalForm } from '@/views/Order/OrderModalForm.tsx'
-import { OrderQueryForm } from '@/views/Order/OrderQueryForm.tsx'
-import { PhotoMgr } from '@/views/Order/PhotoMgr.tsx'
-import { ShareLinkModal } from '@/views/Order/ShareLinkModal.tsx'
+import { OrderDetail } from '@/views/Order/components/core/OrderDetail.tsx'
+import { OrderModalForm } from '@/views/Order/components/forms/OrderModalForm.tsx'
+import { OrderQueryForm } from '@/views/Order/components/forms/OrderQueryForm.tsx'
+import { ShareLinkMgrModal } from '@/views/Order/components/sharing/ShareLinkMgrModal.tsx'
+import { PhotoMgrModal } from '@/views/Order/PhotoMgrModal.tsx'
 import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 import { PlusOutlined, RedoOutlined } from '@ant-design/icons'
-import { Badge, Button, Divider, Flex, FloatButton, Modal, Table, Tag, Tooltip } from 'antd'
+import { Badge, Button, Divider, Flex, FloatButton, Table, Tag, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
-
-const { confirm } = Modal
-
-function showConfirmDialog(title: string, content: ReactNode, onOk: () => Promise<void>) {
-  confirm({
-    title,
-    content,
-    okText: '确定',
-    okType: 'danger',
-    cancelText: '取消',
-    centered: true,
-    onOk() {
-      return new Promise((resolve, reject) => {
-        onOk().then(resolve).catch(reject)
-      })
-    },
-  })
-}
 
 export function Order() {
   const [dataSource, setDataSource] = useState<IOrder[]>([])
@@ -42,10 +23,9 @@ export function Order() {
   const [taskCenterOpen, setTaskCenterOpen] = useState(false)
   const [orderDetailOpen, setOrderDetailOpen] = useState(false)
   const [photoMgrOpen, setPhotoMgrOpen] = useState(false)
-  const [curOrderId, setCurOrderId] = useState<number>(-1)
-  const [curOrderNumber, setCurOrderNumber] = useState('')
-  const [incompleteFileCount, setIncompleteFileCount] = useState(0)
   const [shareLinkMgrOpen, setShareLinkMgrOpen] = useState(false)
+  const [curOrderId, setCurOrderId] = useState<number>(-1)
+  const [incompleteFileCount, setIncompleteFileCount] = useState(0)
   const { rowSelection } = useTableSelection({ type: 'checkbox' })
   const { pagination, current, pageSize, setTotal, reset } = usePagination()
 
@@ -115,9 +95,18 @@ export function Order() {
         <ActionButtons
           record={record}
           onEdit={() => {}}
-          onViewDetail={() => {}}
-          onManagePhotos={() => {}}
-          onManageLinks={() => {}}
+          onViewDetail={(record) => {
+            setCurOrderId(record.id)
+            setOrderDetailOpen(true)
+          }}
+          onManagePhotos={(record) => {
+            setCurOrderId(record.id)
+            setPhotoMgrOpen(true)
+          }}
+          onManageLinks={() => {
+            setCurOrderId(record.id)
+            setShareLinkMgrOpen(true)
+          }}
           onResetStatus={() => {}}
           onViewSelectionResult={() => {}}
           onDelete={async (record) => {
@@ -204,8 +193,8 @@ export function Order() {
       }
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
       <OrderDetail orderId={curOrderId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
-      <PhotoMgr open={photoMgrOpen} orderId={curOrderId} orderNumber={curOrderNumber} onClose={() => setPhotoMgrOpen(false)} />
-      <ShareLinkModal open={shareLinkMgrOpen} orderId={curOrderId} onClose={() => setShareLinkMgrOpen(false)} />
+      <PhotoMgrModal open={photoMgrOpen} orderId={curOrderId} onClose={() => setPhotoMgrOpen(false)} />
+      <ShareLinkMgrModal open={shareLinkMgrOpen} orderId={curOrderId} onClose={() => setShareLinkMgrOpen(false)} />
     </>
   )
 }
