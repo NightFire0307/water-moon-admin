@@ -1,6 +1,6 @@
 import type { IOrder } from '@/types/order.ts'
 import type { TableColumnProps } from 'antd'
-import { getOrderList, removeOrder } from '@/apis/order.ts'
+import { createOrder, getOrderList, removeOrder } from '@/apis/order.ts'
 import usePagination from '@/hooks/usePagination.ts'
 import useTableSelection from '@/hooks/useTableSelection.ts'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
@@ -184,7 +184,13 @@ export function Order() {
           />
         )
       }
-      <OrderModalForm open={orderModalOpen} onSubmit={() => {}} onClose={() => setOrderModalOpen(false)}/>
+      <OrderModalForm
+        open={orderModalOpen}
+        onClose={() => {
+          setOrderModalOpen(false)
+          fetchOrderList()
+        }}
+      />
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
       <OrderDetail orderId={curOrderId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
       <PhotoMgrModal open={photoMgrOpen} orderId={curOrderId} onClose={() => setPhotoMgrOpen(false)} />

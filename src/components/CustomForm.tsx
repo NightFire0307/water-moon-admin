@@ -196,6 +196,7 @@ export const CustomForm = forwardRef<CustomFormRef, CustomFormProps>((props, ref
                   step={field.step ?? 1}
                   min={field.min ?? 0}
                   max={field.max}
+                  style={field.style}
                 />
               )}
               {/* 渲染选择框 */}

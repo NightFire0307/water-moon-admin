@@ -1,7 +1,7 @@
 import type { IProduct } from '@/types/product.ts'
 import type { MenuProps, TableColumnsType } from 'antd'
 import type { ChangeEvent } from 'react'
-import { createProduct, deleteProduct, getProductById, getProductList, getProductTypes, updateProduct } from '@/apis/product.ts'
+import { deleteProduct, getProductById, getProductList, getProductTypes } from '@/apis/product.ts'
 import usePagination from '@/hooks/usePagination.ts'
 import useTableSelection from '@/hooks/useTableSelection.ts'
 import { formatDate } from '@/utils/formatDate.ts'
@@ -88,30 +88,6 @@ export function Product() {
     fetchProductList()
   }
 
-  async function handleCreate(values: { name: string, productType: number }) {
-    try {
-      await createProduct(values)
-      message.success('创建成功')
-    }
-    catch (err) {
-      const e = err as Error
-      message.error(e.message)
-    }
-    finally {
-      setModalOpen(false)
-      fetchProductList()
-    }
-  }
-
-  async function handleUpdate(id: number, values: { name: string, productType: number }) {
-    const { code } = await updateProduct(id, values)
-    if (code === 200) {
-      message.success('修改成功')
-      setModalOpen(false)
-      fetchProductList()
-    }
-  }
-
   async function handleQuery(e: ChangeEvent<HTMLInputElement>) {
     const value = e.target.value
     if (value) {
@@ -146,9 +122,15 @@ export function Product() {
       },
     },
     {
-      title: '更新时间',
-      dataIndex: 'updatedAt',
-      render: formatDate,
+      title: '照片数量限制',
+      dataIndex: 'photoLimit',
+    },
+    {
+      title: '是否上架',
+      dataIndex: 'isPublished',
+      render: (value: boolean) => {
+        return value ? <Tag color="green">是</Tag> : <Tag color="red">否</Tag>
+      },
     },
     {
       title: '创建时间',
@@ -175,11 +157,6 @@ export function Product() {
 
   return (
     <>
-      {/* <ProductQueryForm */}
-      {/*  productTypeOptions={options} */}
-      {/*  onQuery={handleQuery} */}
-      {/*  onReset={() => fetchProductList()} */}
-      {/* /> */}
       <Flex justify="space-between">
         <Form form={form} layout="inline">
           <Form.Item name="name">
@@ -223,9 +200,6 @@ export function Product() {
         mode={mode}
         open={modalOpen}
         initialData={initialData}
-        productTypeOptions={options}
-        onCreate={handleCreate}
-        onUpdate={handleUpdate}
         onClose={() => setModalOpen(false)}
       />
     </>

@@ -1,6 +1,7 @@
 import type { IProduct } from '@/types/product'
 import type { GetRef, TableProps } from 'antd'
 import type { FC, PropsWithChildren, ReactNode } from 'react'
+import { createOrder } from '@/apis/order'
 import { getProductList } from '@/apis/product'
 import IconTrash from '@/assets/icons/trash.svg?react'
 import { PlusOutlined } from '@ant-design/icons'
@@ -28,6 +29,7 @@ const EditableRow: FC<EditableRowProps> = ({ index, ...props }) => {
 }
 
 interface Item {
+  id: number
   key: number
   name: string
   type: string
@@ -79,14 +81,13 @@ const EditableCell: FC<PropsWithChildren<EditableCellProps>> = ({
 
 interface OrderModalFormProps {
   open: boolean
-  onSubmit: () => void
   onClose: () => void
 }
 
 type ColumnTypes = Exclude<TableProps<Item>['columns'], undefined>
 
 export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
-  const { open, onSubmit, onClose } = props
+  const { open, onClose } = props
   const [productOptions, setProductOptions] = useState<IProduct[]>([])
   const [selectedProduct, setSelectedProduct] = useState<number>()
   const [selectedCount, setSelectedCount] = useState<number>(1)
@@ -167,6 +168,7 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
         ...prev,
         {
           key: prev.length + 1,
+          id: product.id,
           name: product.name,
           type: product.type,
           count: selectedCount,
@@ -188,9 +190,12 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
     try {
       await form.validateFields()
       const values = form.getFieldsValue()
-      console.log(values)
-      console.log(dataSource)
-      onSubmit()
+      const { msg } = await createOrder({
+        ...values,
+        order_products: dataSource.map(item => ({ id: item.id, count: item.count })),
+      })
+      message.success(msg)
+      handleCancel()
     }
     catch {
       message.error('表单填写有误，请检查')
@@ -198,6 +203,11 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
     finally {
       setConfirmLoading(false)
     }
+  }
+
+  function handleCancel() {
+    form.resetFields()
+    onClose()
   }
 
   useEffect(() => {
@@ -214,9 +224,13 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
       width={900}
       confirmLoading={confirmLoading}
       onOk={handleOk}
-      onCancel={onClose}
+      onCancel={handleCancel}
     >
-      <Form form={form} layout="vertical" initialValues={{ max_select_photos: 1, extra_photo_price: 0 }}>
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{ max_select_photos: 1, extra_photo_price: 0 }}
+      >
         <Row gutter={16}>
           <Col span={8}>
             <Form.Item name="order_number" label="订单号" required>
