@@ -29,20 +29,27 @@ function AdminLayout() {
   const matches = useMatches()
 
   useEffect(() => {
-    const breadcrumbItems: ItemType = []
-    for (const match of matches) {
-      breadcrumbItems.push({ title: (match.handle as MatchType)?.title || '' })
+    // 构建面包屑
+    const breadcrumbItems = matches
+      .filter(match => (match.handle as MatchType)?.title)
+      .map(match => ({ title: (match.handle as MatchType)?.title || '' }));
+    
+    setBreadcrumb(breadcrumbItems);
+
+    // 设置选中菜单项
+    const pathname = matches[matches.length - 1]?.pathname || '';
+    const routeParts = pathname.split('/').filter(Boolean);
+    const selectKey = routeParts.length ? routeParts[routeParts.length - 1] : '';
+    
+    if (selectKey) {
+      setSelectedKeys([selectKey]);
     }
 
-    setBreadcrumb(breadcrumbItems)
-
-    // 设置选中的菜单项
-    const selectKey: string = matches[matches.length - 1].pathname.split('/').pop() ?? ''
-    setSelectedKeys([selectKey])
-
-    // 设置展开的菜单项
-    // const openKey: string = matches[matches.length - 2].pathname.split('/').pop() ?? ''
-    // setOpenKeys([openKey])
+    // 设置展开菜单项
+    if (routeParts.length > 1) {
+      const openKey = routeParts[routeParts.length - 2];
+      setOpenKeys([openKey]);
+    }
   }, [matches])
 
   const menuItems: MenuItem[] = [

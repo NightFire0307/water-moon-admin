@@ -11,7 +11,7 @@ interface ProductModalFormProps {
   onClose: () => void
 }
 
-export function ProductModalForm(props: ProductModalFormProps) {
+export function ProductModalForm(props: Readonly<ProductModalFormProps>) {
   const { mode, open, onClose, initialData } = props
   const [productTypes, setProductTypes] = useState<IProductType[]>([])
   const [confirmLoading, setConfirmLoading] = useState(false)
@@ -54,16 +54,6 @@ export function ProductModalForm(props: ProductModalFormProps) {
       fetchProductTypes()
     }
   }, [open])
-
-  useEffect(() => {
-    if (!open) {
-      form.resetFields()
-    }
-
-    if (open && mode === 'edit') {
-      form.setFieldsValue(initialData)
-    }
-  }, [open, mode, initialData])
 
   return (
     <Modal
