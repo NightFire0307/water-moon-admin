@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react'
 
 export function Order() {
   const [dataSource, setDataSource] = useState<IOrder[]>([])
-  const [modalVisible, SetModalVisible] = useState(false)
+  const [orderModalOpen, setOrderModalOpen] = useState(false)
   const [taskCenterOpen, setTaskCenterOpen] = useState(false)
   const [orderDetailOpen, setOrderDetailOpen] = useState(false)
   const [photoMgrOpen, setPhotoMgrOpen] = useState(false)
@@ -155,7 +155,7 @@ export function Order() {
           icon={<PlusOutlined />}
           type="primary"
           onClick={() => {
-            SetModalVisible(true)
+            setOrderModalOpen(true)
           }}
         >
           新建订单
@@ -184,7 +184,7 @@ export function Order() {
           />
         )
       }
-      <OrderModalForm />
+      <OrderModalForm open={orderModalOpen} onSubmit={() => {}} onClose={() => setOrderModalOpen(false)}/>
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
       <OrderDetail orderId={curOrderId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
       <PhotoMgrModal open={photoMgrOpen} orderId={curOrderId} onClose={() => setPhotoMgrOpen(false)} />

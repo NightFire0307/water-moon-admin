@@ -1,10 +1,31 @@
-import type { InputRef, TableProps } from 'antd'
+import type { IProduct } from '@/types/product'
+import type { GetRef, TableProps } from 'antd'
 import type { FC, PropsWithChildren, ReactNode } from 'react'
+import { getProductList } from '@/apis/product'
 import IconTrash from '@/assets/icons/trash.svg?react'
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Card, Col, Divider, Flex, Form, Input, InputNumber, Modal, Row, Select, Table } from 'antd'
+import { Button, Card, Col, Divider, Flex, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Table } from 'antd'
+import { useForm } from 'antd/es/form/Form'
+import { createContext, useContext, useEffect, useState } from 'react'
 
-import { useRef, useState } from 'react'
+// 获取 Form 实例类型
+type FormInstance<T> = GetRef<typeof Form<T>>
+const EditableContext = createContext<FormInstance<any> | null>(null)
+
+interface EditableRowProps {
+  index: number
+}
+
+const EditableRow: FC<EditableRowProps> = ({ index, ...props }) => {
+  const [form] = Form.useForm()
+  return (
+    <Form form={form} component={false}>
+      <EditableContext.Provider value={form}>
+        <tr {...props} />
+      </EditableContext.Provider>
+    </Form>
+  )
+}
 
 interface Item {
   key: number
@@ -30,28 +51,24 @@ const EditableCell: FC<PropsWithChildren<EditableCellProps>> = ({
   handleSave,
   ...restProps
 }) => {
-  const inputRef = useRef<InputRef>(null)
+  const form = useContext(EditableContext)!
 
-  const save = async () => {
-    try {
-      const value = inputRef.current?.input?.value
-      handleSave({ ...record, [dataIndex]: value })
-    }
-    catch (errInfo) {
-      console.log('Save failed:', errInfo)
-    }
+  const save = () => {
+    const values = form.getFieldsValue()
+    handleSave({ ...record, ...values })
   }
 
   return (
     <td {...restProps}>
       {editable
         ? (
-            <InputNumber
-              defaultValue={record[dataIndex]}
-              min={0}
-              onPressEnter={save}
-              onBlur={save}
-            />
+            <Form.Item name="count" initialValue={record.count} noStyle>
+              <InputNumber
+                min={1}
+                onPressEnter={save}
+                onBlur={save}
+              />
+            </Form.Item>
           )
         : (
             children
@@ -60,31 +77,33 @@ const EditableCell: FC<PropsWithChildren<EditableCellProps>> = ({
   )
 }
 
-export function OrderModalForm() {
-  const [dataSource, setDataSource] = useState<Item[]>([
-    {
-      key: 1,
-      name: '套餐1',
-      type: '套餐',
-      count: 1,
-    },
-    {
-      key: 2,
-      name: '单品1',
-      type: '单品',
-      count: 2,
-    },
-  ])
+interface OrderModalFormProps {
+  open: boolean
+  onSubmit: () => void
+  onClose: () => void
+}
+
+type ColumnTypes = Exclude<TableProps<Item>['columns'], undefined>
+
+export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
+  const { open, onSubmit, onClose } = props
+  const [productOptions, setProductOptions] = useState<IProduct[]>([])
+  const [selectedProduct, setSelectedProduct] = useState<number>()
+  const [selectedCount, setSelectedCount] = useState<number>(1)
+  const [dataSource, setDataSource] = useState<Item[]>([])
+  const [confirmLoading, setConfirmLoading] = useState(false)
+  const [form] = useForm()
 
   const handleSave = (row: Item) => {
     const newData = [...dataSource]
-    const index = newData.findIndex(item => row.key === item.key)
-    const item = newData[index]
-    newData.splice(index, 1, { ...item, ...row })
-    setDataSource(newData)
+    const data = newData.find(item => row.key === item.key)
+    if (data) {
+      data.count = row.count
+      setDataSource(newData)
+    }
   }
 
-  const columns: TableProps<Item>['columns'] = [
+  const defaultColumns: (ColumnTypes[number] & { editable?: boolean, dataIndex: string })[] = [
     {
       title: '产品名称',
       dataIndex: 'name',
@@ -100,8 +119,18 @@ export function OrderModalForm() {
     },
     {
       title: '操作',
-      render: () => (
-        <Button type="text" icon={<IconTrash />} danger />
+      dataIndex: 'operation',
+      render: (_, record) => (
+        <Popconfirm
+          title="确定删除吗？"
+          okText="确定"
+          cancelText="取消"
+          onConfirm={() => {
+            setDataSource(dataSource.filter(item => item.key !== record.key))
+          }}
+        >
+          <Button type="text" icon={<IconTrash />} danger />
+        </Popconfirm>
       ),
     },
   ]
@@ -109,13 +138,13 @@ export function OrderModalForm() {
   const components = {
     body: {
       cell: EditableCell,
+      row: EditableRow,
     },
   }
 
-  const mergedColumns = columns.map((col) => {
-    if (!col.editable) {
+  const columns = defaultColumns.map((col) => {
+    if (!col.editable)
       return col
-    }
 
     return {
       ...col,
@@ -129,22 +158,79 @@ export function OrderModalForm() {
     }
   })
 
+  function handleAddProduct() {
+    const product = productOptions.find(item => item.id === selectedProduct)
+    if (!product)
+      return
+    setDataSource((prev) => {
+      return [
+        ...prev,
+        {
+          key: prev.length + 1,
+          name: product.name,
+          type: product.type,
+          count: selectedCount,
+        },
+      ]
+    })
+
+    setSelectedProduct(undefined)
+    setSelectedCount(1)
+  }
+
+  async function fetchOrderProducts() {
+    const { data } = await getProductList({ current: 1, pageSize: 100 })
+    setProductOptions(data.list)
+  }
+
+  async function handleOk() {
+    setConfirmLoading(true)
+    try {
+      await form.validateFields()
+      const values = form.getFieldsValue()
+      console.log(values)
+      console.log(dataSource)
+      onSubmit()
+    }
+    catch {
+      message.error('表单填写有误，请检查')
+    }
+    finally {
+      setConfirmLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (open) {
+      fetchOrderProducts()
+    }
+  }, [open])
+
   return (
-    <Modal open={true} title="创建订单" width={900}>
-      <Form layout="vertical">
+    <Modal
+      open={open}
+      title="创建订单"
+      okText="提交"
+      width={900}
+      confirmLoading={confirmLoading}
+      onOk={handleOk}
+      onCancel={onClose}
+    >
+      <Form form={form} layout="vertical" initialValues={{ max_select_photos: 1, extra_photo_price: 0 }}>
         <Row gutter={16}>
           <Col span={8}>
-            <Form.Item label="订单号" required>
+            <Form.Item name="order_number" label="订单号" required>
               <Input placeholder="请输入订单号" />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item label="客户姓名" required>
+            <Form.Item name="customer_name" label="客户姓名" required>
               <Input placeholder="请输入客户姓名" />
             </Form.Item>
           </Col>
           <Col span={8}>
             <Form.Item
+              name="customer_phone"
               label="客户手机"
               rules={[
                 {
@@ -168,44 +254,63 @@ export function OrderModalForm() {
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item label="可选精修张数">
-              <InputNumber defaultValue={0} min={0} style={{ width: '100%' }} />
+            <Form.Item label="可选精修张数" name="max_select_photos">
+              <InputNumber min={1} style={{ width: '100%' }} />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="超选单价">
-              <InputNumber defaultValue={0} min={0} step={50} style={{ width: '100%' }} addonAfter="￥" />
+            <Form.Item label="加选单价" name="extra_photo_price">
+              <InputNumber min={0} step={50} style={{ width: '100%' }} addonBefore="￥" />
             </Form.Item>
           </Col>
         </Row>
-        <Divider>添加产品</Divider>
-        <Row gutter={16}>
-          <Col span={12}>
-            <Card title="添加套餐">
-              <Flex gap={8}>
-                <Select placeholder="选择套餐" style={{ flex: 1 }} />
-                <Button type="primary" icon={<PlusOutlined />} />
-              </Flex>
-            </Card>
-          </Col>
-          <Col span={12}>
-            <Card title="添加单品">
-              <Flex gap={8}>
-                <Select placeholder="选择套餐" style={{ flex: 1 }} />
-                <InputNumber min={1} defaultValue={1} />
-                <Button type="primary" icon={<PlusOutlined />} />
-              </Flex>
-            </Card>
-          </Col>
-        </Row>
-        <Divider>已添加产品</Divider>
-        <Table
-          columns={mergedColumns}
-          dataSource={dataSource}
-          components={components}
-          bordered={false}
-        />
       </Form>
+      <Divider>添加产品</Divider>
+      <Row gutter={16}>
+        <Col span={12}>
+          <Card title="套餐">
+            <Flex gap={8}>
+              <Select placeholder="选择套餐" style={{ flex: 1 }} disabled />
+              <Button type="primary" icon={<PlusOutlined />} disabled />
+            </Flex>
+          </Card>
+        </Col>
+        <Col span={12}>
+          <Card title="单品">
+            <Flex gap={8}>
+              <Select
+                options={productOptions}
+                fieldNames={{ label: 'name', value: 'id' }}
+                placeholder="选择单品"
+                style={{ flex: 1 }}
+                value={selectedProduct}
+                onChange={setSelectedProduct}
+              />
+              <InputNumber
+                min={1}
+                defaultValue={1}
+                value={selectedCount}
+                onChange={value => setSelectedCount(value ?? 1)}
+              />
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleAddProduct}
+              />
+            </Flex>
+          </Card>
+        </Col>
+      </Row>
+      <Divider>已添加产品</Divider>
+      <Table
+        columns={columns as ColumnTypes}
+        dataSource={dataSource}
+        components={components}
+        bordered={false}
+        pagination={false}
+        footer={() => `合计数量：${dataSource.reduce((prev, curr) => prev + curr.count, 0)}`}
+        scroll={{ y: dataSource.length > 2 ? 65 * 2 : undefined }}
+      />
     </Modal>
   )
 }
