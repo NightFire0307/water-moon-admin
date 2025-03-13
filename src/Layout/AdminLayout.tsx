@@ -32,23 +32,23 @@ function AdminLayout() {
     // 构建面包屑
     const breadcrumbItems = matches
       .filter(match => (match.handle as MatchType)?.title)
-      .map(match => ({ title: (match.handle as MatchType)?.title || '' }));
-    
-    setBreadcrumb(breadcrumbItems);
+      .map(match => ({ title: (match.handle as MatchType)?.title || '' }))
+
+    setBreadcrumb(breadcrumbItems)
 
     // 设置选中菜单项
-    const pathname = matches[matches.length - 1]?.pathname || '';
-    const routeParts = pathname.split('/').filter(Boolean);
-    const selectKey = routeParts.length ? routeParts[routeParts.length - 1] : '';
-    
+    const pathname = matches[matches.length - 1]?.pathname || ''
+    const routeParts = pathname.split('/').filter(Boolean)
+    const selectKey = routeParts.length ? routeParts[routeParts.length - 1] : ''
+
     if (selectKey) {
-      setSelectedKeys([selectKey]);
+      setSelectedKeys([selectKey])
     }
 
     // 设置展开菜单项
     if (routeParts.length > 1) {
-      const openKey = routeParts[routeParts.length - 2];
-      setOpenKeys([openKey]);
+      const openKey = routeParts[routeParts.length - 2]
+      setOpenKeys(prev => [...prev, openKey])
     }
   }, [matches])
 
