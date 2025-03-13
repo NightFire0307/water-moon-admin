@@ -1,6 +1,5 @@
 import type { Pagination, Response } from '@/types/common.ts'
 import type { ILink } from '@/types/link.ts'
-import type { IProductType } from '@/types/product.ts'
 
 export enum OrderStatus {
   // 未开始、进行中、已提交、已过期
@@ -26,11 +25,15 @@ export interface CreateOrderData {
   extra_photo_price: number
 }
 
-interface Order_Products {
-  quantity: number
-  custom_photo_limit: number
-  allow_extra_photos: boolean
-  product: IProductType
+interface OrderProducts {
+  id: number
+  name: string
+  type: string
+  photo_limit: number
+  is_published: boolean
+  count: number
+  createdAt: string
+  updatedAt: string
 }
 
 export interface IOrder {
@@ -55,7 +58,7 @@ export interface IOrderDetail {
   customer_phone: string
   select_photos: number
   max_select_photos: number
-  order_products: Order_Products[]
+  order_products: OrderProducts[]
   links: ILink[]
   total_photos: number
   extra_photo_price: number

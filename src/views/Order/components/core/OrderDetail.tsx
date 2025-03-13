@@ -44,13 +44,13 @@ export function OrderDetail(props: OrderDetailProps) {
         label: '产品信息',
         children: data.order_products.map((product) => {
           return (
-            <div key={product.product.id}>
+            <div key={product.id}>
               <p>
-                {product.product.name}
+                {product.name}
                 {' '}
                 x
                 {' '}
-                {product.quantity}
+                {product.count}
               </p>
             </div>
           )
