@@ -25,6 +25,14 @@ export function createOrder(data: CreateOrderData): Promise<Response<IOrder>> {
   })
 }
 
+export function updateOrder(id: number, data: { id: number & CreateOrderData }): Promise<Response<number>> {
+  return request({
+    url: `/api/admin/orders/${id}`,
+    method: 'PUT',
+    data,
+  })
+}
+
 export function removeOrder(id: number): Promise<Response<string>> {
   return request({
     url: `/api/admin/orders/${id}`,

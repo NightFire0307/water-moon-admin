@@ -1,6 +1,7 @@
 import type { IOrder } from '@/types/order.ts'
 import type { TableColumnProps } from 'antd'
-import { createOrder, getOrderList, removeOrder } from '@/apis/order.ts'
+import type { AnyObject } from 'antd/es/_util/type'
+import { getOrderDetailById, getOrderList, removeOrder } from '@/apis/order.ts'
 import usePagination from '@/hooks/usePagination.ts'
 import useTableSelection from '@/hooks/useTableSelection.ts'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
@@ -19,7 +20,11 @@ import { useEffect, useState } from 'react'
 
 export function Order() {
   const [dataSource, setDataSource] = useState<IOrder[]>([])
-  const [orderModalOpen, setOrderModalOpen] = useState(false)
+  const [orderModal, setOrderModal] = useState<{ open: boolean, mode: 'create' | 'edit', initialValues?: AnyObject }>({
+    open: false,
+    mode: 'create',
+    initialValues: {},
+  })
   const [taskCenterOpen, setTaskCenterOpen] = useState(false)
   const [orderDetailOpen, setOrderDetailOpen] = useState(false)
   const [photoMgrOpen, setPhotoMgrOpen] = useState(false)
@@ -94,7 +99,11 @@ export function Order() {
       render: (_, record) => (
         <ActionButtons
           record={record}
-          onEdit={() => {}}
+          onEdit={async (record) => {
+            setCurOrderId(record.id)
+            const { data } = await getOrderDetailById(record.id)
+            setOrderModal({ open: true, mode: 'edit', initialValues: data })
+          }}
           onViewDetail={(record) => {
             setCurOrderId(record.id)
             setOrderDetailOpen(true)
@@ -155,7 +164,7 @@ export function Order() {
           icon={<PlusOutlined />}
           type="primary"
           onClick={() => {
-            setOrderModalOpen(true)
+            setOrderModal({ open: true, mode: 'create' })
           }}
         >
           新建订单
@@ -185,9 +194,11 @@ export function Order() {
         )
       }
       <OrderModalForm
-        open={orderModalOpen}
+        open={orderModal.open}
+        mode={orderModal.mode}
+        initialValues={orderModal.initialValues}
         onClose={() => {
-          setOrderModalOpen(false)
+          setOrderModal({ open: false, mode: 'create' })
           fetchOrderList()
         }}
       />
