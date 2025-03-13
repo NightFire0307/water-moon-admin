@@ -101,7 +101,7 @@ function AdminLayout() {
       <Sider style={{ position: 'relative' }} width={250} collapsedWidth={65} trigger={null} collapsible collapsed={collapsed} theme="light">
         <Flex vertical>
           <div className={styles.logoWrapper}>
-            <div className={styles.logo}>LOGO</div>
+            <div className={styles.logo}>L</div>
           </div>
 
           <div className={styles.menuWrapper}>
@@ -122,7 +122,13 @@ function AdminLayout() {
       </Sider>
       <Layout>
         <Header className={styles['header-wrapper']}>
-          <Button type="text" icon={!collapsed ? <PanelLeftClose /> : <PanelLeftOpen />} onClick={toggle} />
+          <Button
+            type="text"
+            icon={!collapsed
+              ? <PanelLeftClose width={20} height={20} style={{ color: '#434343' }} />
+              : <PanelLeftOpen width={20} height={20} style={{ color: '#434343' }} />}
+            onClick={toggle}
+          />
           <Breadcrumb items={breadcrumb} style={{ margin: '16px 0', fontWeight: 600 }} />
         </Header>
         <Content style={{ position: 'relative', overflowX: 'hidden' }}>
