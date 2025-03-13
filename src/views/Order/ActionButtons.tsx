@@ -82,6 +82,7 @@ export function ActionButtons(props: ActionButtonsProps) {
 
   return (
     <Dropdown
+      trigger={['click']}
       menu={{
         items: [
           {
