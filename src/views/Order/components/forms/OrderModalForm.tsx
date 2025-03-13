@@ -246,8 +246,11 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
   }
 
   function handleCancel() {
-    form.resetFields()
     onClose()
+    form.resetFields()
+    setDataSource([])
+    setSelectedProduct(undefined)
+    setSelectedCount(1)
   }
 
   useEffect(() => {
