@@ -1,32 +1,44 @@
 import { Flex } from 'antd'
 import cs from 'classnames'
-import { Children, cloneElement, type FC, isValidElement, type PropsWithChildren, type ReactElement, useState } from 'react'
+import { type FC, type PropsWithChildren, type ReactElement, type ReactNode, useState } from 'react'
+import { CustomBtn } from './CustomBtn'
 import btnStyles from './CustomBtn.module.less'
 
-interface CustomBtnProps {
-  onClick?: (value: any) => void
+export interface CustomBtnItemType {
+  key: string
+  label: string
+  icon?: ReactElement
+  children: ReactNode
 }
 
-export const CustomBtnGroup: FC<PropsWithChildren<CustomBtnProps>> = ({ onClick, children }) => {
-  const [curIndex, setCurIndex] = useState<number>(-1)
+interface CustomBtnProps {
+  items: CustomBtnItemType[]
+  activeKey?: string
+  onChange?: (value: any) => void
+}
 
-  const handleClick = (value: any, index: number) => {
-    onClick && onClick(value)
-    setCurIndex(index)
+export const CustomBtnGroup: FC<PropsWithChildren<CustomBtnProps>> = ({ items, onChange, activeKey }) => {
+  const [selected, setSelected] = useState<string>(activeKey ?? items[0].key)
+
+  const handleClick = (value: any) => {
+    onChange && onChange(value)
+    activeKey ? setSelected(activeKey) : setSelected(value)
   }
 
   return (
     <Flex vertical gap={8}>
       {
-        Children.map(children, (child, index) => {
-          if (isValidElement(child)) {
-            return cloneElement(child as ReactElement, {
-              className: curIndex === index ? cs(child.props.className, btnStyles['custom-btn-active']) : child.props.className,
-              onClick: () => handleClick(child.props.value, index),
-            })
-          }
-          return child
-        })
+        items.map(item => (
+
+          <CustomBtn
+            value={item.key}
+            key={item.key}
+            onClick={() => handleClick(item.key)}
+            className={selected === item.key ? cs(btnStyles['custom-btn-active']) : ''}
+          >
+            {item.label}
+          </CustomBtn>
+        ))
       }
     </Flex>
   )
