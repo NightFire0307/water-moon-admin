@@ -1,6 +1,6 @@
 import type { GetProp, TableColumnProps, UploadProps } from 'antd'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
-import { LockedOrder } from '@/views/Order/components/forms/OrderModalStepForm.tsx'
+import { LockedOrder } from '@/views/Order/components/forms/OrderModalStepForm.leagcy'
 import { Button, Flex, notification, Space, Table, Typography, Upload } from 'antd'
 import { useContext, useState } from 'react'
 

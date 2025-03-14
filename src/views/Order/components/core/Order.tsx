@@ -11,12 +11,12 @@ import { ActionButtons } from '@/views/Order/ActionButtons.tsx'
 import { OrderDetail } from '@/views/Order/components/core/OrderDetail.tsx'
 import { OrderModalForm } from '@/views/Order/components/forms/OrderModalForm.tsx'
 import { OrderQueryForm } from '@/views/Order/components/forms/OrderQueryForm.tsx'
-import { ShareLinkMgrModal } from '@/views/Order/components/sharing/ShareLinkMgrModal.tsx'
 import { PhotoMgrModal } from '@/views/Order/PhotoMgrModal.tsx'
 import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 import { PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Divider, Flex, FloatButton, Table, Tag, Tooltip } from 'antd'
 import { useEffect, useState } from 'react'
+import { ShareLinkModal } from '../sharing/ShareLinkModal'
 
 export function Order() {
   const [dataSource, setDataSource] = useState<IOrder[]>([])
@@ -205,7 +205,7 @@ export function Order() {
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
       <OrderDetail orderId={curOrderId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
       <PhotoMgrModal open={photoMgrOpen} orderId={curOrderId} onClose={() => setPhotoMgrOpen(false)} />
-      <ShareLinkMgrModal open={shareLinkMgrOpen} orderId={curOrderId} onClose={() => setShareLinkMgrOpen(false)} />
+      <ShareLinkModal open={shareLinkMgrOpen} onClose={() => setShareLinkMgrOpen(false)}/>
     </>
   )
 }
