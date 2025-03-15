@@ -205,7 +205,7 @@ export function Order() {
       <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
       <OrderDetail orderId={curOrderId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
       <PhotoMgrModal open={photoMgrOpen} orderId={curOrderId} onClose={() => setPhotoMgrOpen(false)} />
-      <ShareLinkModal open={shareLinkMgrOpen} onClose={() => setShareLinkMgrOpen(false)}/>
+      <ShareLinkModal open={shareLinkMgrOpen} orderId={curOrderId} onClose={() => setShareLinkMgrOpen(false)}/>
     </>
   )
 }
