@@ -29,10 +29,10 @@ export const CustomBtnGroup: FC<PropsWithChildren<CustomBtnProps>> = ({ items, o
     <Flex vertical gap={8}>
       {
         items.map(item => (
-
           <CustomBtn
             value={item.key}
             key={item.key}
+            icon={item.icon}
             onClick={() => handleClick(item.key)}
             className={selected === item.key ? cs(btnStyles['custom-btn-active']) : ''}
           >
