@@ -1,4 +1,4 @@
-import type { LinkResponseData } from '@/types/link.ts'
+import type { LinkResponseData, LinksResponseData } from '@/types/link.ts'
 import request from '@/utils/request.ts'
 
 interface ShareLinkData {
@@ -12,5 +12,12 @@ export function generateShareLink(data: ShareLinkData): LinkResponseData {
     url: '/api/admin/order/link',
     method: 'post',
     data,
+  })
+}
+
+export function getShareLinksByOrderId(orderId: number): LinksResponseData {
+  return request({
+    url: `/api/admin/order/link/${orderId}`,
+    method: 'get',
   })
 }

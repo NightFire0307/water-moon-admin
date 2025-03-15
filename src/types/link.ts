@@ -5,9 +5,10 @@ export interface ILink {
   share_url: string
   share_password: string
   status: string
-  expired_at: string
+  expired_at: string | null
   created_at: string
   created_by: number
 }
 
 export type LinkResponseData = Promise<Response<ILink>>
+export type LinksResponseData = Promise<Response<ILink[]>>
