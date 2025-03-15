@@ -1,8 +1,9 @@
 import type { ILink } from '@/types/link'
 import { getShareLinksByOrderId } from '@/apis/link'
 import { CustomBtnGroup } from '@/components/CustomBtn'
+import usePagination from '@/hooks/usePagination'
 import { LinkOutlined, PlusOutlined } from '@ant-design/icons'
-import { Col, Flex, Modal, Row, Space, Typography } from 'antd'
+import { Col, Flex, Modal, Pagination, Row, Space, Typography } from 'antd'
 import { type FC, useEffect, useState } from 'react'
 import { ShareLinkCard } from './ShareLinkCard'
 import styles from './ShareLinkModal.module.less'
@@ -19,17 +20,19 @@ interface ShareLinkModalProps {
 
 export const ShareLinkModal: FC<ShareLinkModalProps> = ({ open, onClose }) => {
   const [links, setLinks] = useState<ILink[]>([])
+  const { setTotal, pagination, current, pageSize } = usePagination({ defaultPageSize: 5 })
 
   const fetchLinksByOrderId = async () => {
-    const { data } = await getShareLinksByOrderId(35)
-    setLinks(data)
+    const { data } = await getShareLinksByOrderId(35, { current, pageSize })
+    setLinks(data.list)
+    setTotal(data.total)
   }
 
   useEffect(() => {
     if (open) {
       fetchLinksByOrderId()
     }
-  }, [open])
+  }, [open, current, pageSize])
 
   return (
     <Modal
@@ -65,6 +68,8 @@ export const ShareLinkModal: FC<ShareLinkModalProps> = ({ open, onClose }) => {
             {links.map(link => (
               <ShareLinkCard key={link.id} data={link} />
             ))}
+
+            <Pagination align="end" {...pagination} />
           </Flex>
         </Col>
       </Row>

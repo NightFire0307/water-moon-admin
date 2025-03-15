@@ -15,7 +15,7 @@ interface UsePaginationResult {
 }
 
 /**
- * 表格分页逻辑的自定义Hook
+ * 分页逻辑的自定义Hook
  * @param options 分页配置选项
  * @returns 分页相关状态和方法
  */

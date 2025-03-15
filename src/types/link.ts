@@ -1,4 +1,4 @@
-import type { Response } from '@/types/common.ts'
+import type { Pagination, Response } from '@/types/common.ts'
 
 export interface ILink {
   id: number
@@ -11,4 +11,4 @@ export interface ILink {
 }
 
 export type LinkResponseData = Promise<Response<ILink>>
-export type LinksResponseData = Promise<Response<ILink[]>>
+export type LinksResponseData = Promise<Response<{ list: ILink[] } & Pagination>>

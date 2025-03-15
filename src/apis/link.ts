@@ -1,4 +1,5 @@
 import type { LinkResponseData, LinksResponseData } from '@/types/link.ts'
+import type { PaginationParams } from '@/types/common.ts'
 import request from '@/utils/request.ts'
 
 interface ShareLinkData {
@@ -15,9 +16,10 @@ export function generateShareLink(data: ShareLinkData): LinkResponseData {
   })
 }
 
-export function getShareLinksByOrderId(orderId: number): LinksResponseData {
+export function getShareLinksByOrderId(orderId: number, params: PaginationParams): LinksResponseData {
   return request({
     url: `/api/admin/order/link/${orderId}`,
     method: 'get',
+    params
   })
 }

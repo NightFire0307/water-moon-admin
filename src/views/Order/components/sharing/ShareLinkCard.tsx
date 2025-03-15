@@ -9,11 +9,10 @@ import styles from './ShareLinkCard.module.less'
 
 interface ShareLinkCardProps {
   data: ILink
-  onCopy?: () => void
   onDelete?: () => void
 }
 
-export const ShareLinkCard: FC<ShareLinkCardProps> = ({ data, onCopy, onDelete }) => {
+export const ShareLinkCard: FC<ShareLinkCardProps> = ({ data, onDelete }) => {
   const commonUrl = 'http://127.0.0.1:5173/share/init?surl='
   const { daysUntilExpiry, daysFromCreation } = useMemo(() => {
     const now = dayjs()
