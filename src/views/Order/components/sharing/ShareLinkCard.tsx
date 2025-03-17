@@ -2,14 +2,14 @@ import type { ILink } from '@/types/link'
 import IconCopy from '@/assets/icons/copy.svg?react'
 import IconSquareArrowOutUpRight from '@/assets/icons/square-arrow-out-up-right.svg?react'
 import IconTrash from '@/assets/icons/trash.svg?react'
-import { Button, Card, Flex, message, Space, Tag, Tooltip } from 'antd'
+import { Button, Card, Flex, message, Popconfirm, Space, Tag, Tooltip } from 'antd'
 import dayjs from 'dayjs'
 import { type FC, useMemo } from 'react'
 import styles from './ShareLinkCard.module.less'
 
 interface ShareLinkCardProps {
   data: ILink
-  onDelete?: () => void
+  onDelete: (linkId: number) => void
 }
 
 export const ShareLinkCard: FC<ShareLinkCardProps> = ({ data, onDelete }) => {
@@ -68,13 +68,14 @@ export const ShareLinkCard: FC<ShareLinkCardProps> = ({ data, onDelete }) => {
             />
           </Tooltip>
           <Tooltip title="删除链接">
-            <Button
-              type="text"
-              icon={<IconTrash width={16} height={16} />}
-              shape="circle"
-              danger
-              onClick={onDelete}
-            />
+            <Popconfirm title="确定要删除此链接吗?" onConfirm={() => onDelete(data.id)}>
+              <Button
+                type="text"
+                icon={<IconTrash width={16} height={16} />}
+                shape="circle"
+                danger
+              />
+            </Popconfirm>
           </Tooltip>
         </Flex>
       </Flex>

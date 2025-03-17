@@ -1,5 +1,5 @@
 import type { ILink } from '@/types/link'
-import { getShareLinksByOrderId } from '@/apis/link'
+import { delShareLinkByOrderId, getShareLinksByOrderId } from '@/apis/link'
 import { CustomBtnGroup } from '@/components/CustomBtn'
 import usePagination from '@/hooks/usePagination'
 import { LinkOutlined, PlusOutlined } from '@ant-design/icons'
@@ -34,6 +34,12 @@ export const ShareLinkModal: FC<ShareLinkModalProps> = ({ open, onClose }) => {
     const { data } = await getShareLinksByOrderId(orderId, { current, pageSize })
     setLinks(data.list)
     setTotal(data.total)
+  }
+
+  async function handleDeleteLink(linkId: number) {
+    const { msg } = await delShareLinkByOrderId(linkId)
+    message.success(msg)
+    fetchLinksByOrderId()
   }
 
   useEffect(() => {
@@ -85,7 +91,7 @@ export const ShareLinkModal: FC<ShareLinkModalProps> = ({ open, onClose }) => {
                           <>
                             {
                               links.map(link => (
-                                <ShareLinkCard key={link.id} data={link} />
+                                <ShareLinkCard key={link.id} data={link} onDelete={handleDeleteLink} />
                               ))
                             }
                             <Pagination align="end" {...pagination} />
