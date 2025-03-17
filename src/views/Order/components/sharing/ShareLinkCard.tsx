@@ -59,24 +59,21 @@ export const ShareLinkCard: FC<ShareLinkCardProps> = ({ data, onDelete }) => {
           </Tooltip>
         </Flex>
         <Flex align="center" gap={8}>
-          <Tooltip title="打开链接">
+          <Button
+            type="text"
+            icon={<IconSquareArrowOutUpRight width={16} height={16} />}
+            shape="circle"
+            onClick={() => window.open(commonUrl + data.share_url)}
+          />
+
+          <Popconfirm title="确定要删除此链接吗?" onConfirm={() => onDelete(data.id)}>
             <Button
               type="text"
-              icon={<IconSquareArrowOutUpRight width={16} height={16} />}
+              icon={<IconTrash width={16} height={16} />}
               shape="circle"
-              onClick={() => window.open(commonUrl + data.share_url)}
+              danger
             />
-          </Tooltip>
-          <Tooltip title="删除链接">
-            <Popconfirm title="确定要删除此链接吗?" onConfirm={() => onDelete(data.id)}>
-              <Button
-                type="text"
-                icon={<IconTrash width={16} height={16} />}
-                shape="circle"
-                danger
-              />
-            </Popconfirm>
-          </Tooltip>
+          </Popconfirm>
         </Flex>
       </Flex>
 
