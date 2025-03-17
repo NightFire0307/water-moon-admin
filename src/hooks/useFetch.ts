@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface UseFetchResult<T> {
   data: T | null
@@ -24,21 +24,28 @@ export function useFetch<TData, TParams>(
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<TData | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const latestRequestId = useRef(0)
 
   const refetch = async () => {
+    const requestId = latestRequestId.current + 1
+    latestRequestId.current = requestId
     setLoading(true)
     setError(null)
     try {
       const { data } = await fetchFn(...(params || []))
-      setData(data)
-      onSuccess && onSuccess(data, params || [])
+      if (requestId === latestRequestId.current) {
+        setData(data)
+        onSuccess && onSuccess(data, params || [])
+      }
     }
     catch (err) {
       setError('获取数据失败')
       console.error(err)
     }
     finally {
-      setLoading(false)
+      if (requestId === latestRequestId.current) {
+        setLoading(false)
+      }
     }
   }
 
@@ -46,7 +53,7 @@ export function useFetch<TData, TParams>(
     if (!manual) {
       refetch()
     }
-  }, [manual])
+  }, [manual, params])
 
   return {
     data,
