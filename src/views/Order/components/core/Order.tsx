@@ -15,8 +15,10 @@ import { PhotoMgrModal } from '@/views/Order/PhotoMgrModal.tsx'
 import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 import { PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Divider, Flex, FloatButton, Table, Tag, Tooltip } from 'antd'
-import { useEffect, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
 import { ShareLinkModal } from '../sharing/ShareLinkModal'
+
+export const OrderIdContext = createContext<number | null>(null)
 
 export function Order() {
   const [dataSource, setDataSource] = useState<IOrder[]>([])
@@ -202,10 +204,13 @@ export function Order() {
           fetchOrderList()
         }}
       />
-      <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
-      <OrderDetail orderId={curOrderId} open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
-      <PhotoMgrModal open={photoMgrOpen} orderId={curOrderId} onClose={() => setPhotoMgrOpen(false)} />
-      <ShareLinkModal open={shareLinkMgrOpen} orderId={curOrderId} onClose={() => setShareLinkMgrOpen(false)}/>
+
+      <OrderIdContext.Provider value={curOrderId}>
+        <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
+        <OrderDetail open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
+        <PhotoMgrModal open={photoMgrOpen} onClose={() => setPhotoMgrOpen(false)} />
+        <ShareLinkModal open={shareLinkMgrOpen} onClose={() => setShareLinkMgrOpen(false)} />
+      </OrderIdContext.Provider>
     </>
   )
 }

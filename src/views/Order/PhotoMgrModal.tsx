@@ -1,19 +1,24 @@
 import { getOrderDetailById } from '@/apis/order.ts'
 import { ImageGallery } from '@/components/ImageGallery/ImageGallery.tsx'
 import { Drawer } from 'antd'
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
+import { OrderIdContext } from './components/core/Order'
 
 interface PhotoMgrProps {
   open: boolean
-  orderId: number
   onClose: () => void
 }
 
 export function PhotoMgrModal(props: PhotoMgrProps) {
-  const { open, orderId, onClose } = props
+  const { open, onClose } = props
   const [orderNumber, setOrderNumber] = useState('')
+  const orderId = useContext(OrderIdContext)
 
   useEffect(() => {
+    if (!orderId) {
+      return
+    }
+
     if (!open)
       return
     getOrderDetailById(orderId).then((res) => {
