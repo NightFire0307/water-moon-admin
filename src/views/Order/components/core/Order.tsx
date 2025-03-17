@@ -1,7 +1,7 @@
-import type { IOrder } from '@/types/order.ts'
 import type { TableColumnProps } from 'antd'
 import type { AnyObject } from 'antd/es/_util/type'
 import { getOrderDetailById, getOrderList, removeOrder } from '@/apis/order.ts'
+import { useFetch } from '@/hooks/useFetch'
 import usePagination from '@/hooks/usePagination.ts'
 import useTableSelection from '@/hooks/useTableSelection.ts'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
@@ -21,7 +21,6 @@ import { ShareLinkModal } from '../sharing/ShareLinkModal'
 export const OrderIdContext = createContext<number | null>(null)
 
 export function Order() {
-  const [dataSource, setDataSource] = useState<IOrder[]>([])
   const [orderModal, setOrderModal] = useState<{ open: boolean, mode: 'create' | 'edit', initialValues?: AnyObject }>({
     open: false,
     mode: 'create',
@@ -31,10 +30,22 @@ export function Order() {
   const [orderDetailOpen, setOrderDetailOpen] = useState(false)
   const [photoMgrOpen, setPhotoMgrOpen] = useState(false)
   const [shareLinkMgrOpen, setShareLinkMgrOpen] = useState(false)
-  const [curOrderId, setCurOrderId] = useState<number>(-1)
+  const [curOrderId, setCurOrderId] = useState<number | null>(null)
   const [incompleteFileCount, setIncompleteFileCount] = useState(0)
   const { rowSelection } = useTableSelection({ type: 'checkbox' })
   const { pagination, current, pageSize, setTotal, reset } = usePagination()
+  const { data, loading, refetch } = useFetch(
+    getOrderList, 
+    { 
+      manual: true, 
+      params: [
+        { current, pageSize}
+      ],
+      onSuccess: (data) => {
+        setTotal(data.total)
+      }
+    }
+  )
 
   const columns: TableColumnProps[] = [
     {
@@ -129,14 +140,8 @@ export function Order() {
     },
   ]
 
-  async function fetchOrderList(current = pagination.current, pageSize = pagination.pageSize) {
-    const { data } = await getOrderList({ current, pageSize })
-    setDataSource(data.list)
-    setTotal(data.total)
-  }
-
   useEffect(() => {
-    fetchOrderList()
+    refetch()
   }, [current, pageSize])
 
   useEffect(() => {
@@ -154,10 +159,9 @@ export function Order() {
   return (
     <>
       <OrderQueryForm
-        onQuery={params => fetchOrderList(params)}
+        onQuery={params => refetch(params)}
         onReset={() => {
           reset()
-          fetchOrderList()
         }}
       />
       <Divider />
@@ -172,12 +176,13 @@ export function Order() {
           新建订单
         </Button>
         <Tooltip title="刷新">
-          <Button icon={<RedoOutlined rotate={-90} />} type="text" onClick={() => fetchOrderList()} />
+          <Button icon={<RedoOutlined rotate={-90} />} type="text" onClick={refetch} />
         </Tooltip>
       </Flex>
       <Table
         rowKey="id"
-        dataSource={dataSource}
+        loading={loading}
+        dataSource={data?.list}
         columns={columns}
         style={{ marginTop: '14px' }}
         rowSelection={rowSelection}
@@ -201,7 +206,7 @@ export function Order() {
         initialValues={orderModal.initialValues}
         onClose={() => {
           setOrderModal({ open: false, mode: 'create' })
-          fetchOrderList()
+          refetch()
         }}
       />
 
