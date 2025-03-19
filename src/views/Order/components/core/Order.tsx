@@ -1,3 +1,4 @@
+
 import type { TableColumnProps } from 'antd'
 import type { AnyObject } from 'antd/es/_util/type'
 import { getOrderDetailById, getOrderList, removeOrder } from '@/apis/order.ts'
@@ -165,7 +166,7 @@ export function Order() {
         }}
       />
       <Divider />
-      <Flex justify="flex-end" gap={4}>
+      <Flex justify="space-between" gap={4}>
         <Button
           icon={<PlusOutlined />}
           type="primary"
