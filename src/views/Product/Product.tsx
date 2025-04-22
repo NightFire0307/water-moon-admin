@@ -124,6 +124,9 @@ export function Product() {
     {
       title: '照片数量限制',
       dataIndex: 'photoLimit',
+      render: (value: number) => {
+        return <span>{ value === 0 ? '无限制' : value}</span>
+      },
     },
     {
       title: '是否上架',
@@ -200,7 +203,10 @@ export function Product() {
         mode={mode}
         open={modalOpen}
         initialData={initialData}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false)
+          fetchProductList(current, pageSize)
+        }}
       />
     </>
   )
