@@ -1,4 +1,4 @@
-import type { Response } from './common.ts'
+import type { ApiResponse } from './common.ts'
 
 export interface Permission {
   id: number
@@ -49,7 +49,7 @@ export interface PresignedPolicyResponse {
   }
 }
 
-export type LoginResponseData = Promise<Response<LoginResponse>>
-export type OssTokenResponseData = Promise<Response<OssTokenResponse>>
-export type PresignedUrlResponseData = Promise<Response<PresignedUrlResponse>>
-export type PresignedPolicyResponseData = Promise<Response<PresignedPolicyResponse>>
+export type LoginResponseData = Promise<ApiResponse<LoginResponse>>
+export type OssTokenResponseData = Promise<ApiResponse<OssTokenResponse>>
+export type PresignedUrlResponseData = Promise<ApiResponse<PresignedUrlResponse>>
+export type PresignedPolicyResponseData = Promise<ApiResponse<PresignedPolicyResponse>>

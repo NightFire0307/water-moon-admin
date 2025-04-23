@@ -1,4 +1,4 @@
-import type { PaginationParams, Response } from '@/types/common.ts'
+import type { PaginationParams, ApiResponse } from '@/types/common.ts'
 import type { PhotosResponse } from '@/types/photo.ts'
 import request from '@/utils/request'
 
@@ -14,7 +14,7 @@ export function getPhotosByOrderId(params: GetPhotosByOrderIdParams) {
   })
 }
 
-export function updatePhotosRecommend(orderId: number, data: { photoIds: number[], isRecommended: boolean }): Promise<Response<number[]>> {
+export function updatePhotosRecommend(orderId: number, data: { photoIds: number[], isRecommended: boolean }): Promise<ApiResponse<number[]>> {
   return request({
     url: `/api/admin/photos/recommend/${orderId}`,
     method: 'put',

@@ -1,4 +1,4 @@
-import type { Pagination, Response } from '@/types/common.ts'
+import type { Pagination, ApiResponse } from '@/types/common.ts'
 
 export interface IUser {
   user_id: number
@@ -12,4 +12,4 @@ export interface IUser {
   updateTime: string
 }
 
-export type UserResponseData = Promise<Response<{ list: IUser[] } & Pagination>>
+export type UserResponseData = Promise<ApiResponse<{ list: IUser[] } & Pagination>>

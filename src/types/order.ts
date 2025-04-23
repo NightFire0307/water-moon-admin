@@ -1,4 +1,4 @@
-import type { Pagination, Response } from '@/types/common.ts'
+import type { Pagination, ApiResponse } from '@/types/common.ts'
 import type { ILink } from '@/types/link.ts'
 
 export enum OrderStatus {
@@ -67,5 +67,5 @@ export interface IOrderDetail {
   updated_at: string
 }
 
-export type OrderResponse = Promise<Response<{ list: IOrder[] } & Pagination>>
-export type OrderDetailResponse = Promise<Response<IOrderDetail>>
+export type OrderResponse = Promise<ApiResponse<{ list: IOrder[] } & Pagination>>
+export type OrderDetailResponse = Promise<ApiResponse<IOrderDetail>>

@@ -1,4 +1,4 @@
-import type { PaginationParams, Response } from '../types/common.ts'
+import type { PaginationParams, ApiResponse } from '../types/common.ts'
 import type { IProduct, ProductResponse, ProductTypeResponse } from '../types/product.ts'
 import request from '../utils/request.ts'
 
@@ -20,7 +20,7 @@ export interface ProductCreateParams {
   productType: number
 }
 
-export function createProduct(data: ProductCreateParams): Promise<Response<IProduct>> {
+export function createProduct(data: ProductCreateParams): Promise<ApiResponse<IProduct>> {
   return request({
     url: '/api/admin/product',
     method: 'POST',
@@ -35,7 +35,7 @@ export function getProductById(id: number) {
   })
 }
 
-export function updateProduct(id: number, data: ProductCreateParams): Promise<Response<IProduct>> {
+export function updateProduct(id: number, data: ProductCreateParams): Promise<ApiResponse<IProduct>> {
   return request({
     url: `/api/admin/product/${id}`,
     method: 'PUT',
@@ -43,7 +43,7 @@ export function updateProduct(id: number, data: ProductCreateParams): Promise<Re
   })
 }
 
-export function deleteProduct(id: number): Promise<Response<string>> {
+export function deleteProduct(id: number): Promise<ApiResponse<string>> {
   return request({
     url: `/api/admin/product/${id}`,
     method: 'DELETE',
@@ -73,7 +73,7 @@ export function getProductTypeById(id: number) {
   })
 }
 
-export function createProductType(data: { name: string }): Promise<Response<string>> {
+export function createProductType(data: { name: string }): Promise<ApiResponse<string>> {
   return request({
     url: '/api/admin/product/type',
     method: 'POST',
@@ -81,7 +81,7 @@ export function createProductType(data: { name: string }): Promise<Response<stri
   })
 }
 
-export function updateProductType(id: number, data: { name: string }): Promise<Response<string>> {
+export function updateProductType(id: number, data: { name: string }): Promise<ApiResponse<string>> {
   return request({
     url: `/api/admin/product/type/${id}`,
     method: 'PUT',
@@ -89,14 +89,14 @@ export function updateProductType(id: number, data: { name: string }): Promise<R
   })
 }
 
-export function deleteProductType(id: number): Promise<Response<string>> {
+export function deleteProductType(id: number): Promise<ApiResponse<string>> {
   return request({
     url: `/api/admin/product/type/${id}`,
     method: 'DELETE',
   })
 }
 
-export function batchDeleteProductType(data: { ids: number[] }): Promise<Response<string>> {
+export function batchDeleteProductType(data: { ids: number[] }): Promise<ApiResponse<string>> {
   return request({
     url: '/api/admin/product/type',
     method: 'DELETE',

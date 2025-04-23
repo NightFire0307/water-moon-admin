@@ -1,4 +1,4 @@
-import type { PaginationParams, Response } from '@/types/common.ts'
+import type { PaginationParams, ApiResponse } from '@/types/common.ts'
 import type { LinkResponseData, LinksResponseData } from '@/types/link.ts'
 import request from '@/utils/request.ts'
 
@@ -24,7 +24,7 @@ export function getShareLinksByOrderId(orderId: number, params: PaginationParams
   })
 }
 
-export function delShareLinkByOrderId(orderId: number): Promise<Response<number>> {
+export function delShareLinkByOrderId(orderId: number): Promise<ApiResponse<number>> {
   return request({
     url: `/api/admin/order/link/${orderId}`,
     method: 'delete',

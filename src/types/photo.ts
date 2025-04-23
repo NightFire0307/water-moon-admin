@@ -1,4 +1,4 @@
-import type { Response } from '@/types/common.ts'
+import type { ApiResponse } from '@/types/common.ts'
 
 export interface IPhoto {
   id: number
@@ -9,4 +9,4 @@ export interface IPhoto {
   is_recommend: boolean
 }
 
-export type PhotosResponse = Promise<Response<IPhoto[]>>
+export type PhotosResponse = Promise<ApiResponse<IPhoto[]>>

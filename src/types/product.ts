@@ -1,4 +1,4 @@
-import type { Pagination, Response } from './common'
+import type { Pagination, ApiResponse } from './common'
 
 export interface IProduct {
   id: number
@@ -15,5 +15,5 @@ export interface IProductType {
   updatedAt: string
 }
 
-export type ProductResponse = Promise<Response<{ list: IProduct[] } & Pagination>>
-export type ProductTypeResponse = Promise<Response<{ list: IProductType[] } & Pagination>>
+export type ProductResponse = Promise<ApiResponse<{ list: IProduct[] } & Pagination>>
+export type ProductTypeResponse = Promise<ApiResponse<{ list: IProductType[] } & Pagination>>
