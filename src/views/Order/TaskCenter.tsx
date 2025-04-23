@@ -40,15 +40,15 @@ export function TaskCenter(props: TaskCenterProps) {
   const columns: TableColumnProps[] = [
     {
       title: '文件名',
-      dataIndex: 'file_name',
+      dataIndex: 'fileName',
     },
     {
       title: '所属订单号',
-      dataIndex: 'order_number',
+      dataIndex: 'orderNumber',
     },
     {
       title: '文件大小',
-      dataIndex: 'file_size',
+      dataIndex: 'fileSize',
       render: value => (
         <span>
           {value}
