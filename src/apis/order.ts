@@ -1,4 +1,4 @@
-import type { Response } from '@/types/common.ts'
+import type { ApiResponse } from '@/types/common.ts'
 import type { CreateOrderData, IOrder, OrderDetailResponse, OrderResponse } from '@/types/order.ts'
 import request from '@/utils/request.ts'
 
@@ -17,7 +17,7 @@ export function getOrderDetailById(id: number): OrderDetailResponse {
   })
 }
 
-export function createOrder(data: CreateOrderData): Promise<Response<IOrder>> {
+export function createOrder(data: CreateOrderData): Promise<ApiResponse<IOrder>> {
   return request({
     url: '/api/admin/orders',
     method: 'POST',
@@ -25,7 +25,7 @@ export function createOrder(data: CreateOrderData): Promise<Response<IOrder>> {
   })
 }
 
-export function updateOrder(id: number, data: { id: number & CreateOrderData }): Promise<Response<number>> {
+export function updateOrder(id: number, data: { id: number & CreateOrderData }): Promise<ApiResponse<number>> {
   return request({
     url: `/api/admin/orders/${id}`,
     method: 'PUT',
@@ -33,14 +33,14 @@ export function updateOrder(id: number, data: { id: number & CreateOrderData }):
   })
 }
 
-export function removeOrder(id: number): Promise<Response<string>> {
+export function removeOrder(id: number): Promise<ApiResponse<string>> {
   return request({
     url: `/api/admin/orders/${id}`,
     method: 'DELETE',
   })
 }
 
-export function resetOrderStatus(id: number, data: { status: number }): Promise<Response<number>> {
+export function resetOrderStatus(id: number, data: { status: number }): Promise<ApiResponse<number>> {
   return request({
     url: `/api/admin/orders/${id}`,
     method: 'patch',
