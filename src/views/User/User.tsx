@@ -2,11 +2,12 @@ import type { IUser } from '@/types/user.ts'
 import type { UserFormModalProps } from '@/views/User/UserFormModal.tsx'
 import type { MenuProps, TableColumnProps } from 'antd'
 import { getUserList, resetUserPassword } from '@/apis/user.ts'
+import RotateCcW from '@/assets/icons/rotate-ccw.svg?react'
 import UserFormModal from '@/views/User/UserFormModal.tsx'
 import UserResetPwdModal from '@/views/User/UserResetPwdModal.tsx'
-import { DeleteOutlined, EditOutlined, MoreOutlined, SearchOutlined, UserAddOutlined } from '@ant-design/icons'
-import { Button, Dropdown, Flex, Form, Input, message, Popconfirm, Space, Switch, Table, Tag } from 'antd'
+import { DeleteOutlined, EditOutlined, ExclamationCircleFilled, MoreOutlined, SearchOutlined, UserAddOutlined } from '@ant-design/icons'
 
+import { Button, Dropdown, Flex, Form, Input, message, Modal, Popconfirm, Space, Switch, Table, Tag } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 
@@ -20,21 +21,36 @@ interface ActionProps {
 }
 
 enum MoreAction {
+  EDIT = 'edit',
+  DELETE = 'delete',
   VIEW_DETAIL = 'view_detail',
   RESET_PWD = 'reset_pwd',
 }
+
+const { confirm } = Modal
 
 function Action(props: ActionProps) {
   const { onEdit, onDelete, onResetPwd, onViewDetail } = props
 
   const moreActionItems: MenuProps['items'] = [
     {
-      key: MoreAction.VIEW_DETAIL,
-      label: '查看详情',
+      key: MoreAction.EDIT,
+      label: '编辑',
+      icon: <EditOutlined />,
     },
     {
       key: MoreAction.RESET_PWD,
       label: '重置密码',
+      icon: <RotateCcW />,
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: MoreAction.DELETE,
+      label: '删除',
+      danger: true,
+      icon: <DeleteOutlined />,
     },
   ]
 
@@ -46,21 +62,31 @@ function Action(props: ActionProps) {
       case MoreAction.RESET_PWD:
         onResetPwd()
         break
+      case MoreAction.EDIT:
+        onEdit()
+        break
+      case MoreAction.DELETE:
+        confirm({
+          title: '是否删除该用户？',
+          icon: <ExclamationCircleFilled />,
+          content: '删除后不可恢复，请谨慎操作',
+          onOk() {
+            onDelete()
+          },
+          onCancel() {
+            message.info('已取消删除')
+          },
+        })
+        break
       default:
         break
     }
   }
 
   return (
-    <Space>
-      <Button type="link" icon={<EditOutlined />} onClick={onEdit}>编辑</Button>
-      <Popconfirm title="确定删除该用户吗？" onConfirm={onDelete}>
-        <Button type="link" icon={<DeleteOutlined />} danger>删除</Button>
-      </Popconfirm>
-      <Dropdown menu={{ items: moreActionItems, onClick: handleMoreAction }}>
-        <Button type="text" icon={<MoreOutlined />} />
-      </Dropdown>
-    </Space>
+    <Dropdown menu={{ items: moreActionItems, onClick: handleMoreAction }}>
+      <Button type="text" icon={<MoreOutlined />} />
+    </Dropdown>
   )
 }
 

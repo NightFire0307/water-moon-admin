@@ -4,7 +4,7 @@ import IconImage from '@/assets/icons/image.svg?react'
 import IconImages from '@/assets/icons/images.svg?react'
 import IconLink from '@/assets/icons/link.svg?react'
 import IconPencil from '@/assets/icons/pencil.svg?react'
-import IconRotateCw from '@/assets/icons/rotate-cw.svg?react'
+import IconRotateCcw from '@/assets/icons/rotate-ccw.svg?react'
 import IconTrash from '@/assets/icons/trash.svg?react'
 import { type IOrder, OrderStatus } from '@/types/order.ts'
 import { MoreOutlined } from '@ant-design/icons'
@@ -120,7 +120,7 @@ export function ActionButtons(props: ActionButtonsProps) {
           {
             key: OrderAction.RESET,
             label: '重置状态',
-            icon: <IconRotateCw />,
+            icon: <IconRotateCcw />,
             disabled: [OrderStatus.NOT_STARTED, OrderStatus.CANCEL, OrderStatus.FINISHED].includes((record as IOrder).status),
           },
           {
