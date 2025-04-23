@@ -1,6 +1,6 @@
-import type { ApiResponse } from "./common"
+import type { ApiResponse, Pagination } from "./common"
 
-interface Role {
+export interface IRole {
   role_id: number
   name: string
   description: string
@@ -8,4 +8,4 @@ interface Role {
   updated_at: string
 }
 
-export type RoleResponse = Promise<ApiResponse<Role[]>>
+export type RoleResponse = Promise<ApiResponse<{ list: IRole[] } & Pagination>>
