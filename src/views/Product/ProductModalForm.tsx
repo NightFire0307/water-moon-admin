@@ -1,5 +1,5 @@
 import type { IProductType } from '@/types/product'
-import { createProduct, getProductTypes } from '@/apis/product'
+import { createProduct, getProductTypes, updateProduct } from '@/apis/product'
 import { Col, Form, Input, InputNumber, message, Modal, Row, Select, Switch } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { useEffect, useState } from 'react'
@@ -26,8 +26,15 @@ export function ProductModalForm(props: Readonly<ProductModalFormProps>) {
         const { msg } = await createProduct(values)
         message.success(msg)
       }
-      else {
-        // updateProduct
+
+      if (mode === 'edit') {
+        if (!initialData) {
+          message.error('编辑模式下，初始数据不能为空')
+          return
+        }
+
+        const { msg } = await updateProduct(initialData.id, values)
+        message.success(msg)
       }
     }
     catch {
