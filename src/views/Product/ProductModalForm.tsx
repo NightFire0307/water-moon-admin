@@ -1,21 +1,53 @@
-import type { IProductType } from '@/types/product'
 import { createProduct, getProductTypes, updateProduct } from '@/apis/product'
-import { Col, Form, Input, InputNumber, message, Modal, Row, Select, Switch } from 'antd'
+import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
+import { message, Modal } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { useEffect, useState } from 'react'
 
 interface ProductModalFormProps {
   mode: 'create' | 'edit'
   open: boolean
-  initialData?: { id: number, name: string, productTypeId: number }
+  initialData?: { id: number, name: string, photoLimit: number, productTypeId: number, isPublished: boolean }
   onClose: () => void
 }
 
 export function ProductModalForm(props: Readonly<ProductModalFormProps>) {
   const { mode, open, onClose, initialData } = props
-  const [productTypes, setProductTypes] = useState<IProductType[]>([])
+  const [productTypes, setProductTypes] = useState<{ label: string, value: any }[]>([])
   const [confirmLoading, setConfirmLoading] = useState(false)
   const [form] = useForm()
+
+  const fieldsSchema: FieldSchema[] = [
+    {
+      type: 'input',
+      label: '产品名称',
+      name: 'name',
+      placeholder: '请输入产品名称',
+      required: true,
+    },
+    {
+      type: 'select',
+      name: 'productTypeId',
+      label: '产品类型',
+      placeholder: '请选择产品类型',
+      options: productTypes,
+      required: true,
+    },
+    {
+      type: 'inputNumber',
+      name: 'photoLimit',
+      label: '照片数量限制',
+      extra: '0 表示不限制',
+    },
+    {
+      type: 'switch',
+      label: '是否上架',
+      name: 'isPublished',
+      valuePropName: 'checked',
+      checkedChildren: '是',
+      unCheckedChildren: '否',
+    },
+  ]
 
   async function handleOk() {
     setConfirmLoading(true)
@@ -53,14 +85,23 @@ export function ProductModalForm(props: Readonly<ProductModalFormProps>) {
 
   async function fetchProductTypes() {
     const { data } = await getProductTypes({ current: 1, pageSize: 100 })
-    setProductTypes(data.list)
+    setProductTypes(() => data.list.map((product) => {
+      return {
+        label: product.name,
+        value: product.id,
+      }
+    }))
   }
 
   useEffect(() => {
     if (open) {
       fetchProductTypes()
+
+      if (mode === 'edit') {
+        form.setFieldsValue(initialData)
+      }
     }
-  }, [open])
+  }, [open, mode])
 
   return (
     <Modal
@@ -72,63 +113,7 @@ export function ProductModalForm(props: Readonly<ProductModalFormProps>) {
       confirmLoading={confirmLoading}
       width={600}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={{ isPublished: true, photoLimit: 0, ...initialData }}
-        className="product-form"
-      >
-        <Row gutter={[24, 16]}>
-          <Col span={12}>
-            <Form.Item
-              name="name"
-              label="产品名称"
-              rules={[{ required: true, message: '请输入产品名称' }]}
-            >
-              <Input placeholder="请输入产品名称" allowClear />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              name="productTypeId"
-              label="产品类型"
-              rules={[{ required: true, message: '请选择产品类型' }]}
-            >
-              <Select
-                options={productTypes}
-                fieldNames={{ label: 'name', value: 'id' }}
-                placeholder="请选择产品类型"
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row gutter={[24, 16]}>
-          <Col span={12}>
-            <Form.Item
-              name="photoLimit"
-              label="照片数量限制"
-              extra="0 表示不限制"
-              rules={[{ required: true, message: '请输入照片数量限制' }]}
-            >
-              <InputNumber
-                min={0}
-                style={{ width: '100%' }}
-                placeholder="请输入数量限制"
-              />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              name="isPublished"
-              label="是否上架"
-              valuePropName="checked"
-            >
-              <Switch checkedChildren="是" unCheckedChildren="否" />
-            </Form.Item>
-          </Col>
-        </Row>
-      </Form>
+      <SimpleForm fields={fieldsSchema} form={form} initialValues={{ photoLimit: 0, isPublished: true }} />
     </Modal>
   )
 }

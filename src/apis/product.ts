@@ -1,5 +1,5 @@
-import type { PaginationParams, ApiResponse } from '../types/common.ts'
-import type { IProduct, ProductResponse, ProductTypeResponse } from '../types/product.ts'
+import type { ApiResponse, PaginationParams } from '../types/common.ts'
+import type { IProduct, ProductByIdResponse, ProductResponse, ProductTypeResponse } from '../types/product.ts'
 import request from '../utils/request.ts'
 
 export interface ProductQueryParams extends PaginationParams {
@@ -28,7 +28,7 @@ export function createProduct(data: ProductCreateParams): Promise<ApiResponse<IP
   })
 }
 
-export function getProductById(id: number) {
+export function getProductById(id: number): ProductByIdResponse {
   return request({
     url: `/api/admin/product/${id}`,
     method: 'GET',

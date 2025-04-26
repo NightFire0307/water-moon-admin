@@ -160,7 +160,7 @@ export function ProductType() {
   }, [current, pageSize])
 
   return (
-    <>
+    <div style={{ padding: '24px' }}>
       <ProductQueryForm
         onQuery={handleQuery}
         onReset={() => {
@@ -204,6 +204,6 @@ export function ProductType() {
           setInitialData(undefined)
         }}
       />
-    </>
+    </div>
   )
 }

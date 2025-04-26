@@ -1,12 +1,12 @@
+import type { IRole } from '@/types/role'
 import type { TableProps } from 'antd/lib'
+import { getRoleList } from '@/apis/role'
 import useTableSelection from '@/hooks/useTableSelection'
 import { MoreOutlined, SearchOutlined } from '@ant-design/icons'
-import { Button, Flex, Form, Input, Space, Table } from 'antd'
+import { Button, Divider, Flex, Form, Input, Space, Table } from 'antd'
+import dayjs from 'dayjs'
 import { type FC, useEffect, useState } from 'react'
 import RoleFormModal, { type RoleFormModalProps } from './RoleFormModal'
-import { getRoleList } from '@/apis/role'
-import dayjs from 'dayjs'
-import type { IRole } from '@/types/role'
 
 type RoleFormState = Omit<RoleFormModalProps, 'onClose'>
 
@@ -41,7 +41,7 @@ const Role: FC = () => {
     {
       dataIndex: 'createTime',
       title: '创建时间',
-      render: (text) => (dayjs(text).format('YYYY-MM-DD HH:mm:ss')),
+      render: text => (dayjs(text).format('YYYY-MM-DD HH:mm:ss')),
     },
     {
       title: '操作',
@@ -61,7 +61,7 @@ const Role: FC = () => {
   }, [])
 
   return (
-    <Space direction="vertical" style={{ width: '100%' }}>
+    <Space direction="vertical" style={{ width: '100%', padding: '24px' }}>
       <Flex justify="space-between">
         <Form>
           <Form.Item>

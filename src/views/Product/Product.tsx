@@ -21,7 +21,7 @@ export function Product() {
   const [mode, setMode] = useState<'create' | 'edit'>('create')
   const [options, setOptions] = useState<{ label: string, value: number }[]>([{ label: '所有类型', value: 0 }])
   const [modalOpen, setModalOpen] = useState(false)
-  const [initialData, setInitialData] = useState<{ id: number, name: string, productTypeId: number }>()
+  const [initialData, setInitialData] = useState<{ id: number, name: string, photoLimit: number, productTypeId: number, isPublished: boolean }>()
   const { pagination, setTotal, current, pageSize } = usePagination()
   const { rowSelection, selectedRows } = useTableSelection({ type: 'checkbox' })
   const [form] = useForm()
@@ -71,6 +71,8 @@ export function Product() {
             id: data.id,
             name: data.name,
             productTypeId: data.product_type.id,
+            photoLimit: data.photo_limit,
+            isPublished: data.is_published,
           })
 
           setMode('edit')
@@ -159,7 +161,7 @@ export function Product() {
   ]
 
   return (
-    <>
+    <div style={{ padding: '24px' }}>
       <Flex justify="space-between">
         <Form form={form} layout="inline">
           <Form.Item name="name">
@@ -208,6 +210,6 @@ export function Product() {
           fetchProductList(current, pageSize)
         }}
       />
-    </>
+    </div>
   )
 }

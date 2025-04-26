@@ -78,12 +78,16 @@ function AdminLayout() {
       children: [
         { key: 'list', label: '产品列表' },
         { key: 'type', label: '产品类型' },
+        { key: 'package', label: '产品套餐' },
       ],
     },
     {
       key: 'system_setting',
       icon: <SettingOutlined />,
       label: '系统设置',
+      children: [
+        { key: 'general', label: '通用设置' },
+      ],
     },
   ]
 

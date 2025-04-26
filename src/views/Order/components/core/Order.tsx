@@ -1,4 +1,3 @@
-
 import type { TableColumnProps } from 'antd'
 import type { AnyObject } from 'antd/es/_util/type'
 import { getOrderDetailById, getOrderList, removeOrder } from '@/apis/order.ts'
@@ -36,16 +35,16 @@ export function Order() {
   const { rowSelection } = useTableSelection({ type: 'checkbox' })
   const { pagination, current, pageSize, setTotal, reset } = usePagination()
   const { data, loading, refetch } = useFetch(
-    getOrderList, 
-    { 
-      manual: true, 
+    getOrderList,
+    {
+      manual: true,
       params: [
-        { current, pageSize}
+        { current, pageSize },
       ],
       onSuccess: (data) => {
         setTotal(data.total)
-      }
-    }
+      },
+    },
   )
 
   const columns: TableColumnProps[] = [
@@ -158,7 +157,7 @@ export function Order() {
   }, [])
 
   return (
-    <>
+    <div style={{ padding: '24px' }}>
       <OrderQueryForm
         onQuery={params => refetch(params)}
         onReset={() => {
@@ -217,6 +216,6 @@ export function Order() {
         <PhotoMgrModal open={photoMgrOpen} onClose={() => setPhotoMgrOpen(false)} />
         <ShareLinkModal open={shareLinkMgrOpen} onClose={() => setShareLinkMgrOpen(false)} />
       </OrderIdContext.Provider>
-    </>
+    </div>
   )
 }

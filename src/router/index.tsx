@@ -1,7 +1,8 @@
 import { Order } from '@/views/Order/components/core/Order.tsx'
 import { SelectionResult } from '@/views/Order/SelectionResult.tsx'
+import PackageManager from '@/views/Package/PackageManager.tsx'
 import Role from '@/views/Role/Role.tsx'
-import SystemSetting from '@/views/SystemSetting/SystemSetting.tsx'
+import GeneralSetting from '@/views/SystemSetting/GeneralSetting.tsx'
 import User from '@/views/User/User.tsx'
 import { createBrowserRouter } from 'react-router'
 import App from '../App.tsx'
@@ -87,14 +88,26 @@ export const router = createBrowserRouter([
               title: '产品类型',
             },
           },
+          {
+            path: 'package',
+            element: <PackageManager />,
+            handle: {
+              title: '产品套餐',
+            },
+          },
         ],
       },
       {
         path: 'system_setting',
-        element: <SystemSetting />,
         handle: {
           title: '系统设置',
         },
+        children: [
+          {
+            path: 'general',
+            element: <GeneralSetting />,
+          },
+        ],
       },
     ],
   },
