@@ -22,6 +22,7 @@ type InputNumberField = BaseField & {
 
 type SelectField = BaseField & {
   type: 'select'
+  prefix?: ReactNode
   options: { label: string, value: any }[]
 }
 
@@ -52,7 +53,7 @@ const SimpleForm: FC<SimpleFormProps> = ({ fields, form, layout, initialValues }
       case 'inputNumber':
         return <InputNumber {...commonProps} />
       case 'select':
-        return <Select {...commonProps} options={field.options} />
+        return <Select {...commonProps} options={field.options} prefix={field.prefix} />
       case 'switch':
         return <Switch checkedChildren={field.checkedChildren} unCheckedChildren={field.unCheckedChildren} />
       default:
@@ -74,7 +75,7 @@ const SimpleForm: FC<SimpleFormProps> = ({ fields, form, layout, initialValues }
           }
 
           return (
-            <Form.Item {...commonProps}>
+            <Form.Item {...commonProps} key={field.name}>
               {
                 renderField(field)
               }

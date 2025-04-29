@@ -13,12 +13,15 @@ import { OrderModalForm } from '@/views/Order/components/forms/OrderModalForm.ts
 import { OrderQueryForm } from '@/views/Order/components/forms/OrderQueryForm.tsx'
 import { PhotoMgrModal } from '@/views/Order/PhotoMgrModal.tsx'
 import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
-import { PlusOutlined, RedoOutlined } from '@ant-design/icons'
-import { Badge, Button, Divider, Flex, FloatButton, Table, Tag, Tooltip } from 'antd'
+import { ExclamationCircleOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
+import { Badge, Button, Checkbox, Divider, Flex, FloatButton, message, Modal, Table, Tag, Tooltip } from 'antd'
 import { createContext, useEffect, useState } from 'react'
+import PhotoReviewResult from '../../PhotoReviewResult'
 import { ShareLinkModal } from '../sharing/ShareLinkModal'
 
 export const OrderIdContext = createContext<number | null>(null)
+
+const { confirm } = Modal
 
 export function Order() {
   const [orderModal, setOrderModal] = useState<{ open: boolean, mode: 'create' | 'edit', initialValues?: AnyObject }>({
@@ -30,6 +33,7 @@ export function Order() {
   const [orderDetailOpen, setOrderDetailOpen] = useState(false)
   const [photoMgrOpen, setPhotoMgrOpen] = useState(false)
   const [shareLinkMgrOpen, setShareLinkMgrOpen] = useState(false)
+  const [photoReviewOpen, setPhotoReviewOpen] = useState(false)
   const [curOrderId, setCurOrderId] = useState<number | null>(null)
   const [incompleteFileCount, setIncompleteFileCount] = useState(0)
   const { rowSelection } = useTableSelection({ type: 'checkbox' })
@@ -129,8 +133,24 @@ export function Order() {
             setCurOrderId(record.id)
             setShareLinkMgrOpen(true)
           }}
-          onResetStatus={() => {}}
-          onViewSelectionResult={() => {}}
+          onResetStatus={() => {
+            confirm({
+              title: '是否要重置当前订单状态?',
+              icon: <ExclamationCircleOutlined />,
+              centered: true,
+              content: <Checkbox>重置所有选片结果</Checkbox>,
+              onOk() {
+                message.success('重置成功')
+              },
+              onCancel() {
+                message.info('重置操作已取消')
+              }
+            })
+          }}
+          onViewSelectionResult={() => {
+            setCurOrderId(record.id)
+            setPhotoReviewOpen(true)
+          }}
           onDelete={async (record) => {
             await removeOrder(record.id)
             fetchOrderList()
@@ -215,6 +235,7 @@ export function Order() {
         <OrderDetail open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
         <PhotoMgrModal open={photoMgrOpen} onClose={() => setPhotoMgrOpen(false)} />
         <ShareLinkModal open={shareLinkMgrOpen} onClose={() => setShareLinkMgrOpen(false)} />
+        <PhotoReviewResult open={photoReviewOpen} onClose={() => setPhotoReviewOpen(false)} />
       </OrderIdContext.Provider>
     </div>
   )
