@@ -4,7 +4,7 @@ interface UseFetchResult<T> {
   data: T | null
   loading: boolean
   error: string | null
-  refetch: () => Promise<any> // 重新获取数据的函数
+  refetch: (...args: any[]) => Promise<any> // 重新获取数据的函数
 }
 
 interface UseFetchOptions<TData, TParams> {
@@ -18,21 +18,21 @@ interface UseFetchOptions<TData, TParams> {
 
 export function useFetch<TData, TParams>(
   fetchFn: (...args: TParams[]) => Promise<{ data: TData }>,
-  options: UseFetchOptions<TData, TParams>
+  options: UseFetchOptions<TData, TParams>,
 ): UseFetchResult<TData> {
-  const { manual, params, onSuccess } = options
+  const { manual, params = [], onSuccess } = options
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<TData | null>(null)
   const [error, setError] = useState<string | null>(null)
   const latestRequestId = useRef(0)
 
-  const refetch = async () => {
+  const refetch = async (...args: any[]) => {
     const requestId = latestRequestId.current + 1
     latestRequestId.current = requestId
     setLoading(true)
     setError(null)
     try {
-      const { data } = await fetchFn(...(params || []))
+      const { data } = await fetchFn(...params, ...args)
       if (requestId === latestRequestId.current) {
         setData(data)
         onSuccess && onSuccess(data, params || [])

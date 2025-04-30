@@ -40,7 +40,7 @@ export function removeOrder(id: number): Promise<ApiResponse<string>> {
   })
 }
 
-export function resetOrderStatus(id: number, data: { status: number }): Promise<ApiResponse<number>> {
+export function resetOrderStatus(id: number, data: { resetSelection: boolean }): Promise<ApiResponse<number>> {
   return request({
     url: `/api/admin/orders/${id}`,
     method: 'patch',

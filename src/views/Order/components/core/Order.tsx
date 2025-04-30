@@ -1,6 +1,6 @@
 import type { TableColumnProps } from 'antd'
 import type { AnyObject } from 'antd/es/_util/type'
-import { getOrderDetailById, getOrderList, removeOrder } from '@/apis/order.ts'
+import { getOrderDetailById, getOrderList, removeOrder, resetOrderStatus } from '@/apis/order.ts'
 import { useFetch } from '@/hooks/useFetch'
 import usePagination from '@/hooks/usePagination.ts'
 import useTableSelection from '@/hooks/useTableSelection.ts'
@@ -15,7 +15,7 @@ import { PhotoMgrModal } from '@/views/Order/PhotoMgrModal.tsx'
 import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 import { ExclamationCircleOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Checkbox, Divider, Flex, FloatButton, message, Modal, Table, Tag, Tooltip } from 'antd'
-import { createContext, useEffect, useState } from 'react'
+import { createContext, useEffect, useRef, useState } from 'react'
 import PhotoReviewResult from '../../PhotoReviewResult'
 import { ShareLinkModal } from '../sharing/ShareLinkModal'
 
@@ -36,6 +36,7 @@ export function Order() {
   const [photoReviewOpen, setPhotoReviewOpen] = useState(false)
   const [curOrderId, setCurOrderId] = useState<number | null>(null)
   const [incompleteFileCount, setIncompleteFileCount] = useState(0)
+  const resetSelection = useRef<boolean>(false)
   const { rowSelection } = useTableSelection({ type: 'checkbox' })
   const { pagination, current, pageSize, setTotal, reset } = usePagination()
   const { data, loading, refetch } = useFetch(
@@ -138,13 +139,18 @@ export function Order() {
               title: '是否要重置当前订单状态?',
               icon: <ExclamationCircleOutlined />,
               centered: true,
-              content: <Checkbox>重置所有选片结果</Checkbox>,
-              onOk() {
+              content: <Checkbox onChange={e => resetSelection.current = e.target.checked}>重置所有选片结果</Checkbox>,
+              async onOk() {
+                await resetOrderStatus(record.id, { resetSelection: resetSelection.current })
                 message.success('重置成功')
+                refetch()
               },
               onCancel() {
                 message.info('重置操作已取消')
-              }
+              },
+              onClose() {
+                resetSelection.current = false
+              },
             })
           }}
           onViewSelectionResult={() => {
@@ -153,7 +159,7 @@ export function Order() {
           }}
           onDelete={async (record) => {
             await removeOrder(record.id)
-            fetchOrderList()
+            refetch()
           }}
         />
       ),
