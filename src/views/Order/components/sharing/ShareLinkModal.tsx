@@ -11,7 +11,7 @@ import { ShareLinkForm } from './ShareLinkForm'
 import styles from './ShareLinkModal.module.less'
 
 enum LinkAction {
-  ORDER_LINKS = 'ORDER_links',
+  ORDER_LINKS = 'order_links',
   CREATE_LINK = 'create_link',
 }
 
@@ -67,6 +67,7 @@ export const ShareLinkModal: FC<ShareLinkModalProps> = ({ open, onClose }) => {
 
           <Space direction="vertical" style={{ width: '100%' }}>
             <CustomBtnGroup
+              activeKey={selected}
               items={[
                 { key: LinkAction.ORDER_LINKS, label: '订单链接', icon: <LinkOutlined />, children: '1' },
                 { key: LinkAction.CREATE_LINK, label: '创建链接', icon: <PlusOutlined />, children: '2' },
@@ -104,7 +105,12 @@ export const ShareLinkModal: FC<ShareLinkModalProps> = ({ open, onClose }) => {
             }
 
             {
-              selected === LinkAction.CREATE_LINK && <ShareLinkForm onCreateLink={() => setSelected(LinkAction.ORDER_LINKS)} />
+              selected === LinkAction.CREATE_LINK && (
+                <ShareLinkForm onCreateLink={() => {
+                  setSelected(LinkAction.ORDER_LINKS)
+                }}
+                />
+              )
             }
           </Flex>
         </Col>
