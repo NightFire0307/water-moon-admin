@@ -39,25 +39,30 @@ export function Login() {
   return (
     <div className={styles.loginContainer}>
       <Card className={styles.loginCard}>
+        <div className={styles.loginHeader}>
+          <h1>管理后台</h1>
+          <p className={styles.desc}>登录您的账户</p>
+        </div>
         <Form
           form={form}
+          layout="vertical"
           className="login-form"
           initialValues={{ username: 'admin', password: '123456' }}
         >
           <Form.Item
+            label="用户名"
             name="username"
-            rules={[{ required: true, message: '请输入您的用户名！' }]}
           >
-            <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="用户名" />
+            <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="请输入用户名" />
           </Form.Item>
           <Form.Item
+            label="密码"
             name="password"
-            rules={[{ required: true, message: '请输入您的密码！' }]}
           >
             <Input
               prefix={<LockOutlined className="site-form-item-icon" />}
               type="password"
-              placeholder="密码"
+              placeholder="请输入密码"
             />
           </Form.Item>
 
