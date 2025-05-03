@@ -1,7 +1,8 @@
+import type { TableProps } from 'antd/lib'
 import type { FC } from 'react'
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
-import { Button, Divider, Drawer, Flex, List, Space } from 'antd'
-import { Download, Filter, Grid3x3, List as ListIcon } from 'lucide-react'
+import { Button, Divider, Drawer, Flex, Space, Table, Tag } from 'antd'
+import { Download, DownloadIcon, Filter, Grid3x3, List as ListIcon, ZoomInIcon } from 'lucide-react'
 
 interface PhotoReviewResultProps {
   open: boolean
@@ -31,18 +32,58 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
     },
   ]
 
+  const columns: TableProps['columns'] = [
+    {
+      dataIndex: 'thumbnail_url',
+      title: '照片',
+    },
+    {
+      dataIndex: 'name',
+      title: '编号',
+    },
+    {
+      dataIndex: 'orderProduct',
+      title: '所选产品',
+      render: (orderProduct) => {
+        return (
+          orderProduct.map(product => (
+            <Tag key={product.id}>{product.name}</Tag>
+          ))
+        )
+      },
+    },
+    {
+      dataIndex: 'status',
+      title: '状态',
+    },
+    {
+      title: '操作',
+      render: () => {
+        return (
+          <Space>
+            <Button type="text" icon={<ZoomInIcon size={18} />} />
+            <Button type="text" icon={<DownloadIcon size={18} />} />
+          </Space>
+        )
+      },
+    },
+  ]
+
   const data = [
     {
-      title: '照片-01',
-    },
-    {
-      title: '照片-02',
-    },
-    {
-      title: '照片-03',
-    },
-    {
-      title: '照片-04',
+      thumbnail_url: 'xxx',
+      name: 'DSC_034A34',
+      orderProduct: [
+        {
+          id: 1,
+          name: '缘定今生14寸相册',
+        },
+        {
+          id: 2,
+          name: '7寸单片',
+        },
+      ],
+      status: 'selected',
     },
   ]
 
@@ -51,7 +92,7 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
       title="订单 WK-D1919 选片结果"
       open={open}
       onClose={() => onClose && onClose()}
-      size="large"
+      width={900}
       extra={
         <Button type="primary" icon={<Download size={14} />}>导出照片</Button>
       }
@@ -68,21 +109,12 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
           <Button icon={<ListIcon size={14} />}>列表视图</Button>
         </Space>
       </Flex>
-      <Divider style={{ margin: '0' }} />
-      <div style={{ padding: '16px 24px' }}>
-        <List
-          itemLayout="horizontal"
-          dataSource={data}
-          renderItem={item => (
-            <List.Item>
-              <List.Item.Meta
-                title={<p>{item.title}</p>}
-                description="这是一些备注"
-              />
-            </List.Item>
-          )}
-        />
+      <Divider style={{ margin: 0 }} />
+
+      <div style={{ padding: '24px' }}>
+        <Table columns={columns} dataSource={data} />
       </div>
+
     </Drawer>
   )
 }
