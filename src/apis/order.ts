@@ -47,3 +47,10 @@ export function resetOrderStatus(id: number, data: { resetSelection: boolean }):
     data,
   })
 }
+
+export function getOrderResult(id: number) {
+  return request({
+    url: `/api/admin/orders/${id}/result`,
+    method: 'GET',
+  })
+}
