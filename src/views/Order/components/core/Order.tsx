@@ -51,6 +51,7 @@ export function Order() {
       },
     },
   )
+  const uploadQueue = useMinioUpload(state => state.uploadQueue)
 
   const columns: TableColumnProps[] = [
     {
@@ -216,7 +217,7 @@ export function Order() {
       />
 
       {
-        !taskCenterOpen && (
+        uploadQueue.length > 0 && (
           <FloatButton
             shape="square"
             tooltip="任务中心"

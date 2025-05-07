@@ -1,4 +1,4 @@
-import type { Pagination, ApiResponse } from '@/types/common.ts'
+import type { ApiResponse, Pagination } from '@/types/common.ts'
 import type { ILink } from '@/types/link.ts'
 
 export enum OrderStatus {
@@ -67,5 +67,28 @@ export interface IOrderDetail {
   updated_at: string
 }
 
+export interface IOrderResultPhoto {
+  id: number
+  name: string
+  remark: string
+  status: 'selected' | 'unselected'
+  thumbnail: string
+  order_products: {
+    id: number
+    name: string
+  }[]
+}
+
+// 订单结果
+export interface IOrderResult {
+  id: number
+  photos: IOrderResultPhoto[]
+  status: number
+  order_number: string
+  extra_photo_price: number
+  max_select_photos: number
+}
+
 export type OrderResponse = Promise<ApiResponse<{ list: IOrder[] } & Pagination>>
 export type OrderDetailResponse = Promise<ApiResponse<IOrderDetail>>
+export type OrderResultResponse = Promise<ApiResponse<{ list: IOrderResult } & Pagination>>

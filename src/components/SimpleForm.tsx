@@ -24,6 +24,7 @@ type SelectField = BaseField & {
   type: 'select'
   prefix?: ReactNode
   options: { label: string, value: any }[]
+  onChange?: (value: any) => void
 }
 
 type SwitchField = BaseField & {
@@ -53,7 +54,7 @@ const SimpleForm: FC<SimpleFormProps> = ({ fields, form, layout, initialValues }
       case 'inputNumber':
         return <InputNumber {...commonProps} />
       case 'select':
-        return <Select {...commonProps} options={field.options} prefix={field.prefix} />
+        return <Select {...commonProps} options={field.options} prefix={field.prefix} onChange={field.onChange} />
       case 'switch':
         return <Switch checkedChildren={field.checkedChildren} unCheckedChildren={field.unCheckedChildren} />
       default:

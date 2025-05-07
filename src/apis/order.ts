@@ -1,5 +1,5 @@
 import type { ApiResponse } from '@/types/common.ts'
-import type { CreateOrderData, IOrder, OrderDetailResponse, OrderResponse } from '@/types/order.ts'
+import type { CreateOrderData, IOrder, OrderDetailResponse, OrderResponse, OrderResultResponse } from '@/types/order.ts'
 import request from '@/utils/request.ts'
 
 export function getOrderList(params = {}): OrderResponse {
@@ -48,7 +48,7 @@ export function resetOrderStatus(id: number, data: { resetSelection: boolean }):
   })
 }
 
-export function getOrderResult(id: number) {
+export function getOrderResult(id: number): OrderResultResponse {
   return request({
     url: `/api/admin/orders/${id}/result`,
     method: 'GET',
