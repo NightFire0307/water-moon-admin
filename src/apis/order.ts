@@ -54,3 +54,11 @@ export function getOrderResult(id: number): OrderResultResponse {
     method: 'GET',
   })
 }
+
+export function downloadResult(id: number) {
+  return request({
+    url: `/api/admin/orders/${id}/result/export`,
+    method: 'GET',
+    responseType: 'blob',
+  })
+}

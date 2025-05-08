@@ -1,6 +1,6 @@
 import type { IOrderResultPhoto } from '@/types/order'
 import type { TableProps } from 'antd/lib'
-import { getOrderResult } from '@/apis/order'
+import { downloadResult, getOrderResult } from '@/apis/order'
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
 import { Button, Divider, Drawer, Flex, Space, Table, Tag } from 'antd'
 import { Download, DownloadIcon, Filter, ZoomInIcon } from 'lucide-react'
@@ -15,6 +15,7 @@ interface PhotoReviewResultProps {
 const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
   const [originalData, setOriginalData] = useState<IOrderResultPhoto[]>([])
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'selected' | 'unSelected'>('all')
+  const [downloadLoading, setDownloadLoading] = useState<boolean>(false)
 
   const formFields: FieldSchema[] = [
     {
@@ -113,6 +114,21 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
     setOriginalData(data.list.photos)
   }
 
+  // 导出选片记录
+  const handleExport = async () => {
+    setDownloadLoading(false)
+    const data = await downloadResult(35)
+    const blob = new Blob([data], { type: 'application/zip' })
+    const url = URL.createObjectURL(blob)
+
+    const a = document.createElement('a')
+    a.href = url
+    a.download = '订单选片结果.zip'
+    a.click()
+    URL.revokeObjectURL(url)
+    setDownloadLoading(false)
+  }
+
   useEffect(() => {
     if (open) {
       fetchOrderResult()
@@ -125,9 +141,16 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
       open={open}
       onClose={() => onClose && onClose()}
       width={1000}
-      extra={
-        <Button type="primary" icon={<Download size={14} />}>导出照片</Button>
-      }
+      extra={(
+        <Button
+          type="primary"
+          icon={<Download size={14} />}
+          onClick={handleExport}
+          loading={downloadLoading}
+        >
+          导出照片
+        </Button>
+      )}
       styles={{
         body: {
           padding: 0,
