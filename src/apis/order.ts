@@ -55,7 +55,7 @@ export function getOrderResult(id: number): OrderResultResponse {
   })
 }
 
-export function downloadResult(id: number) {
+export function downloadResult(id: number): Promise<Blob> {
   return request({
     url: `/api/admin/orders/${id}/result/export`,
     method: 'GET',

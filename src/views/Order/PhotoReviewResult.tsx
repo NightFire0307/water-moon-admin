@@ -116,7 +116,7 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
 
   // 导出选片记录
   const handleExport = async () => {
-    setDownloadLoading(false)
+    setDownloadLoading(true)
     const data = await downloadResult(35)
     const blob = new Blob([data], { type: 'application/zip' })
     const url = URL.createObjectURL(blob)
