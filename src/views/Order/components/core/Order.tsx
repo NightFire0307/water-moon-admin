@@ -1,12 +1,13 @@
 import type { TableColumnProps } from 'antd'
 import type { AnyObject } from 'antd/es/_util/type'
 import { getOrderDetailById, getOrderList, removeOrder, resetOrderStatus } from '@/apis/order.ts'
+import { OrderInfoContext } from '@/contexts/orderInfoContext'
 import { useFetch } from '@/hooks/useFetch'
 import usePagination from '@/hooks/usePagination.ts'
 import useTableSelection from '@/hooks/useTableSelection.ts'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import { UploadStatus } from '@/store/useUploadFile.tsx'
-import { OrderStatus } from '@/types/order.ts'
+import { type IOrder, OrderStatus } from '@/types/order.ts'
 import { ActionButtons } from '@/views/Order/ActionButtons.tsx'
 import { OrderDetail } from '@/views/Order/components/core/OrderDetail.tsx'
 import { OrderModalForm } from '@/views/Order/components/forms/OrderModalForm.tsx'
@@ -15,11 +16,9 @@ import { PhotoMgrModal } from '@/views/Order/PhotoMgrModal.tsx'
 import { TaskCenter } from '@/views/Order/TaskCenter.tsx'
 import { ExclamationCircleOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Checkbox, Divider, Flex, FloatButton, message, Modal, Table, Tag, Tooltip } from 'antd'
-import { createContext, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import PhotoReviewResult from '../../PhotoReviewResult'
 import { ShareLinkModal } from '../sharing/ShareLinkModal'
-
-export const OrderIdContext = createContext<number | null>(null)
 
 const { confirm } = Modal
 
@@ -34,7 +33,7 @@ export function Order() {
   const [photoMgrOpen, setPhotoMgrOpen] = useState(false)
   const [shareLinkMgrOpen, setShareLinkMgrOpen] = useState(false)
   const [photoReviewOpen, setPhotoReviewOpen] = useState(false)
-  const [curOrderId, setCurOrderId] = useState<number | null>(null)
+  const [curOrderInfo, setCurOrderInfo] = useState<IOrder>({} as IOrder)
   const [incompleteFileCount, setIncompleteFileCount] = useState(0)
   const resetSelection = useRef<boolean>(false)
   const { rowSelection } = useTableSelection({ type: 'checkbox' })
@@ -119,20 +118,21 @@ export function Order() {
         <ActionButtons
           record={record}
           onEdit={async (record) => {
-            setCurOrderId(record.id)
+            setCurOrderInfo(record as IOrder)
             const { data } = await getOrderDetailById(record.id)
             setOrderModal({ open: true, mode: 'edit', initialValues: data })
           }}
           onViewDetail={(record) => {
-            setCurOrderId(record.id)
+            console.log(record)
+            setCurOrderInfo(record as IOrder)
             setOrderDetailOpen(true)
           }}
           onManagePhotos={(record) => {
-            setCurOrderId(record.id)
+            setCurOrderInfo(record as IOrder)
             setPhotoMgrOpen(true)
           }}
           onManageLinks={() => {
-            setCurOrderId(record.id)
+            setCurOrderInfo(record as IOrder)
             setShareLinkMgrOpen(true)
           }}
           onResetStatus={() => {
@@ -155,7 +155,7 @@ export function Order() {
             })
           }}
           onViewSelectionResult={() => {
-            setCurOrderId(record.id)
+            setCurOrderInfo(record as IOrder)
             setPhotoReviewOpen(true)
           }}
           onDelete={async (record) => {
@@ -237,13 +237,13 @@ export function Order() {
         }}
       />
 
-      <OrderIdContext.Provider value={curOrderId}>
+      <OrderInfoContext.Provider value={curOrderInfo}>
         <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
         <OrderDetail open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
         <PhotoMgrModal open={photoMgrOpen} onClose={() => setPhotoMgrOpen(false)} />
         <ShareLinkModal open={shareLinkMgrOpen} onClose={() => setShareLinkMgrOpen(false)} />
         <PhotoReviewResult open={photoReviewOpen} onClose={() => setPhotoReviewOpen(false)} />
-      </OrderIdContext.Provider>
+      </OrderInfoContext.Provider>
     </div>
   )
 }

@@ -2,6 +2,7 @@ import type { IOrderResultPhoto } from '@/types/order'
 import type { TableProps } from 'antd/lib'
 import { downloadResult, getOrderResult } from '@/apis/order'
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
+import { useOrderInfoContext } from '@/contexts/orderInfoContext'
 import { Button, Divider, Drawer, Flex, Space, Table, Tag } from 'antd'
 import { Download, DownloadIcon, Filter, ZoomInIcon } from 'lucide-react'
 import { type FC, useEffect, useMemo, useState } from 'react'
@@ -16,6 +17,7 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
   const [originalData, setOriginalData] = useState<IOrderResultPhoto[]>([])
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'selected' | 'unSelected'>('all')
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false)
+  const { order_number } = useOrderInfoContext()
 
   const formFields: FieldSchema[] = [
     {
@@ -137,7 +139,7 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
 
   return (
     <Drawer
-      title="订单 WK-D1919 选片结果"
+      title={`订单 WK-${order_number} 选片结果`}
       open={open}
       onClose={() => onClose && onClose()}
       width={1000}

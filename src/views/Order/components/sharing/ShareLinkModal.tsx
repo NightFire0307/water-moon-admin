@@ -1,11 +1,11 @@
 import type { ILink } from '@/types/link'
 import { delShareLinkByOrderId, getShareLinksByOrderId } from '@/apis/link'
 import { CustomBtnGroup } from '@/components/CustomBtn'
+import { useOrderInfoContext } from '@/contexts/orderInfoContext'
 import usePagination from '@/hooks/usePagination'
 import { LinkOutlined, PlusOutlined } from '@ant-design/icons'
 import { Col, Empty, Flex, message, Modal, Pagination, Row, Space, Typography } from 'antd'
-import { type FC, useContext, useEffect, useState } from 'react'
-import { OrderIdContext } from '../core/Order'
+import { type FC, useEffect, useState } from 'react'
 import { ShareLinkCard } from './ShareLinkCard'
 import { ShareLinkForm } from './ShareLinkForm'
 import styles from './ShareLinkModal.module.less'
@@ -24,7 +24,7 @@ export const ShareLinkModal: FC<ShareLinkModalProps> = ({ open, onClose }) => {
   const [selected, setSelected] = useState(LinkAction.ORDER_LINKS)
   const [links, setLinks] = useState<ILink[]>([])
   const { setTotal, pagination, current, pageSize } = usePagination({ defaultPageSize: 5 })
-  const orderId = useContext(OrderIdContext)
+  const { id: orderId } = useOrderInfoContext()
 
   const fetchLinksByOrderId = async () => {
     if (orderId === null) {

@@ -1,8 +1,8 @@
 import { generateShareLink } from '@/apis/link'
+import { useOrderInfoContext } from '@/contexts/orderInfoContext'
 import { Button, Form, Input, message, Radio } from 'antd'
 import dayjs from 'dayjs'
-import { type FC, useContext, useState } from 'react'
-import { OrderIdContext } from '../core/Order'
+import { type FC, useState } from 'react'
 
 enum PasswordType {
   RANDOM = 'random',
@@ -16,7 +16,7 @@ interface ShareLinkFormProps {
 export const ShareLinkForm: FC<ShareLinkFormProps> = ({ onCreateLink }) => {
   const [passwordType, setPasswordType] = useState<PasswordType>(PasswordType.RANDOM)
   const [form] = Form.useForm()
-  const orderId = useContext(OrderIdContext)
+  const { id: orderId } = useOrderInfoContext()
 
   const handleGenerateShareLink = async () => {
     if (!orderId)

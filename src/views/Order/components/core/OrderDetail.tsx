@@ -1,9 +1,9 @@
 import type { DescriptionsProps } from 'antd'
 import { getOrderDetailById } from '@/apis/order.ts'
+import { useOrderInfoContext } from '@/contexts/orderInfoContext'
 import { formatDate } from '@/utils/formatDate.ts'
 import { Descriptions, Modal, Tag } from 'antd'
-import { useContext, useEffect, useState } from 'react'
-import { OrderIdContext } from './Order'
+import { useEffect, useState } from 'react'
 
 interface OrderDetailProps {
   open: boolean
@@ -13,12 +13,12 @@ interface OrderDetailProps {
 export function OrderDetail(props: OrderDetailProps) {
   const { open, onClose } = props
   const [items, setItems] = useState<DescriptionsProps['items']>([])
-  const orderId = useContext(OrderIdContext)
+  const { id } = useOrderInfoContext()
 
   async function fetchOrderDetail() {
-    if (!orderId)
+    if (!id)
       return
-    const { data } = await getOrderDetailById(orderId)
+    const { data } = await getOrderDetailById(id)
 
     setItems([
       { label: '订单号', children: data.order_number },
@@ -74,7 +74,7 @@ export function OrderDetail(props: OrderDetailProps) {
     if (open) {
       fetchOrderDetail()
     }
-  }, [open, orderId])
+  }, [open, id])
 
   return (
     <Modal open={open} centered width={1000} footer={null} onCancel={onClose}>
