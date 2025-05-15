@@ -1,7 +1,7 @@
 import type { FC, ReactNode } from 'react'
 import { Card } from 'antd'
 import cs from 'classnames'
-import { ArrowUp } from 'lucide-react'
+import { ArrowDown, ArrowUp } from 'lucide-react'
 import CountUp from 'react-countup'
 import styles from './DashboardCard.module.less'
 
@@ -41,7 +41,11 @@ const CardItem: FC<CardDataItem> = ({ icon, title, value, growth, color }) => {
               )}
             >
               <span>
-                <ArrowUp size={12} />
+                {
+                  growth > 0
+                    ? <ArrowUp size={14} />
+                    : <ArrowDown size={14} style={{ color: '#f5222d' }} />
+                }
               </span>
               {growth > 0 ? `+${growth}` : growth}
               %
