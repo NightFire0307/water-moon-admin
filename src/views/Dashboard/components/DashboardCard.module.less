@@ -1,58 +1,54 @@
 .dashboard-card__wrapper {
   display: flex;
   flex-wrap: nowrap;
+  gap: 24px;
 }
 
 .dashboard-card {
   flex:1;
-  display: inline-block;
-  padding: 24px;
-  background: #f9f9f9;
-  border-top: 1px solid #e4e4e7;
-  border-right: 1px solid #e4e4e7;
-  border-bottom: 1px solid #e4e4e7;
-  cursor: pointer;
-  transition: border .1s ease-in-out, background .1s ease-in-out;
-
-  &:nth-child(1) {
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
-    border-left: 1px solid #e4e4e7;
-  }
-
-  &:last-child {
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-  }
-
-  &:hover {
-    background: #f4f4f5;
-    border-color: #d4d4d8;
-  }
 
   &__icon {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 40px;
-    height: 40px;
-    background-color: #e6f4ff;
+    width: 48px;
+    height: 48px;
     border-radius: 100%;
-    border: 1px solid #91caff;
-    color: #1677ff
+
+    &--blue {
+      background-color: #e6f4ff;
+      color: #1677ff;
+    }
+
+    &--green {
+      background-color: #e6ffed;
+      color: #52c41a;
+    }
+
+    &--gold {
+      background-color: #fffbe6;
+      color: #faad14;
+    }
+
+    &--magenta {
+      background-color: #fff0f6;
+      color: #f5222d;
+    }
   }
 
   &__content {
-    margin-top: 10px;
-    font-weight: 500;
-    line-height: 1.5;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
 
   &__desc{
     display: flex;
     align-items: center;
+    margin-top: 6px;
     gap: 6px;
-    line-height: 1.5;
+    font-family: 500;
   }
 
   &__title {
@@ -61,27 +57,25 @@
   }
 
   &__value {
-    font-size: 24px;
+    margin-top: 6px;
+    font-size: 32px;
     color: #1b1718;
+    font-weight: 600;
   }
 
   &__change {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0 6px;
     border-radius: 6px;
     font-size: 12px;
+    font-family: 600;
 
     &--negative {
-      background: #fff1f0;
-      border: 1px solid #ffa39e;
       color: #f5222d;
     }
 
     &--positive {
-      background: #f6ffed;
-      border: 1px solid #b7eb8f;
       color: #52c41a;
     }
   }
