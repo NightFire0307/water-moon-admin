@@ -1,6 +1,7 @@
-import { Card, DatePicker, Divider, Tabs, type TabsProps } from 'antd'
+import { Card, DatePicker, Flex, Space } from 'antd'
 import { CalendarClock, CheckCircle, Hourglass, Package } from 'lucide-react'
 import { AreaChart } from './components/AreaChart'
+import { ColumnChart } from './components/ColumnChart'
 import { DashboardCard } from './components/DashboardCard'
 import styles from './Dashboard.module.less'
 
@@ -49,6 +50,12 @@ export function Dashboard() {
       >
         <AreaChart />
       </Card>
+
+      <Flex style={{ marginTop: '24px', width: '100%' }} gap={24}>
+        <Card hoverable style={{ width: '100%' }}>
+          <ColumnChart />
+        </Card>
+      </Flex>
     </div>
   )
 }

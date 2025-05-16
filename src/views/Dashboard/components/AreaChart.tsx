@@ -45,7 +45,7 @@ export const AreaChart: FC = () => {
     series: [
       {
         name: '本周',
-        data: [142, 20, 45, 78, 60, 45, 55],
+        data: [62, 20, 45, 78, 60, 45, 55],
         type: 'line',
         itemStyle: {
           color: '#1677ff',
@@ -90,7 +90,9 @@ export const AreaChart: FC = () => {
   echarts.use([GridComponent, LineChart, CanvasRenderer, UniversalTransition, TooltipComponent])
 
   useEffect(() => {
-    initChart()
+    if (chartRef.current) {
+      initChart()
+    }
     setOptions(option)
   }, [])
 

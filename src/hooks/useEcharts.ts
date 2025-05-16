@@ -17,7 +17,12 @@ function useEcharts() {
 
     // 监听图表容器大小变化
     const resizeObserver = new ResizeObserver(() => {
-      chartInstance.current?.resize()
+      chartInstance.current?.resize({
+        animation: {
+          duration: 1300,
+          easing: 'cubicInOut',
+        },
+      })
     })
 
     resizeObserver.observe(chartRef.current)
@@ -37,7 +42,9 @@ function useEcharts() {
   }, [])
 
   useEffect(() => {
-    return () => chartInstance.current?.dispose()
+    return () => {
+      chartInstance.current?.dispose()
+    }
   }, [])
 
   return {
