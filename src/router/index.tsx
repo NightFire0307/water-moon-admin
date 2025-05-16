@@ -4,7 +4,7 @@ import PackageManager from '@/views/Package/PackageManager.tsx'
 import Role from '@/views/Role/Role.tsx'
 import GeneralSetting from '@/views/SystemSetting/GeneralSetting.tsx'
 import User from '@/views/User/User.tsx'
-import { createBrowserRouter } from 'react-router'
+import { createBrowserRouter, Navigate } from 'react-router'
 import App from '../App.tsx'
 import { ProtectedRoute } from '../components/ProtectedRoute.tsx'
 import { Dashboard } from '../views/Dashboard/Dashboard.tsx'
@@ -18,6 +18,7 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <App />
+        <Navigate to="dashboard" replace />
       </ProtectedRoute>
     ),
     handle: {
