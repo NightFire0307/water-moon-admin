@@ -1,7 +1,7 @@
 import type { ILink } from '@/types/link'
 import { delShareLinkByOrderId, getShareLinksByOrderId } from '@/apis/link'
 import { CustomBtnGroup } from '@/components/CustomBtn'
-import { useOrderInfoContext } from '@/contexts/orderInfoContext'
+import { useOrderInfoContext } from '@/contexts/OrderInfoContext'
 import usePagination from '@/hooks/usePagination'
 import { LinkOutlined, PlusOutlined } from '@ant-design/icons'
 import { Col, Empty, Flex, message, Modal, Pagination, Row, Space, Typography } from 'antd'

@@ -23,7 +23,7 @@ type InputNumberField = BaseField & {
 type SelectField = BaseField & {
   type: 'select'
   prefix?: ReactNode
-  options: { label: string, value: any }[]
+  options: { label: any, value: any }[]
   onChange?: (value: any) => void
 }
 

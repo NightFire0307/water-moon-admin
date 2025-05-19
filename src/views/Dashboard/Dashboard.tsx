@@ -1,4 +1,4 @@
-import { Card, DatePicker, Flex, Space } from 'antd'
+import { Card, DatePicker, Flex } from 'antd'
 import { CalendarClock, CheckCircle, Hourglass, Package } from 'lucide-react'
 import { AreaChart } from './components/AreaChart'
 import { ColumnChart } from './components/ColumnChart'

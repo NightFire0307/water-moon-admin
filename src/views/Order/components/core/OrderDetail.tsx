@@ -1,6 +1,6 @@
 import type { DescriptionsProps } from 'antd'
 import { getOrderDetailById } from '@/apis/order.ts'
-import { useOrderInfoContext } from '@/contexts/orderInfoContext'
+import { useOrderInfoContext } from '@/contexts/OrderInfoContext'
 import { formatDate } from '@/utils/formatDate.ts'
 import { Descriptions, Modal, Tag } from 'antd'
 import { useEffect, useState } from 'react'

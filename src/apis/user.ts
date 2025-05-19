@@ -12,7 +12,7 @@ export function getUserList(params: UserParams): UserResponseData {
   })
 }
 
-export function createUser(data) {
+export function createUser(data: any) {
   return request({
     url: '/api/admin/users',
     method: 'POST',
@@ -20,7 +20,7 @@ export function createUser(data) {
   })
 }
 
-export function updateUser(userId: number, data) {
+export function updateUser(userId: number, data: any) {
   return request({
     url: `/api/admin/users/${userId}`,
     method: 'PUT',

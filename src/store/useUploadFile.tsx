@@ -26,7 +26,7 @@ export interface QueueTask {
   file_name: string
   file_size: number
   progress: number
-  src: string
+  src?: string
   status: UploadStatus
   uploadTask: UploadTask<DirectUploadContext>
 }

@@ -1,3 +1,4 @@
+import type { IRole } from '@/types/role'
 import type { IUser } from '@/types/user.ts'
 import { getRoleList } from '@/apis/role.ts'
 import { Col, Form, Input, message, Modal, Row, Select, Switch } from 'antd'
@@ -7,13 +8,14 @@ export interface UserFormModalProps {
   open: boolean
   mode: 'create' | 'edit'
   initialValues?: IUser
-  onSubmit: (values: IUser) => void
-  onClose: () => void
+  onCreate?: (values: IUser) => void
+  onUpdate?: (values: IUser) => void
+  onClose?: () => void
 }
 
 function UserFormModal(props: UserFormModalProps) {
-  const { open, mode, onSubmit, onClose, initialValues } = props
-  const [options, setOptions] = useState<[]>([])
+  const { open, mode, onCreate, onUpdate, onClose, initialValues } = props
+  const [options, setOptions] = useState<IRole[]>([])
   const [form] = Form.useForm()
 
   useEffect(() => {
@@ -30,26 +32,29 @@ function UserFormModal(props: UserFormModalProps) {
 
   async function fetchRole() {
     const { data } = await getRoleList({})
-    setOptions(data)
+    setOptions(data.list)
   }
 
   async function handleSubmit() {
     try {
       await form.validateFields()
       const values = form.getFieldsValue()
-      console.log(values)
-      onSubmit(values)
+      if (mode === 'create') {
+        onCreate && onCreate(values)
+      }
+      else {
+        onUpdate && onUpdate(values)
+      }
       handleCancel()
     }
-    catch (e) {
-      console.log(e)
+    catch {
       message.error('请检查表单是否填写完整')
     }
   }
 
   function handleCancel() {
     form.resetFields()
-    onClose()
+    onClose && onClose()
   }
 
   return (
@@ -59,15 +64,20 @@ function UserFormModal(props: UserFormModalProps) {
       onOk={handleSubmit}
       onCancel={handleCancel}
     >
-      <Form form={form}>
+      <Form form={form} initialValues={{ isFrozen: false, isAdmin: false, roles: [] }}>
         <Row gutter={8}>
-          <Col>
+          <Col span={12}>
             <Form.Item name="username" label="用户名" required>
               <Input placeholder="请输入用户名" />
             </Form.Item>
           </Col>
-          <Col>
-            <Form.Item name="phone" label="手机号" required>
+          <Col span={12}>
+            <Form.Item name="nickname" label="昵称">
+              <Input placeholder="请输入昵称" />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item name="phoneNumber" label="手机号" required>
               <Input placeholder="请输入手机号" />
             </Form.Item>
           </Col>
@@ -76,13 +86,44 @@ function UserFormModal(props: UserFormModalProps) {
         {
           mode === 'create' && (
             <Row gutter={8}>
-              <Col>
-                <Form.Item name="password" label="密码" required>
+              <Col span={12}>
+                <Form.Item
+                  name="password"
+                  label="密码"
+                  rules={
+                    [
+                      { required: true },
+                      () => ({
+                        validator(_, value) {
+                          if (value.length < 6) {
+                            return Promise.reject(new Error('密码不能少于6位'))
+                          }
+                        },
+                      }),
+                    ]
+                  }
+                >
                   <Input.Password placeholder="请输入密码" />
                 </Form.Item>
               </Col>
-              <Col>
-                <Form.Item name="confirmPassword" label="确认密码" required>
+              <Col span={12}>
+                <Form.Item
+                  name="confirmPassword"
+                  label="确认密码"
+                  rules={[
+                    {
+                      required: true,
+                    },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || getFieldValue('password') === value) {
+                          return Promise.resolve()
+                        }
+                        return Promise.reject(new Error('两次密码输入不一致!'))
+                      },
+                    }),
+                  ]}
+                >
                   <Input.Password placeholder="请再次输入密码" />
                 </Form.Item>
               </Col>

@@ -1,6 +1,6 @@
 import { getOrderDetailById } from '@/apis/order.ts'
 import { ImageGallery } from '@/components/ImageGallery/ImageGallery.tsx'
-import { useOrderInfoContext } from '@/contexts/orderInfoContext'
+import { useOrderInfoContext } from '@/contexts/OrderInfoContext'
 import { Drawer } from 'antd'
 import { useEffect, useState } from 'react'
 

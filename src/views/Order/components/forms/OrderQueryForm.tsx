@@ -1,6 +1,7 @@
-import { CustomForm } from '@/components/CustomForm.tsx'
+import SimpleForm from '@/components/SimpleForm'
 import { OrderStatus } from '@/types/order.ts'
 import { Badge } from 'antd'
+import { useEffect } from 'react'
 
 interface IOrderQueryFormProps {
   onQuery: (values: { order_number?: string, customer_name?: string, customer_phone?: string, status?: OrderStatus }) => void
@@ -17,22 +18,21 @@ export function OrderQueryForm(props: IOrderQueryFormProps) {
     { label: <Badge status="error" text="订单已取消" />, value: OrderStatus.CANCEL.toString() },
   ]
 
+  useEffect(() => {
+    console.log(onQuery, onReset)
+  }, [])
+
   return (
-    <CustomForm
+    <SimpleForm
       layout="inline"
       fields={[
-        { label: '订单号', name: 'order_number', type: 'input' },
-        { label: '客户姓名', name: 'customer_name', type: 'input' },
-        { label: '客户手机', name: 'customer_phone', type: 'input' },
         {
-          label: '订单状态',
-          name: 'status',
           type: 'select',
+          name: 'status',
+          placeholder: '请选择订单状态',
           options,
         },
       ]}
-      onSubmit={onQuery}
-      onReset={onReset}
     />
   )
 }

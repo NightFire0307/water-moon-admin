@@ -6,7 +6,7 @@ import { devtools } from 'zustand/middleware'
 interface ShareLinkInfo {
   share_url: string
   share_password: string
-  expired_at: string
+  expired_at: number
 }
 
 interface ShareLinkState {
@@ -22,7 +22,7 @@ export const useShareLink = create<ShareLinkState & ShareLinkAction>()(
     shareLinkInfo: {
       share_url: '',
       share_password: '',
-      expired_at: '',
+      expired_at: 0,
     },
     createShareUrl: async (order_id, access_password, expired_at) => {
       const { data } = await generateShareLink({
@@ -30,7 +30,6 @@ export const useShareLink = create<ShareLinkState & ShareLinkAction>()(
         password: access_password,
         expired_at: expired_at === 0 ? expired_at : dayjs().add(expired_at, 'day').unix(),
       })
-      console.log(data)
 
       set({
         shareLinkInfo: {

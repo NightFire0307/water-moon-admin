@@ -70,9 +70,8 @@ export function SelectionResult() {
   ]
 
   useEffect(() => {
-    console.log(orderId)
-
-    setPhotos((prev) => {
+    console.log('orderId', orderId)
+    setPhotos(() => {
       const newPhotos: IPhoto[] = []
       for (let i = 0; i < 10; i++) {
         newPhotos.push({

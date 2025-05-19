@@ -1,4 +1,4 @@
-import type { Response } from '@/types/common.ts'
+import type { ApiResponse } from '@/types/common.ts'
 import type { AxiosError } from 'axios'
 import { message } from 'antd'
 import axios from 'axios'
@@ -39,7 +39,7 @@ service.interceptors.response.use(
   (response) => {
     return response.data
   },
-  (error: AxiosError<Response<any>>) => {
+  (error: AxiosError<ApiResponse<any>>) => {
     switch (error.status) {
       case 400:
         message.error(error.response?.data.msg)

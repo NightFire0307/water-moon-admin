@@ -1,12 +1,11 @@
 import type { CreateOrderData, ProductsInfo } from '@/types/order.ts'
 import type { IProduct } from '@/types/product.ts'
 import { getProductList } from '@/apis/product.ts'
-import { LockedOrder } from '@/views/Order/components/forms/OrderModalStepForm.leagcy'
 import { SelectProductCard } from '@/views/Order/SelectProductCard.tsx'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Col, Form, Input, InputNumber, Row, Select, Space } from 'antd'
 import { useForm } from 'antd/es/form/Form'
-import { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react'
 
 interface CreateOrderProps {
   submitData: CreateOrderData
@@ -22,16 +21,8 @@ export const OrderForm = forwardRef<CreateOrderRef, CreateOrderProps>((props, re
   const [singleProducts, setSingleProducts] = useState<ProductsInfo[]>([])
   const [productOptions, setProductOptions] = useState<IProduct[]>([])
   const [singleDisabled, setSingleDisabled] = useState(true)
-  const [disabled, setDisabled] = useState(false)
+  const [disabled, _] = useState(false)
   const [form] = useForm()
-
-  const lockedOrder = useContext(LockedOrder)
-
-  useEffect(() => {
-    if (lockedOrder.id) {
-      setDisabled(true)
-    }
-  }, [lockedOrder])
 
   useImperativeHandle(ref, () => ({
     getValues: async () => {

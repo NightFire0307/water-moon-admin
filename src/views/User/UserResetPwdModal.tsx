@@ -4,7 +4,7 @@ export interface UserResetPwdModalProps {
   userId: number
   open: boolean
   onClose: () => void
-  onReset: (values: { password: string, confirmPassword: string }) => void
+  onReset: (values: { password: string, confirmPassword: string, userId: number }) => void
 }
 
 function UserResetPwdModal(props: UserResetPwdModalProps) {

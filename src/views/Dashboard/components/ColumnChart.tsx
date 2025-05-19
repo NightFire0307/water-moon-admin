@@ -1,25 +1,5 @@
 import useEcharts from '@/hooks/useEcharts'
-import { color } from 'echarts'
-
-import { BarChart } from 'echarts/charts'
-import {
-  GridComponent,
-  LegendComponent,
-  TitleComponent,
-  TooltipComponent,
-} from 'echarts/components'
-import * as echarts from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
 import { type FC, useEffect } from 'react'
-
-echarts.use([
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  LegendComponent,
-  BarChart,
-  CanvasRenderer,
-])
 
 export const ColumnChart: FC = () => {
   const { chartRef, initChart, setOptions } = useEcharts()

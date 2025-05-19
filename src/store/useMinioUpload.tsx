@@ -1,5 +1,4 @@
 import type { IPhoto } from '@/types/photo.ts'
-import type { ISelectOrder } from '@/views/Order/components/core/Order.tsx'
 import type { GetProp, UploadProps } from 'antd'
 import type { AxiosRequestConfig } from 'axios'
 import request from '@/utils/request.ts'
@@ -59,7 +58,7 @@ interface GenerateUploadTaskOptions {
 
 interface UploadFileAction {
   setUploadToken: (token: string) => void
-  generateUploadTask: (files: FileType, selectOrder: ISelectOrder, options?: GenerateUploadTaskOptions) => void
+  generateUploadTask: (files: FileType, selectOrder: { orderId: number, orderNumber: string }, options?: GenerateUploadTaskOptions) => void
   startUploadTask: () => void
   cancelUploadTask: (uid: string) => void
   cancelAllUploadTask: () => void

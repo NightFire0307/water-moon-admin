@@ -1,5 +1,5 @@
 import { generateShareLink } from '@/apis/link'
-import { useOrderInfoContext } from '@/contexts/orderInfoContext'
+import { useOrderInfoContext } from '@/contexts/OrderInfoContext'
 import { Button, Form, Input, message, Radio } from 'antd'
 import dayjs from 'dayjs'
 import { type FC, useState } from 'react'

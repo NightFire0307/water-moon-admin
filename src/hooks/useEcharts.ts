@@ -1,4 +1,7 @@
+import { BarChart, LineChart } from 'echarts/charts'
+import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
 import * as echarts from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
 import { useCallback, useEffect, useRef } from 'react'
 
 /**
@@ -9,6 +12,8 @@ import { useCallback, useEffect, useRef } from 'react'
 function useEcharts() {
   const chartRef = useRef<HTMLDivElement>(null)
   const chartInstance = useRef<echarts.EChartsType | null>(null)
+
+  echarts.use([GridComponent, LineChart, CanvasRenderer, TooltipComponent, LegendComponent, BarChart])
 
   const initChart = useCallback(() => {
     if (!chartRef.current)

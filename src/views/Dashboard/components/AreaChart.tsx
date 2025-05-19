@@ -2,11 +2,6 @@ import type { LineSeriesOption } from 'echarts/charts'
 import type { GridComponentOption } from 'echarts/components'
 import useEcharts from '@/hooks/useEcharts'
 import { graphic, type LegendComponentOption, type TooltipComponentOption } from 'echarts'
-import { LineChart } from 'echarts/charts'
-import { GridComponent, TooltipComponent } from 'echarts/components'
-import * as echarts from 'echarts/core'
-import { UniversalTransition } from 'echarts/features'
-import { CanvasRenderer } from 'echarts/renderers'
 import { type FC, useEffect } from 'react'
 
 type EChartsOption = echarts.ComposeOption<
@@ -86,8 +81,6 @@ export const AreaChart: FC = () => {
       containLabel: true,
     },
   }
-
-  echarts.use([GridComponent, LineChart, CanvasRenderer, UniversalTransition, TooltipComponent])
 
   useEffect(() => {
     if (chartRef.current) {

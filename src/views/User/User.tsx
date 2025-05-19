@@ -1,13 +1,12 @@
 import type { IUser } from '@/types/user.ts'
 import type { UserFormModalProps } from '@/views/User/UserFormModal.tsx'
 import type { MenuProps, TableColumnProps } from 'antd'
-import { getUserList, resetUserPassword } from '@/apis/user.ts'
+import { createUser, delUserById, getUserList, resetUserPassword, updateUser } from '@/apis/user.ts'
 import RotateCcW from '@/assets/icons/rotate-ccw.svg?react'
 import UserFormModal from '@/views/User/UserFormModal.tsx'
 import UserResetPwdModal from '@/views/User/UserResetPwdModal.tsx'
 import { DeleteOutlined, EditOutlined, ExclamationCircleFilled, MoreOutlined, SearchOutlined, UserAddOutlined } from '@ant-design/icons'
-
-import { Button, Dropdown, Flex, Form, Input, message, Modal, Popconfirm, Space, Switch, Table, Tag } from 'antd'
+import { Button, Dropdown, Flex, Form, Input, message, Modal, Space, Switch, Table, Tag } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 
@@ -74,7 +73,7 @@ function Action(props: ActionProps) {
             onDelete()
           },
           onCancel() {
-            message.info('已取消删除')
+            message.info('已取消操作')
           },
         })
         break
@@ -114,7 +113,14 @@ function User() {
     {
       dataIndex: 'isFrozen',
       title: '是否冻结',
-      render: (value: boolean) => <Switch value={value} checkedChildren="已冻结" unCheckedChildren="未冻结" />,
+      render: (value: boolean, record) => (
+        <Switch
+          checked={value}
+          checkedChildren="已冻结"
+          unCheckedChildren="未冻结"
+          onChange={value => handleSwitchChange(value, record.user_id)}
+        />
+      ),
     },
     {
       dataIndex: 'createTime',
@@ -143,11 +149,12 @@ function User() {
     setUserFormModal({ open: true, mode: 'edit', initialValues: record })
   }
 
-  function handleUserDelete(userId: number) {
-    console.log(userId)
+  async function handleUserDelete(userId: number) {
+    await delUserById(userId)
+    message.success('用户删除成功')
   }
 
-  async function handleUserResetPwd(value) {
+  async function handleUserResetPwd(value: { password: string, confirmPassword: string, userId: number }) {
     const { msg } = await resetUserPassword(value)
     message.success(msg)
     setUserResetPwdModal({ open: false, userId: -1 })
@@ -158,26 +165,54 @@ function User() {
     setTableData(data.list)
   }
 
+  async function handleSwitchChange(value: boolean, userId: number) {
+    setTableData((prev) => {
+      for (const data of prev) {
+        if (data.user_id === userId) {
+          data.isFrozen = value
+          break
+        }
+      }
+
+      return [...prev]
+    })
+
+    try {
+      await updateUser(userId, { isFrozen: value })
+      message.success('用户状态更新成功')
+    }
+    catch {
+      message.error('用户状态更新失败')
+    }
+  }
+
+  async function handleCreateUser(value: IUser) {
+    await createUser(value)
+  }
+
   useEffect(() => {
     fetchUser()
   }, [])
 
   return (
-    <Space direction="vertical" style={{ width: '100%' }} size="middle">
-      <Flex justify="space-between">
-        <Form layout="inline">
-          <Form.Item>
-            <Input placeholder="请输入用户名/手机号" prefix={<SearchOutlined />} />
-          </Form.Item>
-        </Form>
-        <Button type="primary" icon={<UserAddOutlined />} onClick={handleUserAdd}>新增用户</Button>
-      </Flex>
-      <Table rowSelection={{ type: 'checkbox' }} rowKey="user_id" columns={columns} dataSource={tableData} />
+    <div style={{ padding: 24 }}>
+      <Space direction="vertical" style={{ width: '100%' }} size="middle">
+        <Flex justify="space-between">
+          <Form layout="inline">
+            <Form.Item>
+              <Input placeholder="请输入用户名/手机号" prefix={<SearchOutlined />} />
+            </Form.Item>
+          </Form>
+          <Button type="primary" icon={<UserAddOutlined />} onClick={handleUserAdd}>新增用户</Button>
+        </Flex>
+        <Table rowSelection={{ type: 'checkbox' }} rowKey="user_id" columns={columns} dataSource={tableData} />
+      </Space>
       <UserFormModal
         open={userFormModal.open}
         mode={userFormModal.mode}
         initialValues={userFormModal.initialValues}
-        onSubmit={() => {}}
+        onCreate={handleCreateUser}
+        onUpdate={() => {}}
         onClose={() => setUserFormModal({ open: false, mode: 'create' })}
       />
       <UserResetPwdModal
@@ -186,7 +221,7 @@ function User() {
         onClose={() => setUserResetPwdModal({ open: false, userId: -1 })}
         onReset={handleUserResetPwd}
       />
-    </Space>
+    </div>
   )
 }
 

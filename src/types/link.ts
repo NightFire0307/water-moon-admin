@@ -1,11 +1,11 @@
-import type { Pagination, ApiResponse } from '@/types/common.ts'
+import type { ApiResponse, Pagination } from '@/types/common.ts'
 
 export interface ILink {
   id: number
   share_url: string
   share_password: string
   status: string
-  expired_at: string | null
+  expired_at: number
   created_at: string
   created_by: number
 }
