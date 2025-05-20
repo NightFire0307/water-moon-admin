@@ -4,7 +4,7 @@ import request from '@/utils/request.ts'
 
 export function getOrderList(params = {}): OrderResponse {
   return request({
-    url: '/api/admin/orders',
+    url: '/admin/orders',
     method: 'GET',
     params,
   })
@@ -12,14 +12,14 @@ export function getOrderList(params = {}): OrderResponse {
 
 export function getOrderDetailById(id: number): OrderDetailResponse {
   return request({
-    url: `/api/admin/orders/${id}`,
+    url: `/admin/orders/${id}`,
     method: 'GET',
   })
 }
 
 export function createOrder(data: CreateOrderData): Promise<ApiResponse<IOrder>> {
   return request({
-    url: '/api/admin/orders',
+    url: '/admin/orders',
     method: 'POST',
     data,
   })
@@ -27,7 +27,7 @@ export function createOrder(data: CreateOrderData): Promise<ApiResponse<IOrder>>
 
 export function updateOrder(id: number, data: { id: number & CreateOrderData }): Promise<ApiResponse<number>> {
   return request({
-    url: `/api/admin/orders/${id}`,
+    url: `/admin/orders/${id}`,
     method: 'PUT',
     data,
   })
@@ -35,14 +35,14 @@ export function updateOrder(id: number, data: { id: number & CreateOrderData }):
 
 export function removeOrder(id: number): Promise<ApiResponse<string>> {
   return request({
-    url: `/api/admin/orders/${id}`,
+    url: `/admin/orders/${id}`,
     method: 'DELETE',
   })
 }
 
 export function resetOrderStatus(id: number, data: { resetSelection: boolean }): Promise<ApiResponse<number>> {
   return request({
-    url: `/api/admin/orders/${id}`,
+    url: `/admin/orders/${id}`,
     method: 'patch',
     data,
   })
@@ -50,14 +50,14 @@ export function resetOrderStatus(id: number, data: { resetSelection: boolean }):
 
 export function getOrderResult(id: number): OrderResultResponse {
   return request({
-    url: `/api/admin/orders/${id}/result`,
+    url: `/admin/orders/${id}/result`,
     method: 'GET',
   })
 }
 
 export function downloadResult(id: number): Promise<Blob> {
   return request({
-    url: `/api/admin/orders/${id}/result/export`,
+    url: `/admin/orders/${id}/result/export`,
     method: 'GET',
     responseType: 'blob',
   })

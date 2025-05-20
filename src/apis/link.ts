@@ -10,7 +10,7 @@ interface ShareLinkData {
 
 export function generateShareLink(data: ShareLinkData): LinkResponseData {
   return request({
-    url: '/api/admin/order/link',
+    url: '/admin/order/link',
     method: 'post',
     data,
   })
@@ -18,7 +18,7 @@ export function generateShareLink(data: ShareLinkData): LinkResponseData {
 
 export function getShareLinksByOrderId(orderId: number, params: PaginationParams): LinksResponseData {
   return request({
-    url: `/api/admin/order/link/${orderId}`,
+    url: `/admin/order/link/${orderId}`,
     method: 'get',
     params,
   })
@@ -26,7 +26,7 @@ export function getShareLinksByOrderId(orderId: number, params: PaginationParams
 
 export function delShareLinkByOrderId(orderId: number): Promise<ApiResponse<number>> {
   return request({
-    url: `/api/admin/order/link/${orderId}`,
+    url: `/admin/order/link/${orderId}`,
     method: 'delete',
   })
 }

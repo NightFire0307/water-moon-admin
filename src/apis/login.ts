@@ -3,7 +3,7 @@ import request from '../utils/request.ts'
 
 export function login(data: { username: string, password: string }): LoginResponseData {
   return request({
-    url: '/api/auth/admin/login',
+    url: '/auth/admin/login',
     method: 'post',
     data,
   })

@@ -18,7 +18,6 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <App />
-        <Navigate to="dashboard" replace />
       </ProtectedRoute>
     ),
     handle: {

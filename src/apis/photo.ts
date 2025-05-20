@@ -8,7 +8,7 @@ interface GetPhotosByOrderIdParams extends PaginationParams {
 
 export function getPhotosByOrderId(params: GetPhotosByOrderIdParams) {
   return request({
-    url: `/api/admin/photos`,
+    url: `/admin/photos`,
     method: 'get',
     params,
   })
@@ -16,7 +16,7 @@ export function getPhotosByOrderId(params: GetPhotosByOrderIdParams) {
 
 export function updatePhotosRecommend(orderId: number, data: { photoIds: number[], isRecommended: boolean }): Promise<ApiResponse<number[]>> {
   return request({
-    url: `/api/admin/photos/recommend/${orderId}`,
+    url: `/admin/photos/recommend/${orderId}`,
     method: 'put',
     data,
   })
@@ -24,7 +24,7 @@ export function updatePhotosRecommend(orderId: number, data: { photoIds: number[
 
 export function savePhotos(orderId: number, data: { file_name: string, file_size: number }[]): PhotosResponse {
   return request({
-    url: `/api/admin/photos/${orderId}`,
+    url: `/admin/photos/${orderId}`,
     method: 'post',
     data,
   })
@@ -32,7 +32,7 @@ export function savePhotos(orderId: number, data: { file_name: string, file_size
 
 export function removePhotos(orderId: number, data: { photoIds: number[] }) {
   return request({
-    url: `/api/admin/photos/${orderId}`,
+    url: `/admin/photos/${orderId}`,
     method: 'delete',
     data,
   })

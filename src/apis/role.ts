@@ -3,7 +3,7 @@ import request from '@/utils/request.ts'
 
 export function getRoleList(params = {}): RoleResponse {
   return request({
-    url: '/api/admin/roles',
+    url: '/admin/roles',
     method: 'GET',
     params,
   })

@@ -6,7 +6,7 @@ type UserParams = PaginationParams & { username?: string }
 
 export function getUserList(params: UserParams): UserResponseData {
   return request({
-    url: '/api/admin/users',
+    url: '/admin/users',
     method: 'GET',
     params,
   })
@@ -14,7 +14,7 @@ export function getUserList(params: UserParams): UserResponseData {
 
 export function createUser(data: any) {
   return request({
-    url: '/api/admin/users',
+    url: '/admin/users',
     method: 'POST',
     data,
   })
@@ -22,7 +22,7 @@ export function createUser(data: any) {
 
 export function updateUser(userId: number, data: any) {
   return request({
-    url: `/api/admin/users/${userId}`,
+    url: `/admin/users/${userId}`,
     method: 'PUT',
     data,
   })
@@ -30,7 +30,7 @@ export function updateUser(userId: number, data: any) {
 
 export function resetUserPassword(data: { userId: number, password: string }): Promise<ApiResponse<number>> {
   return request({
-    url: '/api/admin/users/reset_password',
+    url: '/admin/users/reset_password',
     method: 'POST',
     data,
   })
@@ -38,7 +38,7 @@ export function resetUserPassword(data: { userId: number, password: string }): P
 
 export function delUserById(userId: number): Promise<ApiResponse<number>> {
   return request({
-    url: `/api/admin/users/${userId}`,
+    url: `/admin/users/${userId}`,
     method: 'DELETE',
   })
 }
