@@ -67,7 +67,7 @@ function UserFormModal(props: UserFormModalProps) {
       <Form form={form} initialValues={{ isFrozen: false, isAdmin: false, roles: [] }}>
         <Row gutter={8}>
           <Col span={12}>
-            <Form.Item name="username" label="用户名" required>
+            <Form.Item name="username" label="用户名" rules={[{ required: true, message: '请输入用户名' }]}>
               <Input placeholder="请输入用户名" />
             </Form.Item>
           </Col>
@@ -77,7 +77,17 @@ function UserFormModal(props: UserFormModalProps) {
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item name="phoneNumber" label="手机号" required>
+            <Form.Item
+              name="phoneNumber"
+              label="手机号"
+              rules={[
+                { required: true, message: '请输入手机号' },
+                {
+                  pattern: /^1[3-9]\d{9}$/,
+                  message: '请输入有效的11位手机号',
+                },
+              ]}
+            >
               <Input placeholder="请输入手机号" />
             </Form.Item>
           </Col>
@@ -98,6 +108,8 @@ function UserFormModal(props: UserFormModalProps) {
                           if (value.length < 6) {
                             return Promise.reject(new Error('密码不能少于6位'))
                           }
+
+                          return Promise.resolve()
                         },
                       }),
                     ]

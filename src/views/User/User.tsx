@@ -3,6 +3,7 @@ import type { UserFormModalProps } from '@/views/User/UserFormModal.tsx'
 import type { MenuProps, TableColumnProps } from 'antd'
 import { createUser, delUserById, getUserList, resetUserPassword, updateUser } from '@/apis/user.ts'
 import RotateCcW from '@/assets/icons/rotate-ccw.svg?react'
+import { useFetch } from '@/hooks/useFetch'
 import UserFormModal from '@/views/User/UserFormModal.tsx'
 import UserResetPwdModal from '@/views/User/UserResetPwdModal.tsx'
 import { DeleteOutlined, EditOutlined, ExclamationCircleFilled, MoreOutlined, SearchOutlined, UserAddOutlined } from '@ant-design/icons'
@@ -90,9 +91,10 @@ function Action(props: ActionProps) {
 }
 
 function User() {
-  const [tableData, setTableData] = useState<IUser[]>([])
+  const [dataSource, setDataSource] = useState<IUser[]>([])
   const [userFormModal, setUserFormModal] = useState<IUserFormModal>({ open: false, mode: 'create' })
   const [userResetPwdModal, setUserResetPwdModal] = useState<{ open: boolean, userId: number }>({ open: false, userId: -1 })
+  const { loading, refetch, data } = useFetch<{ list: IUser[] }, any>(getUserList, { manual: true })
 
   const columns: TableColumnProps[] = [
     {
@@ -152,6 +154,7 @@ function User() {
   async function handleUserDelete(userId: number) {
     await delUserById(userId)
     message.success('用户删除成功')
+    refetch()
   }
 
   async function handleUserResetPwd(value: { password: string, confirmPassword: string, userId: number }) {
@@ -160,13 +163,8 @@ function User() {
     setUserResetPwdModal({ open: false, userId: -1 })
   }
 
-  async function fetchUser() {
-    const { data } = await getUserList({ pageSize: 10, current: 1 })
-    setTableData(data.list)
-  }
-
   async function handleSwitchChange(value: boolean, userId: number) {
-    setTableData((prev) => {
+    setDataSource((prev) => {
       for (const data of prev) {
         if (data.user_id === userId) {
           data.isFrozen = value
@@ -188,11 +186,19 @@ function User() {
 
   async function handleCreateUser(value: IUser) {
     await createUser(value)
+    message.success('用户创建成功')
+    refetch()
   }
 
   useEffect(() => {
-    fetchUser()
+    refetch()
   }, [])
+
+  useEffect(() => {
+    if (data) {
+      setDataSource(data.list)
+    }
+  }, [data])
 
   return (
     <div style={{ padding: 24 }}>
@@ -205,7 +211,7 @@ function User() {
           </Form>
           <Button type="primary" icon={<UserAddOutlined />} onClick={handleUserAdd}>新增用户</Button>
         </Flex>
-        <Table rowSelection={{ type: 'checkbox' }} rowKey="user_id" columns={columns} dataSource={tableData} />
+        <Table rowSelection={{ type: 'checkbox' }} rowKey="user_id" columns={columns} dataSource={dataSource} loading={loading} />
       </Space>
       <UserFormModal
         open={userFormModal.open}
