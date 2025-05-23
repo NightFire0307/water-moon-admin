@@ -1,17 +1,20 @@
 import type { IRole } from '@/types/role'
 import type { TableProps } from 'antd/lib'
-import { getRoleList } from '@/apis/role'
+import { createRole, deleteRole, getRoleByRoleId, getRoleList, updateRole } from '@/apis/role'
 import useTableSelection from '@/hooks/useTableSelection'
-import { MoreOutlined, SearchOutlined } from '@ant-design/icons'
-import { Button, Flex, Form, Input, Space, Table } from 'antd'
+import { SearchOutlined } from '@ant-design/icons'
+import { Button, Flex, Form, Input, message, Modal, Space, Table } from 'antd'
 import dayjs from 'dayjs'
 import { type FC, useEffect, useState } from 'react'
+import ActionButton from './components/ActionButton'
 import RoleFormModal, { type RoleFormModalProps } from './RoleFormModal'
+
+const { confirm } = Modal
 
 type RoleFormState = Omit<RoleFormModalProps, 'onClose'>
 
 interface RoleDataType {
-  role_id: string
+  role_id: number
   name: string
   description: string
 }
@@ -22,6 +25,7 @@ const Role: FC = () => {
     open: false,
   })
   const [dataSource, setDataSource] = useState<IRole[]>([])
+  const [initValues, setInitValues] = useState<IRole | null>(null)
 
   const { rowSelection } = useTableSelection({ type: 'checkbox' })
 
@@ -45,15 +49,50 @@ const Role: FC = () => {
     },
     {
       title: '操作',
-      render: () => (
-        <Button type="text" icon={<MoreOutlined />} />
+      render: (_, record) => (
+        <ActionButton
+          onEdit={() => handleEdit(record.role_id)}
+          onDelete={() => handleDeleteRole(record.role_id)}
+        />
       ),
     },
   ]
 
-  const fetchRoles = async () => {
+  const handleCreateRole = async (values: any) => {
+    await createRole(values)
+    message.success('创建成功')
+    setRoleFormState({ open: false, mode: 'create' })
+    fetchRoles()
+  }
+
+  const handleEditRole = async (roleId: number, values: any) => {
+    await updateRole(roleId, values)
+  }
+
+  async function fetchRoles() {
     const { data } = await getRoleList({})
     setDataSource(data.list)
+  }
+
+  async function handleEdit(roleId: number) {
+    const { data } = await getRoleByRoleId(roleId)
+    setInitValues(data)
+    setRoleFormState({ open: true, mode: 'edit' })
+  }
+
+  function handleDeleteRole(roleId: number) {
+    confirm({
+      title: '是否删除该角色?',
+      content: '删除后该角色将无法恢复',
+      async onOk() {
+        await deleteRole(roleId)
+        message.success('删除成功')
+        fetchRoles()
+      },
+      onCancel() {
+        message.info('取消删除')
+      },
+    })
   }
 
   useEffect(() => {
@@ -76,15 +115,15 @@ const Role: FC = () => {
         rowKey="role_id"
         rowSelection={rowSelection}
         columns={columns}
-        dataSource={dataSource.map(role => ({
-          ...role,
-          role_id: role.role_id.toString(),
-        }))}
+        dataSource={dataSource}
       />
 
       <RoleFormModal
         open={roleFormState.open}
         mode={roleFormState.mode}
+        initValues={initValues}
+        onCreate={handleCreateRole}
+        onEdit={handleEditRole}
         onClose={() => setRoleFormState(prev => ({ ...prev, open: false }))}
       />
     </Space>

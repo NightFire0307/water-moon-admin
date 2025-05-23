@@ -18,12 +18,13 @@ interface UseFetchOptions<TData, TParams> {
 
 export function useFetch<TData, TParams>(
   fetchFn: (...args: TParams[]) => Promise<{ data: TData }>,
-  options: UseFetchOptions<TData, TParams>,
+  options: UseFetchOptions<TData, TParams> = {},
 ): UseFetchResult<TData> {
-  const { manual, params = [], onSuccess } = options
+  const { manual, params, onSuccess } = options
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<TData | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const defaultParamsRef = useRef<TParams[]>(params || [])
   const latestRequestId = useRef(0)
 
   const refetch = async (...args: any[]) => {
@@ -32,7 +33,7 @@ export function useFetch<TData, TParams>(
     setLoading(true)
     setError(null)
     try {
-      const { data } = await fetchFn(...params, ...args)
+      const { data } = await fetchFn(...defaultParamsRef.current, ...args)
       if (requestId === latestRequestId.current) {
         setData(data)
         onSuccess && onSuccess(data, params || [])
@@ -53,7 +54,7 @@ export function useFetch<TData, TParams>(
     if (!manual) {
       refetch()
     }
-  }, [manual, params])
+  }, [params])
 
   return {
     data,
