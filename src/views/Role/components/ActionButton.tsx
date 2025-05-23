@@ -15,7 +15,7 @@ interface ActionButtonProps {
 function ActionButton(props: ActionButtonProps) {
   const { onEdit, onDelete } = props
 
-  const handleMenuClick = ({ key }) => {
+  const handleMenuClick = ({ key }: { key: string }) => {
     switch (key) {
       case ActionButtonType.EDIT:
         onEdit?.()
