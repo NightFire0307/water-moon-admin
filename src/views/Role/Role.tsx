@@ -67,6 +67,9 @@ const Role: FC = () => {
 
   const handleEditRole = async (roleId: number, values: any) => {
     await updateRole(roleId, values)
+    message.success('编辑成功')
+    setRoleFormState({ open: false, mode: 'create' })
+    fetchRoles()
   }
 
   async function fetchRoles() {

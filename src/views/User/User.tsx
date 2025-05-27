@@ -190,6 +190,12 @@ function User() {
     refetch()
   }
 
+  async function handleUpdateUser(userId: number, value: IUser) {
+    await updateUser(userId, value)
+    message.success('用户更新成功')
+    refetch()
+  }
+
   useEffect(() => {
     refetch()
   }, [])
@@ -218,7 +224,7 @@ function User() {
         mode={userFormModal.mode}
         initialValues={userFormModal.initialValues}
         onCreate={handleCreateUser}
-        onUpdate={() => {}}
+        onUpdate={handleUpdateUser}
         onClose={() => setUserFormModal({ open: false, mode: 'create' })}
       />
       <UserResetPwdModal

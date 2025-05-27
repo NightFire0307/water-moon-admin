@@ -9,7 +9,7 @@ export interface UserFormModalProps {
   mode: 'create' | 'edit'
   initialValues?: IUser
   onCreate?: (values: IUser) => void
-  onUpdate?: (values: IUser) => void
+  onUpdate?: (userId: number, values: IUser) => void
   onClose?: () => void
 }
 
@@ -43,7 +43,12 @@ function UserFormModal(props: UserFormModalProps) {
         onCreate && onCreate(values)
       }
       else {
-        onUpdate && onUpdate(values)
+        if (!initialValues?.user_id) {
+          message.error('用户ID不存在，无法更新')
+          return
+        }
+
+        onUpdate && onUpdate(initialValues?.user_id, values)
       }
       handleCancel()
     }
