@@ -23,9 +23,17 @@ export interface UserInfo {
   updateTime: string
 }
 
+export interface LoginUserInfo {
+  userId: number
+  username: string
+  nickname: string
+  roles: string[]
+  permissions: string[]
+}
+
 export interface LoginResponse {
   accessToken: string
-  userInfo: UserInfo
+  userInfo: LoginUserInfo
 }
 
 export interface OssTokenResponse {

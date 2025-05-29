@@ -1,11 +1,11 @@
-import type { Pagination, ApiResponse } from '@/types/common.ts'
+import type { ApiResponse, Pagination } from '@/types/common.ts'
 
 export interface IUser {
   user_id: number
   username: string
   nickname: string
   phone: string
-  roles: { role_id: number, name: string }[]
+  roles: { roleId: number, name: string }[]
   isAdmin: boolean
   isFrozen: boolean
   createTime: string

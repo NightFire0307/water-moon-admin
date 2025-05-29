@@ -86,6 +86,9 @@ const RoleFormModal: FC<RoleFormModalProps> = ({ open, mode, initValues, onCreat
     >
       <Form form={form}>
         <Form.Item>
+          <Form.Item name="code" label="角色编码" required>
+            <Input placeholder="请输入角色编码" />
+          </Form.Item>
           <Form.Item
             name="name"
             label="角色名称"

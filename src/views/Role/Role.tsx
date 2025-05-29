@@ -14,7 +14,7 @@ const { confirm } = Modal
 type RoleFormState = Omit<RoleFormModalProps, 'onClose'>
 
 interface RoleDataType {
-  role_id: number
+  roleId: number
   name: string
   description: string
 }
@@ -31,8 +31,12 @@ const Role: FC = () => {
 
   const columns: TableProps<RoleDataType>['columns'] = [
     {
-      dataIndex: 'role_id',
+      dataIndex: 'roleId',
       title: '角色ID',
+    },
+    {
+      dataIndex: 'code',
+      title: '角色编码',
     },
     {
       dataIndex: 'name',
@@ -51,8 +55,8 @@ const Role: FC = () => {
       title: '操作',
       render: (_, record) => (
         <ActionButton
-          onEdit={() => handleEdit(record.role_id)}
-          onDelete={() => handleDeleteRole(record.role_id)}
+          onEdit={() => handleEdit(record.roleId)}
+          onDelete={() => handleDeleteRole(record.roleId)}
         />
       ),
     },
@@ -115,7 +119,7 @@ const Role: FC = () => {
       </Flex>
 
       <Table
-        rowKey="role_id"
+        rowKey="roleId"
         rowSelection={rowSelection}
         columns={columns}
         dataSource={dataSource}

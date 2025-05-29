@@ -50,6 +50,9 @@ service.interceptors.response.use(
         useUserInfo.getState().clearToken()
         window.location.href = '/login'
         break
+      case 403:
+        message.error('您没有权限访问该资源')
+        break
       default:
         message.error(`接口请求错误：${error.code}`)
         break

@@ -1,7 +1,7 @@
 import type { ApiResponse, Pagination } from './common'
 
 export interface IRole {
-  role_id: number
+  roleId: number
   name: string
   description: string
   created_at: string

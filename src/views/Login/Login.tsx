@@ -10,6 +10,7 @@ import styles from './Login.module.less'
 export function Login() {
   const [loading, setLoading] = useState(false)
   const saveToken = useUserInfo(state => state.saveToken)
+  const saveUserInfo = useUserInfo(state => state.saveUserInfo)
   const navigate = useNavigate()
   const [form] = useForm()
 
@@ -18,13 +19,14 @@ export function Login() {
     const values = form.getFieldsValue()
     try {
       const { data } = await login(values)
-      const { accessToken } = data
+      const { accessToken, userInfo } = data
       await saveToken(accessToken)
+      await saveUserInfo(userInfo)
 
       if (accessToken) {
         message.success('登录成功')
         setTimeout(() => {
-          navigate('/')
+          navigate('/dashboard')
         }, 1000)
       }
     }

@@ -1,5 +1,6 @@
 import type { PropsWithChildren } from 'react'
 import { message } from 'antd'
+import localforage from 'localforage'
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import { useUserInfo } from '../store/useUserInfo.tsx'
@@ -10,6 +11,7 @@ export function ProtectedRoute(props: PropsWithChildren) {
   const isAuthenticated = useRef(false) // 使用 useRef 存储 isAuthenticated
   const accessToken = useUserInfo(state => state.accessToken)
   const loadToken = useUserInfo(state => state.loadToken)
+  const saveUserInfo = useUserInfo(state => state.saveUserInfo)
 
   useEffect(() => {
     if (accessToken) {
@@ -25,6 +27,20 @@ export function ProtectedRoute(props: PropsWithChildren) {
       }
     })
   }, [loadToken, accessToken, navigate])
+
+  useEffect(() => {
+    localforage.getItem('userInfo').then((userInfoData) => {
+      if (userInfoData) {
+        saveUserInfo(userInfoData as {
+          userId: number
+          username: string
+          nickname: string
+          roles: string[]
+          permissions: string[]
+        })
+      }
+    })
+  }, [])
 
   return children
 }

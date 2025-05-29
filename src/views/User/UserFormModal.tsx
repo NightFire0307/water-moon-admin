@@ -21,7 +21,7 @@ function UserFormModal(props: UserFormModalProps) {
   useEffect(() => {
     if (mode === 'edit' && initialValues) {
       // 提取Roles
-      const roles = initialValues.roles.map(role => role.role_id)
+      const roles = initialValues.roles.map(role => role.roleId)
       form.setFieldsValue({ ...initialValues, roles })
     }
   }, [open, initialValues])
@@ -149,7 +149,7 @@ function UserFormModal(props: UserFormModalProps) {
         }
 
         <Form.Item name="roles" label="用户角色">
-          <Select options={options} placeholder="请选择角色" mode="multiple" fieldNames={{ label: 'name', value: 'role_id' }} />
+          <Select options={options} placeholder="请选择角色" mode="multiple" fieldNames={{ label: 'name', value: 'roleId' }} />
         </Form.Item>
 
         <Row gutter={8}>

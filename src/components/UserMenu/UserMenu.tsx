@@ -34,6 +34,7 @@ const userMenuItems: MenuProps['items'] = [
 function UserMenu({ collapsed }: UserMenuProps) {
   const userStore = useUserInfo()
   const navigate = useNavigate()
+  const userInfo = useUserInfo(state => state.userInfo)
 
   async function handleUserMenuClick({ key }: { key: string }) {
     switch (key) {
@@ -56,7 +57,7 @@ function UserMenu({ collapsed }: UserMenuProps) {
           {
             !collapsed && (
               <>
-                <div style={{ fontWeight: 600, flexShrink: 0 }}>Wk Admin</div>
+                <div style={{ fontWeight: 600, flexShrink: 0 }}>{userInfo.nickname}</div>
                 <ChevronsUpDown color="#9f9fa9" style={{ marginLeft: 'auto' }} />
               </>
             )

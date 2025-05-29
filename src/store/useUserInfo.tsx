@@ -2,12 +2,20 @@ import * as localforage from 'localforage'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 
-interface UserInfoStore {
+export interface UserInfoStore {
+  userInfo: {
+    userId: number
+    username: string
+    nickname: string
+    roles: string[]
+    permissions: string[]
+  }
   accessToken: string
 }
 
 interface UserInfoAction {
   saveToken: (accessToken: string) => Promise<void>
+  saveUserInfo: (userInfo: UserInfoStore['userInfo']) => Promise<void>
   loadToken: () => Promise<void>
   clearToken: () => Promise<void>
 }
@@ -15,6 +23,7 @@ interface UserInfoAction {
 export const useUserInfo = create<UserInfoStore & UserInfoAction>()(
   devtools(set => ({
     accessToken: '',
+    userInfo: {},
     saveToken: async (accessToken: string) => {
       // 更新本地 Token
       try {
@@ -41,6 +50,11 @@ export const useUserInfo = create<UserInfoStore & UserInfoAction>()(
     clearToken: async () => {
       set({ accessToken: '' })
       await localforage.removeItem('accessToken')
+    },
+    saveUserInfo: async (userInfo: UserInfoStore['userInfo']) => {
+      // 更新本地用户信息
+      await localforage.setItem('userInfo', userInfo)
+      set({ userInfo })
     },
   }), {
     name: 'userInfo',
