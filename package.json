@@ -1,16 +1,19 @@
 {
   "name": "water-moon-admin",
-  "private": true,
-  "version": "0.0.0",
   "type": "module",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "docker:build": "docker build -t water-moon-admin .",
+    "docker:run": "docker run -d -p 80:80 --name water-moon-admin water-moon-admin"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.0",
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@react-pdf/renderer": "^4.3.0",
     "antd": "^5.23.3",
     "axios": "^1.7.9",
@@ -20,15 +23,14 @@
     "localforage": "^1.10.0",
     "lucide-react": "^0.503.0",
     "qiniu-js": "^4.0.0-beta.6",
-    "react": "^19.0.0",
+    "react": "^19.1.0",
     "react-countup": "^6.5.3",
-    "react-dom": "^19.0.0",
-    "react-router": "^7.1.0",
-    "react-router-dom": "^7.1.0",
+    "react-dom": "^19.1.0",
+    "react-router": "^7.6.0",
+    "react-router-dom": "^7.6.0",
     "zustand": "^5.0.2"
   },
   "devDependencies": {
-    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@antfu/eslint-config": "^3.12.1",
     "@eslint/js": "^9.17.0",
     "@types/react": "^18.3.17",
@@ -39,6 +41,7 @@
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.13.0",
     "less": "^4.2.1",
+    "rollup-plugin-visualizer": "^5.14.0",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.18.1",
     "vite": "^6.0.3",
