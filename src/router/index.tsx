@@ -98,6 +98,13 @@ export const router = createBrowserRouter([
         ],
       },
       {
+        path: 'post_management',
+        handle: {
+          title: '后期管理',
+        },
+        element: <div>页面正在建设中...</div>,
+      },
+      {
         path: 'system_setting',
         handle: {
           title: '系统设置',

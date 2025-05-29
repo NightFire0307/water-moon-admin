@@ -4,6 +4,7 @@ import PanelLeftOpen from '@/assets/icons/panel-left-open.svg?react'
 import UserMenu from '@/components/UserMenu/UserMenu.tsx'
 import {
   DashboardOutlined,
+  ProductOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
   UploadOutlined,
@@ -86,6 +87,11 @@ function AdminLayout() {
         { key: 'type', label: '产品类型' },
         { key: 'package', label: '产品套餐' },
       ],
+    },
+    {
+      key: 'post_management',
+      label: '后期管理',
+      icon: <ProductOutlined />,
     },
     {
       key: 'system_setting',
