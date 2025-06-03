@@ -73,6 +73,7 @@ export const DashboardCard: FC<DashboardProps> = ({ data }) => {
             value={item.value}
             growth={item.growth}
             color={item.color}
+            key={`${item.title}-${item.value}`}
           />
         ))
       }
