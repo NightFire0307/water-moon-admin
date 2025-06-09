@@ -79,7 +79,7 @@ export function Order() {
             break
           case OrderStatus.SUBMITTED:
             color = 'orange'
-            text = '选片完成'
+            text = '选片已提交'
             break
           case OrderStatus.CANCEL:
             color = 'gray'

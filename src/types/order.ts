@@ -89,6 +89,15 @@ export interface IOrderResult {
   max_select_photos: number
 }
 
+// 订单统计
+export interface IOrderSummary {
+  totalOrderCount: number
+  inProgressOrderCount: number
+  completedOrderCount: number
+  todayOrderCount: number
+}
+
 export type OrderResponse = Promise<ApiResponse<{ list: IOrder[] } & Pagination>>
 export type OrderDetailResponse = Promise<ApiResponse<IOrderDetail>>
 export type OrderResultResponse = Promise<ApiResponse<{ list: IOrderResult } & Pagination>>
+export type OrderSummaryResponse = Promise<ApiResponse<IOrderSummary>>

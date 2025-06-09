@@ -1,5 +1,5 @@
 import type { ApiResponse } from '@/types/common.ts'
-import type { CreateOrderData, IOrder, OrderDetailResponse, OrderResponse, OrderResultResponse } from '@/types/order.ts'
+import type { CreateOrderData, IOrder, OrderDetailResponse, OrderResponse, OrderResultResponse, OrderSummaryResponse } from '@/types/order.ts'
 import request from '@/utils/request.ts'
 
 export function getOrderList(params = {}): OrderResponse {
@@ -60,5 +60,12 @@ export function downloadResult(id: number): Promise<Blob> {
     url: `/admin/orders/${id}/result/export`,
     method: 'GET',
     responseType: 'blob',
+  })
+}
+
+export function getOrderSummary(): OrderSummaryResponse {
+  return request({
+    url: '/admin/orders/summary',
+    method: 'GET',
   })
 }
