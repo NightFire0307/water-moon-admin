@@ -17,7 +17,7 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
   const [originalData, setOriginalData] = useState<IOrderResultPhoto[]>([])
   const [selectedStatus, setSelectedStatus] = useState<'all' | 'selected' | 'unSelected'>('all')
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false)
-  const { order_number } = useOrderInfoContext()
+  const { order_number, id } = useOrderInfoContext()
 
   const formFields: FieldSchema[] = [
     {
@@ -112,14 +112,14 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
   }, [originalData, selectedStatus])
 
   const fetchOrderResult = async () => {
-    const { data } = await getOrderResult(35)
+    const { data } = await getOrderResult(id)
     setOriginalData(data.list.photos)
   }
 
   // 导出选片记录
   const handleExport = async () => {
     setDownloadLoading(true)
-    const data = await downloadResult(35)
+    const data = await downloadResult(id)
     const blob = new Blob([data], { type: 'application/zip' })
     const url = URL.createObjectURL(blob)
 

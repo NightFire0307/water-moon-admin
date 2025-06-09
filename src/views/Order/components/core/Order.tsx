@@ -123,7 +123,6 @@ export function Order() {
             setOrderModal({ open: true, mode: 'edit', initialValues: data })
           }}
           onViewDetail={(record) => {
-            console.log(record)
             setCurOrderInfo(record as IOrder)
             setOrderDetailOpen(true)
           }}
