@@ -1,10 +1,11 @@
 import { Order } from '@/views/Order/components/core/Order.tsx'
 import { SelectionResult } from '@/views/Order/SelectionResult.tsx'
 import PackageManager from '@/views/Package/PackageManager.tsx'
+import { Profile } from '@/views/Profile/index.tsx'
 import Role from '@/views/Role/Role.tsx'
 import GeneralSetting from '@/views/SystemSetting/GeneralSetting.tsx'
 import User from '@/views/User/User.tsx'
-import { createBrowserRouter, Navigate } from 'react-router'
+import { createBrowserRouter } from 'react-router'
 import App from '../App.tsx'
 import { ProtectedRoute } from '../components/ProtectedRoute.tsx'
 import { Dashboard } from '../views/Dashboard/Dashboard.tsx'
@@ -115,6 +116,13 @@ export const router = createBrowserRouter([
             element: <GeneralSetting />,
           },
         ],
+      },
+      {
+        path: 'profile',
+        handle: {
+          title: '个人设置',
+        },
+        element: <Profile />,
       },
     ],
   },

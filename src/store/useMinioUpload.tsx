@@ -288,7 +288,7 @@ function createUploadTask(file: FileType, orderId: number) {
       formData.append('uid', file.uid)
       formData.append('file', file)
       await request({
-        url: `/api/admin/photos/upload/${orderId}`,
+        url: `/admin/photos/upload/${orderId}`,
         method: 'POST',
         data: formData,
         ...config,

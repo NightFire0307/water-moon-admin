@@ -39,6 +39,7 @@ function UserMenu({ collapsed }: UserMenuProps) {
   async function handleUserMenuClick({ key }: { key: string }) {
     switch (key) {
       case UserMenuKey.Setting:
+        navigate('profile')
         break
       case UserMenuKey.Logout:
         await userStore.clearToken()
