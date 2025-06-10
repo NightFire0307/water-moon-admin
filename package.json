@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "docker:build": "docker build -t water-moon-admin .",
-    "docker:run": "docker run -d -p 80:80 --name water-moon-admin water-moon-admin"
+    "docker:run": "docker run -d -p 3780:80 --name water-moon-admin water-moon-admin"
   },
   "dependencies": {
     "@ant-design/icons": "^5.6.0",
