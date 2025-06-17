@@ -5,37 +5,41 @@ import { Button, Flex } from 'antd'
 export interface Product {
   productId: number
   name: string
-  price: number
   count: number
 }
 
 interface ProductCardItemProps {
   products: Product[]
+  // 增加产品数量
+  onIncreaseProduct?: (productId: number) => void
+  // 减少产品数量
+  onDecreaseProduct?: (productId: number) => void
+  onRemoveProduct?: (productId: number) => void
 }
 
-export const ProductCardItem: FC<ProductCardItemProps> = ({ products }) => {
+export const ProductCardItem: FC<ProductCardItemProps> = ({ products, onIncreaseProduct, onDecreaseProduct, onRemoveProduct }) => {
   return (
     <>
       {
         products.map(product => (
           <Flex justify="space-between" key={product.productId}>
             <Flex gap={16} align="center">
-              <div style={{ width: '32px', height: '32px', background: '#eee' }}></div>
               <div>
                 <div>{product.name}</div>
-                <span>
-                  ￥
-                  {product.price}
-                </span>
               </div>
             </Flex>
             <Flex align="center" gap={16}>
               <Flex align="center" gap={16}>
-                <Button type="text" icon={<MinusOutlined />} />
+                <Button icon={<MinusOutlined />} onClick={() => onDecreaseProduct && onDecreaseProduct(product.productId)}/>
                 <div>{product.count}</div>
-                <Button type="text" icon={<PlusOutlined />} />
+                <Button icon={<PlusOutlined />} onClick={() => onIncreaseProduct && onIncreaseProduct(product.productId)}/>
               </Flex>
-              <Button type="text" icon={<CloseOutlined />} danger />
+              <Button 
+                type="text" 
+                icon={<CloseOutlined />} 
+                danger 
+                onClick={() => onRemoveProduct && onRemoveProduct(product.productId)}
+              />
             </Flex>
           </Flex>
         ),

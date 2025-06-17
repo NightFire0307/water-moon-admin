@@ -1,10 +1,11 @@
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Card, Flex, Modal } from 'antd'
+import { Button, Card, Divider, Flex, Modal } from 'antd'
 import { ShoppingCart, ShoppingCartIcon } from 'lucide-react'
 import { type FC, useState } from 'react'
 import styles from './PackageModal.module.less'
 import { type Product, ProductCardItem } from './ProductCardItem'
+import { ProductPicker, type ProductPickerData } from './ProductPicker'
 
 interface PackageModalProps {
   open: boolean
@@ -26,6 +27,17 @@ function EmptyProduct() {
 
 export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, onClose, onSubmit }) => {
   const [products, setProducts] = useState<Product[]>([])
+  const [productsPickerData, setProductsPickerData] = useState<ProductPickerData[]>([
+    {
+      id: 1,
+      category: '手机',
+      items: [
+        { productId: 1, name: 'iPhone 14 Pro', checked: false },
+        { productId: 2, name: 'iPhone 14', checked: false },
+        { productId: 3, name: 'iPhone SE', checked: false },
+      ]
+    },
+  ])
 
   const formFields: FieldSchema[] = [
     {
@@ -37,7 +49,6 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
       label: '套餐价格',
       name: 'price',
       type: 'inputNumber',
-      addonBefore: '¥',
       addonAfter: '元',
     },
     {
@@ -46,6 +57,38 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
       type: 'switch',
     },
   ]
+
+  function handleAddProduct(product: { productId: number, name: string }) {
+    setProducts((prev) => {
+      return [...prev, { productId: product.productId, name: product.name, count: 1 }]
+    })
+  }
+
+  function handleRemoveProduct(productId: number) {
+    setProducts((prev) => prev.filter(product => product.productId !== productId))
+  }
+
+  function handleIncreaseProduct(productId: number) {
+    setProducts((prev) => {
+      return prev.map(product => {
+        if (product.productId === productId) {
+          return { ...product, count: product.count + 1 }
+        }
+        return product
+      })
+    })
+  }
+
+  function handleDecreaseProduct(productId: number) {
+    setProducts((prev) => {
+      return prev.map(product => {
+        if (product.productId === productId) {
+          return { ...product, count: Math.max(1, product.count - 1) }
+        }
+        return product
+      })
+    })
+  }
 
   return (
     <Modal
@@ -63,30 +106,45 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
         <Button icon={<PlusOutlined />}>选择产品</Button>
       </Flex>
 
-      {
-        products.length === 0
-          ? (
-              <EmptyProduct />
-            )
-          : (
-              <Card
-                type="inner"
-                title={(
-                  <Flex align="center" justify="space-between">
-                    <Flex align="center" gap={8}>
-                      <ShoppingCartIcon size={16} />
-                      <span>已选择的产品(0)</span>
+      <Flex vertical gap={16}>
+        <ProductPicker
+          data={productsPickerData}
+          onAddProduct={handleAddProduct}
+          onRemoveProduct={handleRemoveProduct}
+        />
+
+        {
+          products.length === 0
+            ? (
+                <EmptyProduct />
+              )
+            : (
+                <Card
+                  type="inner"
+                  title={(
+                    <Flex align="center" justify="space-between">
+                      <Flex align="center" gap={8}>
+                        <ShoppingCartIcon size={16} />
+                        <span>已选择的产品({ products.length })</span>
+                      </Flex>
                     </Flex>
-                    <div>
-                      总价:￥699.0
-                    </div>
+                  )}
+                  styles={{
+                    body: { maxHeight: 200, overflowY: 'auto' },
+                  }}
+                >
+                  <Flex vertical gap={16}>
+                    <ProductCardItem 
+                      products={products}
+                      onIncreaseProduct={handleIncreaseProduct}
+                      onDecreaseProduct={handleDecreaseProduct}
+                    />
                   </Flex>
-                )}
-              >
-                <ProductCardItem products={products} />
-              </Card>
-            )
-      }
+                </Card>
+              )
+        }
+
+      </Flex>
 
     </Modal>
   )
