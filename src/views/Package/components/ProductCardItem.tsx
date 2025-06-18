@@ -30,14 +30,14 @@ export const ProductCardItem: FC<ProductCardItemProps> = ({ products, onIncrease
             </Flex>
             <Flex align="center" gap={16}>
               <Flex align="center" gap={16}>
-                <Button icon={<MinusOutlined />} onClick={() => onDecreaseProduct && onDecreaseProduct(product.productId)}/>
+                <Button icon={<MinusOutlined />} onClick={() => onDecreaseProduct && onDecreaseProduct(product.productId)} />
                 <div>{product.count}</div>
-                <Button icon={<PlusOutlined />} onClick={() => onIncreaseProduct && onIncreaseProduct(product.productId)}/>
+                <Button icon={<PlusOutlined />} onClick={() => onIncreaseProduct && onIncreaseProduct(product.productId)} />
               </Flex>
-              <Button 
-                type="text" 
-                icon={<CloseOutlined />} 
-                danger 
+              <Button
+                type="text"
+                icon={<CloseOutlined />}
+                danger
                 onClick={() => onRemoveProduct && onRemoveProduct(product.productId)}
               />
             </Flex>

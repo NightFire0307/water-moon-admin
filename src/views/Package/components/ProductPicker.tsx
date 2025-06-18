@@ -36,7 +36,8 @@ export const ProductPicker: FC<ProductPickerProps> = ({ data, onAddProduct, onRe
   const [products, setProducts] = useState<ProductPickerData[]>([])
 
   function handleProductClick(categoryId: number, productId: number, checked: boolean) {
-    if (products.length === 0) return 
+    if (products.length === 0)
+      return
 
     setProducts(prevProducts => (
       prevProducts.map((product) => {
@@ -65,7 +66,8 @@ export const ProductPicker: FC<ProductPickerProps> = ({ data, onAddProduct, onRe
   }
 
   useEffect(() => {
-    if (data.length === 0) return
+    if (data.length === 0)
+      return
 
     // 初始化产品列表
     const initialProducts = data.map(category => ({
@@ -79,7 +81,7 @@ export const ProductPicker: FC<ProductPickerProps> = ({ data, onAddProduct, onRe
     <div className={styles.productPickerWrapper}>
       <Input prefix={<Search size={16} />} placeholder="搜索产品或分类..." />
 
-      <div>
+      <div className={styles.productPickerWrapper__content}>
         {
           products.map(product => (
             <div key={product.id}>

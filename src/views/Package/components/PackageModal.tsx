@@ -1,8 +1,9 @@
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Card, Divider, Flex, Modal } from 'antd'
+import { Button, Card, Flex, Modal } from 'antd'
+import { useForm } from 'antd/es/form/Form'
 import { ShoppingCart, ShoppingCartIcon } from 'lucide-react'
-import { type FC, useState } from 'react'
+import { type FC, useEffect, useState } from 'react'
 import styles from './PackageModal.module.less'
 import { type Product, ProductCardItem } from './ProductCardItem'
 import { ProductPicker, type ProductPickerData } from './ProductPicker'
@@ -35,9 +36,21 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
         { productId: 1, name: 'iPhone 14 Pro', checked: false },
         { productId: 2, name: 'iPhone 14', checked: false },
         { productId: 3, name: 'iPhone SE', checked: false },
-      ]
+      ],
+    },
+    {
+      id: 2,
+      category: '电脑',
+      items: [
+        { productId: 4, name: 'MacBook Pro', checked: false },
+        { productId: 5, name: 'MacBook Air', checked: false },
+        { productId: 6, name: 'iMac', checked: false },
+        { productId: 7, name: 'Mac mini', checked: false },
+      ],
     },
   ])
+  const [productPickerVisible, setProductPickerVisible] = useState(false)
+  const [form] = useForm()
 
   const formFields: FieldSchema[] = [
     {
@@ -65,12 +78,12 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
   }
 
   function handleRemoveProduct(productId: number) {
-    setProducts((prev) => prev.filter(product => product.productId !== productId))
+    setProducts(prev => prev.filter(product => product.productId !== productId))
   }
 
   function handleIncreaseProduct(productId: number) {
     setProducts((prev) => {
-      return prev.map(product => {
+      return prev.map((product) => {
         if (product.productId === productId) {
           return { ...product, count: product.count + 1 }
         }
@@ -81,12 +94,20 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
 
   function handleDecreaseProduct(productId: number) {
     setProducts((prev) => {
-      return prev.map(product => {
+      return prev.map((product) => {
         if (product.productId === productId) {
           return { ...product, count: Math.max(1, product.count - 1) }
         }
         return product
       })
+    })
+  }
+
+  function handleOk() {
+    const value = form.getFieldsValue()
+    console.log('提交数据:', {
+      ...products,
+      ...value,
     })
   }
 
@@ -96,22 +117,37 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
       open={open}
       onCancel={onClose}
       width={800}
+      onOk={handleOk}
     >
       <SimpleForm
+        form={form}
         fields={formFields}
+        initialValues={{
+          isPublished: true,
+          price: 0,
+        }}
       />
 
       <Flex align="center" justify="space-between">
         <h3>套餐产品</h3>
-        <Button icon={<PlusOutlined />}>选择产品</Button>
+        <Button
+          icon={<PlusOutlined />}
+          onClick={() => setProductPickerVisible(prev => !prev)}
+        >
+          选择产品
+        </Button>
       </Flex>
 
       <Flex vertical gap={16}>
-        <ProductPicker
-          data={productsPickerData}
-          onAddProduct={handleAddProduct}
-          onRemoveProduct={handleRemoveProduct}
-        />
+        {
+          productPickerVisible && (
+            <ProductPicker
+              data={productsPickerData}
+              onAddProduct={handleAddProduct}
+              onRemoveProduct={handleRemoveProduct}
+            />
+          )
+        }
 
         {
           products.length === 0
@@ -125,7 +161,11 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
                     <Flex align="center" justify="space-between">
                       <Flex align="center" gap={8}>
                         <ShoppingCartIcon size={16} />
-                        <span>已选择的产品({ products.length })</span>
+                        <span>
+                          已选择的产品(
+                          { products.length }
+                          )
+                        </span>
                       </Flex>
                     </Flex>
                   )}
@@ -134,10 +174,11 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
                   }}
                 >
                   <Flex vertical gap={16}>
-                    <ProductCardItem 
+                    <ProductCardItem
                       products={products}
                       onIncreaseProduct={handleIncreaseProduct}
                       onDecreaseProduct={handleDecreaseProduct}
+                      onRemoveProduct={handleRemoveProduct}
                     />
                   </Flex>
                 </Card>

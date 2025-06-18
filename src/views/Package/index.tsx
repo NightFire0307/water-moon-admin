@@ -1,8 +1,9 @@
 import type { TableProps } from 'antd/lib'
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
 import { MoreOutlined, PlusOutlined } from '@ant-design/icons'
-import { Button, Divider, Table } from 'antd'
+import { Button, Divider, Space, Table } from 'antd'
 import { useForm } from 'antd/es/form/Form'
+import { Trash } from 'lucide-react'
 import { type FC, useState } from 'react'
 import { PackageModal } from './components/PackageModal'
 
@@ -16,6 +17,10 @@ const PackageManager: FC = () => {
   const [form] = useForm()
 
   const columns: TableProps['columns'] = [
+    {
+      dataIndex: 'id',
+      title: 'ID',
+    },
     {
       dataIndex: 'name',
       title: '套餐名称',
@@ -63,13 +68,18 @@ const PackageManager: FC = () => {
     <div style={{ padding: '24px' }}>
       <SimpleForm fields={fields} form={form} layout="inline" />
       <Divider />
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={() => setModalState({ open: true, mode: 'create' })}
-      >
-        创建套餐
-      </Button>
+      <Space direction="horizontal" style={{ marginBottom: '24px' }}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setModalState({ open: true, mode: 'create' })}
+        >
+          创建套餐
+        </Button>
+        <Button type="primary" icon={<Trash size={16} />} danger disabled>
+          批量删除
+        </Button>
+      </Space>
       <Table columns={columns} />
       <PackageModal
         open={modalState.open}
