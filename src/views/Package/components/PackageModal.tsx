@@ -1,7 +1,7 @@
 import { getProductByCategory } from '@/apis/product'
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Card, Flex, Modal } from 'antd'
+import { Button, Card, Flex, message, Modal } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { ShoppingCart, ShoppingCartIcon } from 'lucide-react'
 import { type FC, useEffect, useRef, useState } from 'react'
@@ -39,12 +39,15 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
       label: '套餐名称',
       name: 'name',
       type: 'input',
+      required: true,
+      placeholder: '请输入套餐名称',
     },
     {
       label: '套餐价格',
       name: 'price',
       type: 'inputNumber',
       addonAfter: '元',
+      placeholder: '请输入套餐价格',
     },
     {
       label: '上架套餐',
@@ -93,12 +96,20 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
     })
   }
 
-  function handleOk() {
-    const value = form.getFieldsValue()
-    console.log('提交数据:', {
-      ...products,
-      ...value,
-    })
+  async function handleOk() {
+    try {
+      await form.validateFields()
+      const value = form.getFieldsValue()
+      onSubmit && onSubmit({
+        items: [
+          ...products,
+        ],
+        ...value,
+      })
+    }
+    catch {
+      message.error('请填写完整的表单信息')
+    }
   }
 
   async function fetchProductByCategory(keyword?: string) {

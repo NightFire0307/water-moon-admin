@@ -1,4 +1,5 @@
 import type { TableProps } from 'antd/lib'
+import { createPackage } from '@/apis/package'
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
 import { MoreOutlined, PlusOutlined } from '@ant-design/icons'
 import { Button, Divider, Space, Table } from 'antd'
@@ -64,6 +65,11 @@ const PackageManager: FC = () => {
     },
   ]
 
+  async function handleCreatePackage(value) {
+    const { data } = await createPackage(value)
+    console.log(data)
+  }
+
   return (
     <div style={{ padding: '24px' }}>
       <SimpleForm fields={fields} form={form} layout="inline" />
@@ -85,7 +91,7 @@ const PackageManager: FC = () => {
         open={modalState.open}
         mode={modalState.mode}
         onClose={() => setModalState({ open: false, mode: 'create' })}
-        onSubmit={data => console.log(data)}
+        onSubmit={handleCreatePackage}
       />
     </div>
   )
