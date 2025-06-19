@@ -1,9 +1,10 @@
+import { getProductByCategory } from '@/apis/product'
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Card, Flex, Modal } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { ShoppingCart, ShoppingCartIcon } from 'lucide-react'
-import { type FC, useEffect, useState } from 'react'
+import { type FC, useEffect, useRef, useState } from 'react'
 import styles from './PackageModal.module.less'
 import { type Product, ProductCardItem } from './ProductCardItem'
 import { ProductPicker, type ProductPickerData } from './ProductPicker'
@@ -28,29 +29,10 @@ function EmptyProduct() {
 
 export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, onClose, onSubmit }) => {
   const [products, setProducts] = useState<Product[]>([])
-  const [productsPickerData, setProductsPickerData] = useState<ProductPickerData[]>([
-    {
-      id: 1,
-      category: '手机',
-      items: [
-        { productId: 1, name: 'iPhone 14 Pro', checked: false },
-        { productId: 2, name: 'iPhone 14', checked: false },
-        { productId: 3, name: 'iPhone SE', checked: false },
-      ],
-    },
-    {
-      id: 2,
-      category: '电脑',
-      items: [
-        { productId: 4, name: 'MacBook Pro', checked: false },
-        { productId: 5, name: 'MacBook Air', checked: false },
-        { productId: 6, name: 'iMac', checked: false },
-        { productId: 7, name: 'Mac mini', checked: false },
-      ],
-    },
-  ])
+  const [productsPickerData, setProductsPickerData] = useState<ProductPickerData[]>([])
   const [productPickerVisible, setProductPickerVisible] = useState(false)
   const [form] = useForm()
+  const cacheSelectedIds = useRef<Set<number>>(new Set())
 
   const formFields: FieldSchema[] = [
     {
@@ -75,10 +57,18 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
     setProducts((prev) => {
       return [...prev, { productId: product.productId, name: product.name, count: 1 }]
     })
+
+    // 缓存已选择的产品ID
+    cacheSelectedIds.current.add(product.productId)
   }
 
   function handleRemoveProduct(productId: number) {
     setProducts(prev => prev.filter(product => product.productId !== productId))
+
+    // 移除缓存中的产品ID
+    if (cacheSelectedIds.current.has(productId)) {
+      cacheSelectedIds.current.delete(productId)
+    }
   }
 
   function handleIncreaseProduct(productId: number) {
@@ -110,6 +100,27 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
       ...value,
     })
   }
+
+  async function fetchProductByCategory(keyword?: string) {
+    const { data } = await getProductByCategory(keyword)
+    setProductsPickerData(() => {
+      return data.map(item => ({
+        id: item.id,
+        category: item.category,
+        items: item.items.map(product => ({
+          productId: product.productId,
+          name: product.name,
+          checked: cacheSelectedIds.current.has(product.productId) || false,
+        })),
+      }))
+    })
+  }
+
+  useEffect(() => {
+    if (open) {
+      fetchProductByCategory()
+    }
+  }, [open])
 
   return (
     <Modal
@@ -143,6 +154,7 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
           productPickerVisible && (
             <ProductPicker
               data={productsPickerData}
+              onSearch={fetchProductByCategory}
               onAddProduct={handleAddProduct}
               onRemoveProduct={handleRemoveProduct}
             />

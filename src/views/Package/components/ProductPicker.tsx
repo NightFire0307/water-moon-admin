@@ -1,3 +1,4 @@
+import { useSearchInput } from '@/hooks/useSearchInput'
 import { Checkbox, Divider, Input } from 'antd'
 import { Search } from 'lucide-react'
 import { type FC, useEffect, useState } from 'react'
@@ -28,12 +29,14 @@ export interface ProductPickerData {
 
 interface ProductPickerProps {
   data: ProductPickerData[]
+  onSearch?: (keyword: string) => void
   onAddProduct?: (product: { productId: number, name: string }) => void
   onRemoveProduct?: (productId: number) => void
 }
 
-export const ProductPicker: FC<ProductPickerProps> = ({ data, onAddProduct, onRemoveProduct }) => {
+export const ProductPicker: FC<ProductPickerProps> = ({ data, onSearch, onAddProduct, onRemoveProduct }) => {
   const [products, setProducts] = useState<ProductPickerData[]>([])
+  const { onChange, onCompositionStart, onCompositionEnd } = useSearchInput(onSearch)
 
   function handleProductClick(categoryId: number, productId: number, checked: boolean) {
     if (products.length === 0)
@@ -72,14 +75,20 @@ export const ProductPicker: FC<ProductPickerProps> = ({ data, onAddProduct, onRe
     // 初始化产品列表
     const initialProducts = data.map(category => ({
       ...category,
-      items: category.items.map(item => ({ ...item, checked: false })),
+      items: category.items.map(item => ({ ...item })),
     }))
     setProducts(initialProducts)
   }, [data])
 
   return (
     <div className={styles.productPickerWrapper}>
-      <Input prefix={<Search size={16} />} placeholder="搜索产品或分类..." />
+      <Input
+        prefix={<Search size={16} />}
+        placeholder="搜索产品或分类..."
+        onChange={onChange}
+        onCompositionStart={onCompositionStart}
+        onCompositionEnd={onCompositionEnd}
+      />
 
       <div className={styles.productPickerWrapper__content}>
         {

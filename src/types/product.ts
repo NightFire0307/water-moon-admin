@@ -30,6 +30,16 @@ export interface IProductDetail {
   updatedAt: string
 }
 
+export interface IProductByCategory {
+  id: number
+  category: string
+  items: {
+    productId: number
+    name: string
+  }[]
+}
+
 export type ProductResponse = Promise<ApiResponse<{ list: IProduct[] } & Pagination>>
 export type ProductByIdResponse = Promise<ApiResponse<IProductDetail>>
 export type ProductTypeResponse = Promise<ApiResponse<{ list: IProductType[] } & Pagination>>
+export type ProductByCategoryResponse = Promise<ApiResponse<IProductByCategory[]>>
