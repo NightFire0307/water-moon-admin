@@ -1,6 +1,7 @@
+import type { PackageResponse } from '@/types/package'
 import request from '@/utils/request.ts'
 
-export function getPackageList() {
+export function getPackageList(): PackageResponse {
   return request({
     url: '/admin/packages',
     method: 'get',

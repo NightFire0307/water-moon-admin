@@ -1,0 +1,82 @@
+.items {
+  background: #e6f4ff;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 9999px;
+  min-width: 100px
+}
+
+.packageProductDetail {
+  min-width: 230px;
+  max-height: 300px;
+  overflow-y: auto;
+  
+  &__header {
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__content {
+    margin: 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-weight: 500;
+  }
+
+  &__item {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__itemMain {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  &__itemIndex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 100%;
+    background: #1677ff;
+    color: #fff;
+  }
+
+  &__count {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    width: 24px;
+    height: 24px;
+    border-radius: 9999px;
+    background: #e6f4ff;
+  }
+
+  &__footer {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__totalLabel {
+    color: #999;
+  }
+
+  &__totalValue {
+    font-weight: 600;
+  }
+
+  &__divider {
+    margin: 0;
+  }
+}
