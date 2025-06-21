@@ -1,16 +1,18 @@
 import type { IPackage } from '@/types/package'
 import type { TableProps } from 'antd/lib'
-import { createPackage, getPackageList } from '@/apis/package'
+import { createPackage, getPackageList, deletePackage, getPackageById } from '@/apis/package'
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
 import useTableSelection from '@/hooks/useTableSelection'
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Divider, Popover, Space, Table, Tag } from 'antd'
+import { Button, Divider, message, Modal, Popover, Space, Table, Tag } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { Package, Trash } from 'lucide-react'
 import { type FC, useEffect, useState } from 'react'
 import { PackageActions } from './components/PackageActions'
-import { PackageModal } from './components/PackageModal'
+import { type PackageFormValues, PackageModal } from './components/PackageModal'
 import styles from './index.module.less'
+
+const { confirm } = Modal
 
 interface PackageProductDetailProps {
   items: Record<string, any>[]
@@ -53,10 +55,11 @@ function PackageProductDetail({ items }: PackageProductDetailProps) {
 interface ModalState {
   open: boolean
   mode: 'create' | 'edit'
+  initialValues?: PackageFormValues
 }
 
 const PackageManager: FC = () => {
-  const [modalState, setModalState] = useState<ModalState>({ open: false, mode: 'create' })
+  const [modalState, setModalState] = useState<ModalState>({ open: false, mode: 'create', initialValues: {} as PackageFormValues })
   const [dataSource, setDataSource] = useState<IPackage[]>([])
   const [form] = useForm()
   const { rowSelection } = useTableSelection({ type: 'checkbox' })
@@ -102,8 +105,11 @@ const PackageManager: FC = () => {
     },
     {
       title: '操作',
-      render: () => (
-        <PackageActions />
+      render: (item: IPackage) => (
+        <PackageActions
+          onEdit={() => handleEditPackage(item.id)}
+          onDelete={() => handleDeletePackage(item.id)}
+        />
       ),
     },
   ]
@@ -127,9 +133,49 @@ const PackageManager: FC = () => {
     },
   ]
 
-  async function handleCreatePackage(value) {
-    const { data } = await createPackage(value)
-    console.log(data)
+  async function handleCreatePackage(value: PackageFormValues) {
+    try {
+      const { msg } = await createPackage(value)
+      message.success(msg)
+      setModalState({ open: false, mode: 'create' })
+      fetchPackageData()
+    }
+    catch (err) {
+      message.error('创建套餐失败，请稍后重试')
+      console.error(err)
+    }
+  }
+
+  async function handleEditPackage(packageId: number) {
+    console.log(packageId)
+    const { data } = await getPackageById(packageId)
+    setModalState({
+      open: true,
+      mode: 'edit',
+      initialValues: data
+    })
+  }
+
+  function handleDeletePackage(packageId: number) {
+    confirm({
+      title: '确认删除',
+      content: '您确定要删除此套餐吗？此操作不可逆。',
+      okText: '删除',
+      okType: 'danger',
+      onOk: async () => {
+        try {
+          const { msg } = await deletePackage(packageId)
+          message.success(msg) 
+          fetchPackageData()
+        } catch(err) {
+          message.error('删除套餐失败，请稍后重试')
+          console.error(err)
+        }
+      },
+      onCancel() {
+        message.info('已取消删除操作')
+      },
+    })
   }
 
   async function fetchPackageData() {
@@ -161,6 +207,7 @@ const PackageManager: FC = () => {
       <PackageModal
         open={modalState.open}
         mode={modalState.mode}
+        initialData={modalState.initialValues}
         onClose={() => setModalState({ open: false, mode: 'create' })}
         onSubmit={handleCreatePackage}
       />

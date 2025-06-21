@@ -9,12 +9,19 @@ import styles from './PackageModal.module.less'
 import { type Product, ProductCardItem } from './ProductCardItem'
 import { ProductPicker, type ProductPickerData } from './ProductPicker'
 
+export interface PackageFormValues {
+  name: string
+  price: number
+  isPublished: boolean
+  items: Product[]
+}
+
 interface PackageModalProps {
   open: boolean
   mode: 'create' | 'edit'
   initialData?: Record<string, any>
   onClose: () => void
-  onSubmit: (data: Record<string, any>) => void
+  onSubmit: (data: PackageFormValues) => void
 }
 
 // 空产品
@@ -130,8 +137,32 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
   useEffect(() => {
     if (open) {
       fetchProductByCategory()
+      form.setFieldsValue({
+        name: initialData?.name ?? '',
+        price: initialData?.price ?? 0,
+        isPublished: initialData?.isPublished ?? true,
+      })
+
+      // TODO: 定义类型
+      initialData?.items.forEach(item => {
+        setProducts(prev => ([
+          ...prev,
+          {
+            productId: item.product.productId,
+            name: item.product.name,
+            count: item.count,
+          }
+        ]))
+      })
     }
-  }, [open])
+    else {
+      // 重置表单和产品列表
+      form.resetFields()
+      setProducts([])
+      setProductsPickerData([])
+      cacheSelectedIds.current.clear()
+    }
+  }, [open, initialData])
 
   return (
     <Modal
