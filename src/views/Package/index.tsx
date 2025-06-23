@@ -1,6 +1,6 @@
 import type { IPackage } from '@/types/package'
 import type { TableProps } from 'antd/lib'
-import { createPackage, getPackageList, deletePackage, getPackageById } from '@/apis/package'
+import { createPackage, deletePackage, getPackageById, getPackageList, updatePackage } from '@/apis/package'
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
 import useTableSelection from '@/hooks/useTableSelection'
 import { PlusOutlined } from '@ant-design/icons'
@@ -147,12 +147,11 @@ const PackageManager: FC = () => {
   }
 
   async function handleEditPackage(packageId: number) {
-    console.log(packageId)
     const { data } = await getPackageById(packageId)
     setModalState({
       open: true,
       mode: 'edit',
-      initialValues: data
+      initialValues: data,
     })
   }
 
@@ -165,9 +164,10 @@ const PackageManager: FC = () => {
       onOk: async () => {
         try {
           const { msg } = await deletePackage(packageId)
-          message.success(msg) 
+          message.success(msg)
           fetchPackageData()
-        } catch(err) {
+        }
+        catch (err) {
           message.error('删除套餐失败，请稍后重试')
           console.error(err)
         }
@@ -176,6 +176,18 @@ const PackageManager: FC = () => {
         message.info('已取消删除操作')
       },
     })
+  }
+
+  async function handleUpdatePackage(packageId: number, value: PackageFormValues) {
+    try {
+      const { msg } = await updatePackage(packageId, value)
+      message.success(msg)
+      setModalState({ open: false, mode: 'create' })
+      fetchPackageData()
+    }
+    catch (e) {
+      console.error(e)
+    }
   }
 
   async function fetchPackageData() {
@@ -209,7 +221,8 @@ const PackageManager: FC = () => {
         mode={modalState.mode}
         initialData={modalState.initialValues}
         onClose={() => setModalState({ open: false, mode: 'create' })}
-        onSubmit={handleCreatePackage}
+        onCreate={handleCreatePackage}
+        onUpdate={handleUpdatePackage}
       />
     </div>
   )

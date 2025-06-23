@@ -20,8 +20,9 @@ interface PackageModalProps {
   open: boolean
   mode: 'create' | 'edit'
   initialData?: Record<string, any>
-  onClose: () => void
-  onSubmit: (data: PackageFormValues) => void
+  onClose?: () => void
+  onCreate?: (data: PackageFormValues) => void
+  onUpdate?: (packageId: number, data: PackageFormValues) => void
 }
 
 // 空产品
@@ -34,7 +35,7 @@ function EmptyProduct() {
   )
 }
 
-export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, onClose, onSubmit }) => {
+export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, onClose, onCreate, onUpdate }) => {
   const [products, setProducts] = useState<Product[]>([])
   const [productsPickerData, setProductsPickerData] = useState<ProductPickerData[]>([])
   const [productPickerVisible, setProductPickerVisible] = useState(false)
@@ -107,12 +108,24 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
     try {
       await form.validateFields()
       const value = form.getFieldsValue()
-      onSubmit && onSubmit({
-        items: [
-          ...products,
-        ],
-        ...value,
-      })
+      if (mode === 'create') {
+        onCreate && onCreate({
+          items: [
+            ...products,
+          ],
+          ...value,
+        })
+      }
+
+      if (mode === 'edit') {
+        onUpdate && onUpdate(initialData?.id, {
+          items: [
+            ...products,
+          ],
+          ...value,
+          price: Number(value.price),
+        })
+      }
     }
     catch {
       message.error('请填写完整的表单信息')
@@ -144,14 +157,14 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
       })
 
       // TODO: 定义类型
-      initialData?.items.forEach(item => {
+      initialData?.items.forEach((item) => {
         setProducts(prev => ([
           ...prev,
           {
             productId: item.product.productId,
             name: item.product.name,
             count: item.count,
-          }
+          },
         ]))
       })
     }
