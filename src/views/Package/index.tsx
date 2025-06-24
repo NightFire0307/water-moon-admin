@@ -2,12 +2,13 @@ import type { IPackage } from '@/types/package'
 import type { TableProps } from 'antd/lib'
 import { createPackage, deletePackage, getPackageById, getPackageList, updatePackage } from '@/apis/package'
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
+import { useFetch } from '@/hooks/useFetch'
 import useTableSelection from '@/hooks/useTableSelection'
-import { PlusOutlined } from '@ant-design/icons'
-import { Button, Divider, message, Modal, Popover, Space, Table, Tag } from 'antd'
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
+import { Badge, Button, Divider, message, Modal, Popover, Space, Table, Tag } from 'antd'
 import { useForm } from 'antd/es/form/Form'
-import { Package, Trash } from 'lucide-react'
-import { type FC, useEffect, useState } from 'react'
+import { Package, RotateCcw, Trash } from 'lucide-react'
+import { type FC, useState } from 'react'
 import { PackageActions } from './components/PackageActions'
 import { type PackageFormValues, PackageModal } from './components/PackageModal'
 import styles from './index.module.less'
@@ -61,6 +62,11 @@ interface ModalState {
 const PackageManager: FC = () => {
   const [modalState, setModalState] = useState<ModalState>({ open: false, mode: 'create', initialValues: {} as PackageFormValues })
   const [dataSource, setDataSource] = useState<IPackage[]>([])
+  const { loading, refetch } = useFetch(getPackageList, {
+    onSuccess: (result) => {
+      setDataSource(result)
+    },
+  })
   const [form] = useForm()
   const { rowSelection } = useTableSelection({ type: 'checkbox' })
 
@@ -118,18 +124,18 @@ const PackageManager: FC = () => {
     {
       type: 'input',
       name: 'name',
+      label: '套餐名称',
       placeholder: '请输入套餐名称',
     },
     {
       type: 'select',
-      name: 'products',
+      name: 'is_published',
+      label: '上架状态',
+      placeholder: '请选择上架状态',
       options: [
-        {
-          label: '选择1',
-          value: '1',
-        },
+        { label: <Badge status="success" text="已上架" />, value: true },
+        { label: <Badge status="error" text="未上架" />, value: false },
       ],
-      placeholder: '请选择产品',
     },
   ]
 
@@ -138,7 +144,7 @@ const PackageManager: FC = () => {
       const { msg } = await createPackage(value)
       message.success(msg)
       setModalState({ open: false, mode: 'create' })
-      fetchPackageData()
+      refetch()
     }
     catch (err) {
       message.error('创建套餐失败，请稍后重试')
@@ -165,7 +171,7 @@ const PackageManager: FC = () => {
         try {
           const { msg } = await deletePackage(packageId)
           message.success(msg)
-          fetchPackageData()
+          refetch()
         }
         catch (err) {
           message.error('删除套餐失败，请稍后重试')
@@ -183,25 +189,38 @@ const PackageManager: FC = () => {
       const { msg } = await updatePackage(packageId, value)
       message.success(msg)
       setModalState({ open: false, mode: 'create' })
-      fetchPackageData()
+      refetch()
     }
     catch (e) {
       console.error(e)
     }
   }
 
-  async function fetchPackageData() {
-    const { data } = await getPackageList()
-    setDataSource(data)
+  function handleSearchPackage() {
+    const values = form.getFieldsValue()
+    refetch({
+      name: values.name,
+      is_published: values.is_published,
+    })
   }
-
-  useEffect(() => {
-    fetchPackageData()
-  }, [])
 
   return (
     <div style={{ padding: '24px' }}>
-      <SimpleForm fields={fields} form={form} layout="inline" />
+      <Space>
+        <SimpleForm fields={fields} form={form} layout="inline" />
+        <Button type="primary" icon={<SearchOutlined />} onClick={handleSearchPackage}>
+          查询
+        </Button>
+        <Button
+          icon={<RotateCcw size={14} />}
+          onClick={() => {
+            form.resetFields()
+            refetch()
+          }}
+        >
+          重置
+        </Button>
+      </Space>
       <Divider />
       <Space direction="horizontal" style={{ marginBottom: '24px' }}>
         <Button
@@ -215,7 +234,7 @@ const PackageManager: FC = () => {
           批量删除
         </Button>
       </Space>
-      <Table rowKey="id" columns={columns} dataSource={dataSource} rowSelection={rowSelection} />
+      <Table rowKey="id" columns={columns} dataSource={dataSource} rowSelection={rowSelection} loading={loading} />
       <PackageModal
         open={modalState.open}
         mode={modalState.mode}
