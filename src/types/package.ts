@@ -19,6 +19,7 @@ export interface IPackageItem {
     createdAt: string
     updatedAt: string
   }
+  product_type: string
 }
 
 export type PackageResponse = Promise<ApiResponse<IPackage[]>>

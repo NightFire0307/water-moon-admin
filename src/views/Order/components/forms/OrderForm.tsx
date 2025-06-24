@@ -1,7 +1,7 @@
 import type { CreateOrderData, ProductsInfo } from '@/types/order.ts'
 import type { IProduct } from '@/types/product.ts'
 import { getProductList } from '@/apis/product.ts'
-import { SelectProductCard } from '@/views/Order/SelectProductCard.tsx'
+import { SelectProductCard } from '@/views/Order/components/SelectProductCard'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Col, Form, Input, InputNumber, Row, Select, Space } from 'antd'
 import { useForm } from 'antd/es/form/Form'
