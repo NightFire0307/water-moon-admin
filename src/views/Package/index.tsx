@@ -10,7 +10,7 @@ import { Badge, Button, Divider, Empty, message, Modal, Popover, Space, Table, T
 import { useForm } from 'antd/es/form/Form'
 import cs from 'classnames'
 import { Package, RotateCcw, Trash } from 'lucide-react'
-import { type FC, useEffect, useState } from 'react'
+import { type FC, useEffect, useMemo, useState } from 'react'
 import { PackageActions } from './components/PackageActions'
 import { type PackageFormValues, PackageModal } from './components/PackageModal'
 import styles from './index.module.less'
@@ -22,6 +22,10 @@ interface PackageProductDetailProps {
 }
 
 function PackageProductDetail({ items }: PackageProductDetailProps) {
+  const totalCount = useMemo(() => {
+    return items.reduce((total, item) => total + item.count, 0)
+  }, [items])
+
   return (
     <>
       {
@@ -30,8 +34,16 @@ function PackageProductDetail({ items }: PackageProductDetailProps) {
           : (
               <div className={styles.packageProductDetail}>
                 <div className={styles.packageProductDetail__header}>
-                  <Package size={16} />
-                  <span>包含产品</span>
+                  <div className={styles.packageProductDetail__headerLeft}>
+                    <Package size={16} />
+                    <span>包含产品</span>
+                  </div>
+                  <div className={styles.packageProductDetail__productCount}>
+                    <span>
+                      {items.length}
+                      种产品
+                    </span>
+                  </div>
                 </div>
                 <Divider className={styles.packageProductDetail__divider} />
                 <div className={styles.packageProductDetail__content}>
@@ -52,8 +64,8 @@ function PackageProductDetail({ items }: PackageProductDetailProps) {
                 <div className={styles.packageProductDetail__footer}>
                   <div className={styles.packageProductDetail__totalLabel}>总数量</div>
                   <div className={styles.packageProductDetail__totalValue}>
-                    {items.length}
-                    件
+                    {totalCount}
+                    &nbsp;件
                   </div>
                 </div>
               </div>
