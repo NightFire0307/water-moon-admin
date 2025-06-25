@@ -1,4 +1,4 @@
-import type { ApiResponse } from './common'
+import type { ApiResponse, Pagination } from './common'
 
 export interface IPackage {
   id: number
@@ -22,4 +22,4 @@ export interface IPackageItem {
   product_type: string
 }
 
-export type PackageResponse = Promise<ApiResponse<IPackage[]>>
+export type PackageResponse = Promise<ApiResponse<{ list: IPackage[] } & Pagination>>

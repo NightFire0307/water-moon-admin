@@ -3,12 +3,14 @@ import type { TableProps } from 'antd/lib'
 import { createPackage, deletePackage, getPackageById, getPackageList, updatePackage } from '@/apis/package'
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
 import { useFetch } from '@/hooks/useFetch'
+import usePagination from '@/hooks/usePagination'
 import useTableSelection from '@/hooks/useTableSelection'
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
-import { Badge, Button, Divider, message, Modal, Popover, Space, Table, Tag } from 'antd'
+import { Badge, Button, Divider, Empty, message, Modal, Popover, Space, Table, Tag } from 'antd'
 import { useForm } from 'antd/es/form/Form'
+import cs from 'classnames'
 import { Package, RotateCcw, Trash } from 'lucide-react'
-import { type FC, useState } from 'react'
+import { type FC, useEffect, useState } from 'react'
 import { PackageActions } from './components/PackageActions'
 import { type PackageFormValues, PackageModal } from './components/PackageModal'
 import styles from './index.module.less'
@@ -21,35 +23,43 @@ interface PackageProductDetailProps {
 
 function PackageProductDetail({ items }: PackageProductDetailProps) {
   return (
-    <div className={styles.packageProductDetail}>
-      <div className={styles.packageProductDetail__header}>
-        <Package size={16} />
-        <span>包含产品</span>
-      </div>
-      <Divider className={styles.packageProductDetail__divider} />
-      <div className={styles.packageProductDetail__content}>
-        {
-          items.map((item, index) => (
-            <div className={styles.packageProductDetail__item} key={item.id}>
-              <div className={styles.packageProductDetail__itemMain}>
-                <div className={styles.packageProductDetail__itemIndex}>{index + 1}</div>
-                <div className={styles.packageProductDetail__itemName}>{item.product.name}</div>
-              </div>
-              <div className={styles.packageProductDetail__count}>{`x${item.count}`}</div>
-            </div>
-          ))
-        }
-      </div>
+    <>
+      {
+        items.length === 0
+          ? <Empty description="暂无产品" />
+          : (
+              <div className={styles.packageProductDetail}>
+                <div className={styles.packageProductDetail__header}>
+                  <Package size={16} />
+                  <span>包含产品</span>
+                </div>
+                <Divider className={styles.packageProductDetail__divider} />
+                <div className={styles.packageProductDetail__content}>
+                  {
+                    items.map((item, index) => (
+                      <div className={styles.packageProductDetail__item} key={item.id}>
+                        <div className={styles.packageProductDetail__itemMain}>
+                          <div className={styles.packageProductDetail__itemIndex}>{index + 1}</div>
+                          <div className={styles.packageProductDetail__itemName}>{item.product.name}</div>
+                        </div>
+                        <div className={styles.packageProductDetail__count}>{`x${item.count}`}</div>
+                      </div>
+                    ))
+                  }
+                </div>
 
-      <Divider className={styles.packageProductDetail__divider} />
-      <div className={styles.packageProductDetail__footer}>
-        <div className={styles.packageProductDetail__totalLabel}>总数量</div>
-        <div className={styles.packageProductDetail__totalValue}>
-          {items.length}
-          件
-        </div>
-      </div>
-    </div>
+                <Divider className={styles.packageProductDetail__divider} />
+                <div className={styles.packageProductDetail__footer}>
+                  <div className={styles.packageProductDetail__totalLabel}>总数量</div>
+                  <div className={styles.packageProductDetail__totalValue}>
+                    {items.length}
+                    件
+                  </div>
+                </div>
+              </div>
+            )
+      }
+    </>
   )
 }
 
@@ -62,9 +72,12 @@ interface ModalState {
 const PackageManager: FC = () => {
   const [modalState, setModalState] = useState<ModalState>({ open: false, mode: 'create', initialValues: {} as PackageFormValues })
   const [dataSource, setDataSource] = useState<IPackage[]>([])
+  const { current, pageSize, pagination, setTotal } = usePagination()
   const { loading, refetch } = useFetch(getPackageList, {
+    manual: true,
     onSuccess: (result) => {
-      setDataSource(result)
+      setDataSource(result.list)
+      setTotal(result.total)
     },
   })
   const [form] = useForm()
@@ -90,12 +103,23 @@ const PackageManager: FC = () => {
       title: '产品数量',
       render: items => (
         <Popover content={<PackageProductDetail items={items} />} placement="right">
-          <div className={styles.items}>
-            <Package size={16} />
-            <span style={{ fontWeight: 600 }}>
-              {items.length}
-            </span>
-            <span>个产品</span>
+          <div className={
+            cs(styles.packageSummary__items, items.length !== 0 ? styles.default : styles.warning)
+          }
+          >
+            {
+              items.length === 0
+                ? <span className={styles.packageSummary__empty}>暂无产品</span>
+                : (
+                    <>
+                      <Package size={16} />
+                      <span className={styles.packageSummary__count}>
+                        {items.length}
+                      </span>
+                      <span className={styles.packageSummary__label}>个产品</span>
+                    </>
+                  )
+            }
           </div>
         </Popover>
       ),
@@ -204,6 +228,13 @@ const PackageManager: FC = () => {
     })
   }
 
+  useEffect(() => {
+    refetch({
+      current,
+      pageSize,
+    })
+  }, [current, pageSize])
+
   return (
     <div style={{ padding: '24px' }}>
       <Space>
@@ -234,7 +265,14 @@ const PackageManager: FC = () => {
           批量删除
         </Button>
       </Space>
-      <Table rowKey="id" columns={columns} dataSource={dataSource} rowSelection={rowSelection} loading={loading} />
+      <Table
+        rowKey="id"
+        columns={columns}
+        dataSource={dataSource}
+        rowSelection={rowSelection}
+        loading={loading}
+        pagination={pagination}
+      />
       <PackageModal
         open={modalState.open}
         mode={modalState.mode}

@@ -1,4 +1,4 @@
-import type { ApiResponse } from '@/types/common'
+import type { ApiResponse, PaginationParams } from '@/types/common'
 import type { PackageResponse } from '@/types/package'
 import request from '@/utils/request.ts'
 
@@ -7,7 +7,7 @@ interface PackageParams {
   isPublished?: boolean
 }
 
-export function getPackageList(params?: PackageParams): PackageResponse {
+export function getPackageList(params?: PaginationParams & PackageParams): PackageResponse {
   return request({
     url: '/admin/packages',
     method: 'get',
