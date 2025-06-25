@@ -66,11 +66,11 @@ function PackageProductDetail({ items }: PackageProductDetailProps) {
 interface ModalState {
   open: boolean
   mode: 'create' | 'edit'
-  initialValues?: PackageFormValues
+  initialValues?: IPackage
 }
 
 const PackageManager: FC = () => {
-  const [modalState, setModalState] = useState<ModalState>({ open: false, mode: 'create', initialValues: {} as PackageFormValues })
+  const [modalState, setModalState] = useState<ModalState>({ open: false, mode: 'create', initialValues: {} as IPackage })
   const [dataSource, setDataSource] = useState<IPackage[]>([])
   const { current, pageSize, pagination, setTotal } = usePagination()
   const { loading, refetch } = useFetch(getPackageList, {

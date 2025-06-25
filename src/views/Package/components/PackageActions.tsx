@@ -28,7 +28,7 @@ export const PackageActions: FC<PackageActionsProps> = ({ onEdit, onDelete }) =>
   ]
 
   const handleMenuClick = ({ key }: { key: string }) => {
-    switch(key) {
+    switch (key) {
       case 'edit':
         onEdit?.()
         break
@@ -36,7 +36,7 @@ export const PackageActions: FC<PackageActionsProps> = ({ onEdit, onDelete }) =>
         onDelete?.()
         break
       default:
-        console.warn(`Unhandled action type: ${key}`);
+        console.warn(`Unhandled action type: ${key}`)
         break
     }
   }

@@ -1,3 +1,4 @@
+import type { IPackage } from '@/types/package'
 import { getProductByCategory } from '@/apis/product'
 import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
 import { PlusOutlined } from '@ant-design/icons'
@@ -19,7 +20,7 @@ export interface PackageFormValues {
 interface PackageModalProps {
   open: boolean
   mode: 'create' | 'edit'
-  initialData?: Record<string, any>
+  initialData?: IPackage
   onClose?: () => void
   onCreate?: (data: PackageFormValues) => void
   onUpdate?: (packageId: number, data: PackageFormValues) => void
@@ -118,7 +119,7 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
       }
 
       if (mode === 'edit') {
-        onUpdate && onUpdate(initialData?.id, {
+        onUpdate && onUpdate(initialData!.id, {
           items: [
             ...products,
           ],
@@ -153,11 +154,13 @@ export const PackageModal: FC<PackageModalProps> = ({ open, mode, initialData, o
       form.setFieldsValue({
         name: initialData?.name ?? '',
         price: initialData?.price ?? 0,
-        isPublished: initialData?.isPublished ?? true,
+        isPublished: initialData?.is_published ?? true,
       })
 
       // TODO: 定义类型
       initialData?.items.forEach((item) => {
+        cacheSelectedIds.current.add(item.product.productId)
+
         setProducts(prev => ([
           ...prev,
           {

@@ -1,5 +1,5 @@
 import type { ApiResponse, PaginationParams } from '@/types/common'
-import type { PackageResponse } from '@/types/package'
+import type { IPackage, PackageResponse } from '@/types/package'
 import request from '@/utils/request.ts'
 
 interface PackageParams {
@@ -15,7 +15,7 @@ export function getPackageList(params?: PaginationParams & PackageParams): Packa
   })
 }
 
-export function getPackageById(id: number) {
+export function getPackageById(id: number): Promise<ApiResponse<IPackage>> {
   return request({
     url: `/admin/packages/${id}`,
     method: 'get',
