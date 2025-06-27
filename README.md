@@ -1,50 +1,61 @@
-# React + TypeScript + Vite
+# Water-moon-admin
+Water Moon Admin 是一个基于 React 和 Ant Design 构建的在线选片后台管理系统，支持产品管理、订单配置与用户选片流程控制
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## ✨ 特性 (Features)
+- 📁 **订单管理**：创建、编辑客户订单，绑定照片集、指定可制作产品
+- 🖼️ **照片集管理**：上传原片、预览、分类、标记制作用途（如大框、相册等）
+- 🛠️ **产品配置**：支持配置影楼常用产品类型（摆台、相册、大框等）及每类限制张数
+- 🎁 **套餐管理**：支持创建套餐并关联多个产品，方便统一管理影楼常用组合服务
+- 📊 **选片统计**：按订单维度查看用户选片结果、备注、导出
+- 🔐 **权限控制（RBAC）**：支持管理员、选片师、普通用户多角色访问控制
+- 🔗 **短链生成**：每个订单生成专属选片链接与动态密码，供客户访问选片页面
 
-Currently, two official plugins are available:
+## ⚙️ 技术栈 Technology Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🌐 前端：React 18, TypeScript, Vite, Zustand, Ant Design
+- 🖥️ 后端：NestJS + TypeORM + MySQL
+- ☁️ 存储：MinIO，客户端直传 OSS
+- 🔐 权限控制：JWT + RBAC 模型
+- 🧰 构建与部署：Docker + PM2
 
-## Expanding the ESLint configuration
+## 📦 安装与运行 Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+本项目包含两个子项目：后台管理前端和后端服务，需分别启动。
 
-- Configure the top-level `parserOptions` property like this:
+---
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### 🖥️ 后台前端（[water-moon-admin](https://github.com/NightFire0307/water-moon-admin)）
+
+```bash
+# 克隆项目
+git clone https://github.com/NightFire0307/water-moon-admin.git
+cd water-moon-admin
+
+# 安装依赖
+npm install
+
+# 启动开发环境
+npm run dev
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+---
+### 🛠️ 后端服务 ([water-moon-server](https://github.com/NightFire0307/water-moon-server))
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+```bash
+# 克隆项目
+git clone https://github.com/NightFire0307/water-moon-server.git
+cd water-moon-server
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+# 安装依赖
+npm install
+
+# 配置环境变量
+# 修改 .env 内容，设置数据库、OSS 等配置
+
+# 启动开发服务
+npm run start:dev
 ```
+
+## 🤝 参与贡献（Contributing）
+
+我们欢迎任何形式的贡献！无论是提交 bug、提建议、添加功能，还是改进文档，都是对项目的重要支持。

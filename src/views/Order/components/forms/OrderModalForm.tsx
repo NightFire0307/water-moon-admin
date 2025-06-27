@@ -1,12 +1,15 @@
+import type { IPackage } from '@/types/package'
 import type { IProduct } from '@/types/product'
 import type { GetRef, TableProps } from 'antd'
 import type { FC, PropsWithChildren, ReactNode } from 'react'
 import { createOrder, updateOrder } from '@/apis/order'
+import { getPackageList } from '@/apis/package'
 import { getProductList } from '@/apis/product'
 import IconTrash from '@/assets/icons/trash.svg?react'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Card, Col, Divider, Flex, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Table } from 'antd'
 import { useForm } from 'antd/es/form/Form'
+import { options } from 'node_modules/axios/index.d.cts'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 // 获取 Form 实例类型
@@ -108,6 +111,9 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
   const { open, mode, initialValues, onClose } = props
   const [productOptions, setProductOptions] = useState<IProduct[]>([])
   const [selectedProduct, setSelectedProduct] = useState<number>()
+  const [packageState, setPackageState] = useState<{ options: IPackage[], selectedId?: number }>({
+    options: [],
+  })
   const [selectedCount, setSelectedCount] = useState<number>(1)
   const [dataSource, setDataSource] = useState<Item[]>([])
   const [confirmLoading, setConfirmLoading] = useState(false)
@@ -196,11 +202,36 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
 
     setSelectedProduct(undefined)
     setSelectedCount(1)
+
+    console.log(dataSource)
+  }
+
+  // 添加套餐
+  function handleAddPackage() {
+    const pkg = packageState.options.find(item => item.id === packageState.selectedId)
+    if (!pkg)
+      return
+
+    setDataSource(prev => ([
+      ...prev,
+      ...pkg.items.map(item => ({
+        key: prev.length + 1 + item.id,
+        id: item.product.id,
+        name: item.product.name,
+        type: item.product_type,
+        count: item.count,
+      }))
+    ]))
   }
 
   async function fetchOrderProducts() {
     const { data } = await getProductList({ current: 1, pageSize: 100 })
     setProductOptions(data.list)
+  }
+
+  async function fetchPackages() {
+    const { data } = await getPackageList({})
+    setPackageState(prev => ({ ...prev, options: data }))
   }
 
   async function handleOk() {
@@ -251,11 +282,13 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
     setDataSource([])
     setSelectedProduct(undefined)
     setSelectedCount(1)
+    setPackageState({ options: [], selectedId: undefined })
   }
 
   useEffect(() => {
     if (open) {
       fetchOrderProducts()
+      fetchPackages()
     }
 
     if (mode === 'edit' && initialValues) {
@@ -339,8 +372,14 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
         <Col span={12}>
           <Card title="套餐">
             <Flex gap={8}>
-              <Select placeholder="选择套餐" style={{ flex: 1 }} disabled />
-              <Button type="primary" icon={<PlusOutlined />} disabled />
+              <Select
+                fieldNames={{ label: 'name', value: 'id' }}
+                placeholder="选择套餐"
+                style={{ flex: 1 }}
+                options={packageState.options}
+                onChange={value => setPackageState(prev => ({ ...prev, selectedId: value }))}
+              />
+              <Button type="primary" icon={<PlusOutlined />} onClick={handleAddPackage} />
             </Flex>
           </Card>
         </Col>

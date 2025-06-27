@@ -18,6 +18,8 @@ type InputField = BaseField & {
 
 type InputNumberField = BaseField & {
   type: 'inputNumber'
+  addonBefore?: ReactNode
+  addonAfter?: ReactNode
 }
 
 type SelectField = BaseField & {
@@ -52,7 +54,7 @@ const SimpleForm: FC<SimpleFormProps> = ({ fields, form, layout, initialValues }
       case 'input':
         return <Input {...commonProps} />
       case 'inputNumber':
-        return <InputNumber {...commonProps} />
+        return <InputNumber {...commonProps} addonBefore={field.addonBefore} addonAfter={field.addonAfter} />
       case 'select':
         return <Select {...commonProps} options={field.options} prefix={field.prefix} onChange={field.onChange} />
       case 'switch':
