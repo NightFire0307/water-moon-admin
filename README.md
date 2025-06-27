@@ -55,3 +55,7 @@ npm install
 # 启动开发服务
 npm run start:dev
 ```
+
+## 🤝 参与贡献（Contributing）
+
+我们欢迎任何形式的贡献！无论是提交 bug、提建议、添加功能，还是改进文档，都是对项目的重要支持。
