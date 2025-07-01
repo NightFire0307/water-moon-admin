@@ -123,13 +123,13 @@ const PackageManager: FC = () => {
               items.length === 0
                 ? <span className={styles.packageSummary__empty}>暂无产品</span>
                 : (
-                    <>
+                    <div className={styles.packageSummary__countContainer}>
                       <Package size={16} />
                       <span className={styles.packageSummary__count}>
                         {items.length}
                       </span>
                       <span className={styles.packageSummary__label}>个产品</span>
-                    </>
+                    </div>
                   )
             }
           </div>
