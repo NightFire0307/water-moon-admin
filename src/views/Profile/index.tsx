@@ -1,20 +1,28 @@
-import { NotificationOutlined } from '@ant-design/icons'
-import UserOutlined from '@ant-design/icons/lib/icons/UserOutlined'
 import { Tabs, type TabsProps } from 'antd'
-import { BasicInfo } from './BasicInfo'
+import { Shield, User } from 'lucide-react'
+import commonStyles from './common.module.less'
+import { BasicInfo } from './components/BasicInfo'
 
 export function Profile() {
   const items: TabsProps['items'] = [
     {
       key: '1',
-      label: '基本信息',
-      icon: <UserOutlined />,
+      label: (
+        <span className={commonStyles.tabLabel}>
+          <User size={14} />
+          基本信息
+        </span>
+      ),
       children: <BasicInfo />,
     },
     {
       key: '2',
-      label: '安全设置',
-      icon: <NotificationOutlined />,
+      label: (
+        <span className={commonStyles.tabLabel}>
+          <Shield size={14} />
+          安全设置
+        </span>
+      ),
       children: '这是用户安全设置的内容',
     },
   ]
