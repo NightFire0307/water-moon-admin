@@ -54,7 +54,7 @@ service.interceptors.response.use(
         message.error('您没有权限访问该资源')
         break
       default:
-        message.error(`接口请求错误：${error.code}`)
+        message.error('服务器发生错误，请稍后再试')
         break
     }
 

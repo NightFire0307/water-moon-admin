@@ -13,7 +13,7 @@ interface ShareLinkCardProps {
 }
 
 export const ShareLinkCard: FC<ShareLinkCardProps> = ({ data, onDelete }) => {
-  const commonUrl = 'http://127.0.0.1:5173/share/init?surl='
+  const commonUrl = 'http://localhost:5174/share/init?surl='
   const { daysUntilExpiry, daysFromCreation } = useMemo(() => {
     const now = dayjs()
 
