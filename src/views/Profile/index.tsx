@@ -2,6 +2,7 @@ import { Tabs, type TabsProps } from 'antd'
 import { Shield, User } from 'lucide-react'
 import commonStyles from './common.module.less'
 import { BasicInfo } from './components/BasicInfo'
+import { ChangePassword } from './components/ChangePassword'
 
 export function Profile() {
   const items: TabsProps['items'] = [
@@ -23,7 +24,7 @@ export function Profile() {
           安全设置
         </span>
       ),
-      children: '这是用户安全设置的内容',
+      children: <ChangePassword />,
     },
   ]
 

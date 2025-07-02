@@ -1,8 +1,9 @@
 import type { MenuProps } from 'antd'
 import ChevronsUpDown from '@/assets/icons/chevrons-up-down.svg?react'
 import { useUserInfo } from '@/store/useUserInfo.tsx'
-import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons'
+import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Dropdown, Flex } from 'antd'
+import { User2 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import styles from './UserMenu.module.less'
 
@@ -17,9 +18,9 @@ enum UserMenuKey {
 
 const userMenuItems: MenuProps['items'] = [
   {
-    label: '个人设置',
+    label: '个人信息',
     key: UserMenuKey.Setting,
-    icon: <SettingOutlined />,
+    icon: <User2 size={14} />,
   },
   {
     type: 'divider',
