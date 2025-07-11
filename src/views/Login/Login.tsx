@@ -3,7 +3,8 @@ import { useUserInfo } from '@/store/useUserInfo.tsx'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input, message } from 'antd'
 import { useForm } from 'antd/es/form/Form'
-import { useEffect, useState } from 'react'
+import { throttle } from 'lodash-es'
+import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './Login.module.less'
 
@@ -14,7 +15,7 @@ export function Login() {
   const navigate = useNavigate()
   const [form] = useForm()
 
-  async function handleLogin() {
+  const handleLogin = useCallback(throttle(async () => {
     setLoading(true)
 
     // 校验表单
@@ -40,31 +41,23 @@ export function Login() {
         }, 1000)
       }
     }
-    catch {
-      message.error('登录失败')
+    catch (err) {
+      console.error(err)
     }
     finally {
       setLoading(false)
     }
-  }
+  }, 1000), [form])
 
-  function handleKeyDown(e: KeyboardEvent) {
+  function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter') {
       e.preventDefault() // 阻止默认的表单提交行为
       handleLogin()
     }
   }
 
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown)
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [])
-
   return (
-    <div className={styles.loginContainer}>
+    <div className={styles.loginContainer} onKeyDown={handleKeyDown}>
       <Card className={styles.loginCard}>
         <div className={styles.loginHeader}>
           <h1>管理后台</h1>
