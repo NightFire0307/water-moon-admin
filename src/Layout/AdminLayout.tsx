@@ -4,9 +4,7 @@ import PanelLeftOpen from '@/assets/icons/panel-left-open.svg?react'
 import UserMenu from '@/components/UserMenu/UserMenu.tsx'
 import {
   DashboardOutlined,
-  ProductOutlined,
   SafetyCertificateOutlined,
-  SettingOutlined,
   UploadOutlined,
   UserOutlined,
   VideoCameraOutlined,
@@ -88,19 +86,6 @@ function AdminLayout() {
         { key: 'package', label: '产品套餐' },
       ],
     },
-    {
-      key: 'post_management',
-      label: '后期管理',
-      icon: <ProductOutlined />,
-    },
-    {
-      key: 'system_setting',
-      icon: <SettingOutlined />,
-      label: '系统设置',
-      children: [
-        { key: 'general', label: '通用设置' },
-      ],
-    },
   ]
 
   const toggle = () => {
@@ -111,6 +96,10 @@ function AdminLayout() {
     const route = keyPath.reverse().join('/')
     navigate(route)
   }
+
+  useEffect(() => {
+    navigate('/dashboard')
+  }, [])
 
   return (
     <Layout style={{ minHeight: '100vh' }}>

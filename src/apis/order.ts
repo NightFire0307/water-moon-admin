@@ -69,3 +69,10 @@ export function getOrderSummary(): OrderSummaryResponse {
     method: 'GET',
   })
 }
+
+export function getWeeklyOrderStats() {
+  return request({
+    url: '/admin/orders/weekly-stats',
+    method: 'GET',
+  })
+}

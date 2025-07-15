@@ -4,6 +4,15 @@ import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { useCallback, useEffect, useRef } from 'react'
 
+echarts.use([
+  GridComponent,
+  LineChart,
+  CanvasRenderer,
+  TooltipComponent,
+  LegendComponent,
+  BarChart,
+])
+
 /**
  * 封装echarts初始化和设置配置项
  * 注：按需导入图表时依旧需要手动注册组件
@@ -12,30 +21,37 @@ import { useCallback, useEffect, useRef } from 'react'
 function useEcharts() {
   const chartRef = useRef<HTMLDivElement>(null)
   const chartInstance = useRef<echarts.EChartsType | null>(null)
-
-  echarts.use([GridComponent, LineChart, CanvasRenderer, TooltipComponent, LegendComponent, BarChart])
+  const resizeObserver = useRef<ResizeObserver | null>(null)
 
   const initChart = useCallback(() => {
     if (!chartRef.current)
       return
+
+    // 清理旧的实例
+    if (chartInstance.current) {
+      chartInstance.current.dispose()
+      chartInstance.current = null
+    }
+
+    // 创建新实例
     chartInstance.current = echarts.init(chartRef.current)
 
-    // 监听图表容器大小变化
-    const resizeObserver = new ResizeObserver(() => {
+    // 清理旧的观察器
+    if (resizeObserver.current) {
+      resizeObserver.current.disconnect()
+    }
+
+    // 创建新的观察器
+    resizeObserver.current = new ResizeObserver(() => {
       chartInstance.current?.resize({
         animation: {
-          duration: 1300,
+          duration: 700,
           easing: 'cubicInOut',
         },
       })
     })
 
-    resizeObserver.observe(chartRef.current)
-
-    return () => {
-      chartInstance.current?.dispose()
-      resizeObserver.disconnect()
-    }
+    resizeObserver.current.observe(chartRef.current)
   }, [])
 
   const setOptions = useCallback((options: echarts.EChartsCoreOption, clear = true) => {
@@ -46,17 +62,29 @@ function useEcharts() {
     chartInstance.current.setOption(options)
   }, [])
 
-  useEffect(() => {
-    return () => {
-      chartInstance.current?.dispose()
+  const dispose = useCallback(() => {
+    if (chartInstance.current) {
+      chartInstance.current.dispose()
+      chartInstance.current = null
+    }
+    if (resizeObserver.current) {
+      resizeObserver.current.disconnect()
+      resizeObserver.current = null
     }
   }, [])
 
+  useEffect(() => {
+    return () => {
+      dispose()
+    }
+  }, [dispose])
+
   return {
     chartRef,
-    chartInstance,
+    chartInstance: chartInstance.current,
     initChart,
     setOptions,
+    dispose,
   }
 }
 

@@ -1,10 +1,9 @@
 import type { IOrderSummary } from '@/types/order'
-import { getOrderSummary } from '@/apis/order'
-import { Card, DatePicker, Flex } from 'antd'
+import { getOrderSummary, getWeeklyOrderStats } from '@/apis/order'
+import { Card, DatePicker } from 'antd'
 import { CalendarClock, CheckCircle, Hourglass, Package } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { AreaChart } from './components/AreaChart'
-import { ColumnChart } from './components/ColumnChart'
 import { DashboardCard } from './components/DashboardCard'
 import styles from './Dashboard.module.less'
 
@@ -17,6 +16,7 @@ export function Dashboard() {
     completedOrderCount: 0,
     totalOrderCount: 0,
   })
+  const [weekOrderCounts, setWeekOrderCounts] = useState<number[]>([])
 
   const data = [
     {
@@ -53,8 +53,14 @@ export function Dashboard() {
     setOrderSummary({ ...data })
   }
 
+  const fetchLastWeekOrderCounts = async () => {
+    const { data } = await getWeeklyOrderStats()
+    setWeekOrderCounts(data.lastWeekOrderCounts)
+  }
+
   useEffect(() => {
     fetchOrderSummary()
+    fetchLastWeekOrderCounts()
   }, [])
 
   return (
@@ -67,14 +73,8 @@ export function Dashboard() {
         style={{ marginTop: 24 }}
         extra={<RangePicker />}
       >
-        <AreaChart />
+        <AreaChart lastWeekOrderCounts={weekOrderCounts} />
       </Card>
-
-      <Flex style={{ marginTop: '24px', width: '100%' }} gap={24}>
-        <Card hoverable style={{ width: '100%' }}>
-          <ColumnChart />
-        </Card>
-      </Flex>
     </div>
   )
 }

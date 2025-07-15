@@ -29,7 +29,11 @@ const CardItem: FC<CardDataItem> = ({ icon, title, value, growth, color }) => {
             {title}
           </div>
           <div className={styles['dashboard-card__value']}>
-            <CountUp end={value} />
+            {
+              value > 0
+                ? <CountUp end={value} duration={2} />
+                : <span>0</span>
+            }
           </div>
           <div className={styles['dashboard-card__desc']}>
             <span

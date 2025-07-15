@@ -8,7 +8,12 @@ type EChartsOption = echarts.ComposeOption<
   GridComponentOption | LineSeriesOption | TooltipComponentOption | GridComponentOption | LegendComponentOption
 >
 
-export const AreaChart: FC = () => {
+interface AreaChartProps {
+  lastWeekOrderCounts: number[]
+  currentWeekOrderCounts?: number[]
+}
+
+export const AreaChart: FC<AreaChartProps> = ({ lastWeekOrderCounts, currentWeekOrderCounts = [] }) => {
   const { chartRef, setOptions, initChart } = useEcharts()
 
   const option: EChartsOption = {
@@ -40,7 +45,7 @@ export const AreaChart: FC = () => {
     series: [
       {
         name: '本周',
-        data: [62, 20, 45, 78, 60, 45, 55],
+        data: currentWeekOrderCounts,
         type: 'line',
         itemStyle: {
           color: '#1677ff',
@@ -57,7 +62,7 @@ export const AreaChart: FC = () => {
       },
       {
         name: '上周',
-        data: [42, 80, 45, 10, 29],
+        data: lastWeekOrderCounts,
         type: 'line',
         itemStyle: {
           color: '#13c2c2',
@@ -87,7 +92,7 @@ export const AreaChart: FC = () => {
       initChart()
     }
     setOptions(option)
-  }, [])
+  }, [lastWeekOrderCounts, currentWeekOrderCounts])
 
   return (
     <div ref={chartRef} style={{ height: 350, width: '100%' }}></div>
