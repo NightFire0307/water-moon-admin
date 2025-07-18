@@ -7,143 +7,272 @@ Font.register({
 
 const styles = StyleSheet.create({
   page: {
-    padding: 14,
     fontFamily: 'NotoSansSC',
     fontSize: 10,
-    lineHeight: 1.5,
+    padding: 30,
+    lineHeight: 1.6,
     backgroundColor: '#fff',
   },
-  section: {
-    marginBottom: 10,
+  header: {
+    backgroundColor: '#2563eb',
+    padding: 20,
+    marginBottom: 25,
+    borderRadius: 8,
   },
-  row: {
-    flexDirection: 'row',
-    marginBottom: 4,
-  },
-  label: {
-    width: 80,
+  title: {
+    fontSize: 20,
     fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#ffffff',
+    marginBottom: 8,
   },
-  value: {
-    flex: 1,
+  subtitle: {
+    fontSize: 12,
+    textAlign: 'center',
+    color: '#e2e8f0',
   },
-  tableHeader: {
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1e40af',
+    marginBottom: 12,
+    paddingBottom: 5,
+    borderBottom: '2px solid #3b82f6',
+  },
+  infoGrid: {
     flexDirection: 'row',
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 4,
-    paddingVertical: 4,
-    borderTop: '1px solid #000',
-    borderBottom: '1px solid #000',
+    flexWrap: 'wrap',
+    backgroundColor: '#f8fafc',
+    padding: 15,
+    borderRadius: 6,
+    border: '1px solid #e2e8f0',
   },
-  tableRow: {
-    flexDirection: 'row',
-    paddingVertical: 2,
+  infoItem: {
+    width: '50%',
+    marginBottom: 10,
+    paddingHorizontal: 5,
   },
-  col: {
-    width: '20%',
+  infoLabel: {
+    fontSize: 9,
+    color: '#64748b',
+    marginBottom: 2,
   },
-  notes: {
-    marginTop: 10,
-    fontSize: 8,
+  infoValue: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#1e293b',
   },
-  signatureRow: {
+  productCard: {
+    backgroundColor: '#fff',
+    border: '1px solid #e2e8f0',
+    borderRadius: 8,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+  },
+  productHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 20,
+    alignItems: 'center',
+    marginBottom: 10,
+    paddingBottom: 8,
+    borderBottom: '1px solid #f1f5f9',
+  },
+  productName: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#1e40af',
+  },
+  productType: {
+    fontSize: 10,
+    color: '#6b7280',
+    backgroundColor: '#f3f4f6',
+    padding: 3,
+    borderRadius: 4,
+  },
+  productDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  productDetailItem: {
+    flex: 1,
+    marginRight: 10,
+  },
+  productDetailLabel: {
     fontSize: 9,
+    color: '#9ca3af',
+    marginBottom: 2,
+  },
+  productDetailValue: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: '#374151',
+  },
+  photoIdsContainer: {
+    marginTop: 8,
+  },
+  photoIdsLabel: {
+    fontSize: 9,
+    color: '#6b7280',
+    marginBottom: 5,
+  },
+  photoIds: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 4,
+  },
+  photoId: {
+    fontSize: 9,
+    backgroundColor: '#eff6ff',
+    color: '#1d4ed8',
+    padding: 4,
+    borderRadius: 4,
+    border: '1px solid #dbeafe',
+    marginRight: 4,
+    marginBottom: 4,
+  },
+  footer: {
+    marginTop: 30,
+    paddingTop: 15,
+    borderTop: '1px solid #e2e8f0',
+    textAlign: 'center',
+  },
+  footerText: {
+    fontSize: 8,
+    color: '#9ca3af',
   },
 })
 
 export function PdfDocument() {
+  const data = {
+    customerId: 'A001',
+    customerName: '张三',
+    customerPhone: '13800138000',
+    store: '北京旗舰店',
+    photographer: '李老师',
+    stylist: '王老师',
+    selector: '赵老师',
+    shootDate: '2025-07-10',
+    selectDate: '2025-07-15',
+    pickupDate: '2025-08-01',
+    extraFee: '￥500',
+    totalPhotos: '50',
+  }
+
+  const products = [
+    {
+      name: '大框相框',
+      type: '相框',
+      count: 1,
+      perCount: 1,
+      photoIds: ['001', '002'],
+    },
+    {
+      name: '摆台',
+      type: '摆台',
+      count: 2,
+      perCount: 1,
+      photoIds: ['003', '005', '006'],
+    },
+    {
+      name: '入册',
+      type: '相册',
+      count: 1,
+      perCount: 20,
+      photoIds: ['007', '008', '009', '010'],
+    },
+  ]
+
+  const fields = [
+    { label: '客户编号', key: 'customerId' },
+    { label: '客户姓名', key: 'customerName' },
+    { label: '客户手机', key: 'customerPhone' },
+    { label: '门市', key: 'store' },
+    { label: '摄影师', key: 'photographer' },
+    { label: '造型师', key: 'stylist' },
+    { label: '选片师', key: 'selector' },
+    { label: '拍照日', key: 'shootDate' },
+    { label: '选片日', key: 'selectDate' },
+    { label: '取件日', key: 'pickupDate' },
+    { label: '加挑金额', key: 'extraFee' },
+    { label: '总张数', key: 'totalPhotos' },
+  ]
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        {/* 顶部客户信息 */}
+        {/* 页面头部 */}
+        <View style={styles.header}>
+          <Text style={styles.title}>客户产品制作单</Text>
+          <Text style={styles.subtitle}>Customer Information Sheet</Text>
+        </View>
+
+        {/* 客户基本信息 */}
         <View style={styles.section}>
-          <View style={styles.row}>
-            <Text style={styles.label}>客户编号:</Text>
-            <Text style={styles.value}>A177480</Text>
-            <Text style={styles.label}>客户:</Text>
-            <Text style={styles.value}>刘包泽 138001380000</Text>
-            <Text style={styles.label}>打印日:</Text>
-            <Text style={styles.value}>2025-06-14</Text>
-          </View>
-          <View style={styles.row}>
-            <Text style={styles.label}>拍摄师:</Text>
-            <Text style={styles.value}></Text>
-            <Text style={styles.label}>选片师:</Text>
-            <Text style={styles.value}></Text>
-            <Text style={styles.label}>取件方式:</Text>
-            <Text style={styles.value}></Text>
+          <Text style={styles.sectionTitle}>客户基本信息</Text>
+          <View style={styles.infoGrid}>
+            {fields.map(({ label, key }, index) => (
+              <View key={index} style={styles.infoItem}>
+                <Text style={styles.infoLabel}>{label}</Text>
+                <Text style={styles.infoValue}>{data[key as keyof typeof data] || '-'}</Text>
+              </View>
+            ))}
           </View>
         </View>
 
-        <View>
-          {/* 表格头 */}
-          <View style={styles.tableHeader}>
-            <Text style={styles.col}>产品</Text>
-            <Text style={styles.col}>类别</Text>
-            <Text style={styles.col}>P数</Text>
-            <Text style={styles.col}>数量</Text>
-            <Text style={styles.col}>单片</Text>
-          </View>
+        {/* 产品选择详情 */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>产品选择详情</Text>
+          {products.map((product, index) => (
+            <View key={index} style={styles.productCard}>
+              <View style={styles.productHeader}>
+                <Text style={styles.productName}>{product.name}</Text>
+                <Text style={styles.productType}>{product.type}</Text>
+              </View>
 
-          {/* 表格内容（示例：一行） */}
-          <View style={styles.tableRow}>
-            <Text style={styles.col}>麦琪10寸册</Text>
-            <Text style={styles.col}>10寸</Text>
-            <Text style={styles.col}>0</Text>
-            <Text style={styles.col}>1</Text>
-            <Text style={styles.col}>26张</Text>
-          </View>
+              <View style={styles.productDetails}>
+                <View style={styles.productDetailItem}>
+                  <Text style={styles.productDetailLabel}>数量</Text>
+                  <Text style={styles.productDetailValue}>{product.count}</Text>
+                </View>
+                <View style={styles.productDetailItem}>
+                  <Text style={styles.productDetailLabel}>单片数量</Text>
+                  <Text style={styles.productDetailValue}>{product.perCount}</Text>
+                </View>
+                <View style={styles.productDetailItem}>
+                  <Text style={styles.productDetailLabel}>总片数</Text>
+                  <Text style={styles.productDetailValue}>{product.count * product.perCount}</Text>
+                </View>
+              </View>
 
-          {/* 照片编号块（建议分页或分组） */}
-          <View style={{ marginTop: 10 }}>
-            <Text>照片编号：</Text>
-            <Text>776A7967、776A7971、776A8013</Text>
-          </View>
-
+              <View style={styles.photoIdsContainer}>
+                <Text style={styles.photoIdsLabel}>选择照片编号</Text>
+                <View style={styles.photoIds}>
+                  {product.photoIds.map((id, i) => (
+                    <Text key={i} style={styles.photoId}>
+                      #
+                      {id}
+                    </Text>
+                  ))}
+                </View>
+              </View>
+            </View>
+          ))}
         </View>
-
-        <View>
-          {/* 表格头 */}
-          <View style={styles.tableHeader}>
-            <Text style={styles.col}>产品</Text>
-            <Text style={styles.col}>类别</Text>
-            <Text style={styles.col}>P数</Text>
-            <Text style={styles.col}>数量</Text>
-            <Text style={styles.col}>单片</Text>
-          </View>
-
-          {/* 表格内容（示例：一行） */}
-          <View style={styles.tableRow}>
-            <Text style={styles.col}>麦琪10寸册</Text>
-            <Text style={styles.col}>10寸</Text>
-            <Text style={styles.col}>0</Text>
-            <Text style={styles.col}>1</Text>
-            <Text style={styles.col}>26张</Text>
-          </View>
-
-          {/* 照片编号块（建议分页或分组） */}
-          <View style={{ marginTop: 10 }}>
-            <Text>照片编号：</Text>
-            <Text>776A7967、776A7971、776A8013、776A7967、776A7971、776A8013、776A7967、776A7971、776A8013、776A7967、776A7971、776A8013</Text>
-          </View>
-
-        </View>
-
-        {/* 备注说明 */}
-        <Text style={styles.notes}>
-          &lt;不能修饰的部分&gt;
-          {'\n'}
-          脸部光线、阴影已调正大小方向、牙齿矫正、发丝、眼神、睫毛长短、眼镜镜片反光...
-        </Text>
 
         {/* 页脚 */}
-        <View style={styles.signatureRow}>
-          <Text>页数：1/1</Text>
-          <Text>服务人员签名：__________</Text>
-          <Text>客户签名：__________</Text>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            本单据由系统自动生成 | 生成时间：
+            {new Date().toLocaleString('zh-CN')}
+          </Text>
         </View>
       </Page>
     </Document>

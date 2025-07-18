@@ -6,6 +6,8 @@ import { PdfDocument } from './PdfDocument'
 export function usePdfBlob() {
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [pageNumber, setPageNumber] = useState(1)
+  const [numPages, setNumPages] = useState(0)
   const currentBlobUrl = useRef<string | null>(null)
 
   // 处理打印 PDF 功能
@@ -17,6 +19,11 @@ export function usePdfBlob() {
         printWindow.print()
       })
     }
+  }
+
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
+    setNumPages(numPages)
+    setPageNumber(1)
   }
 
   useEffect(() => {
@@ -60,5 +67,9 @@ export function usePdfBlob() {
     loading,
     setLoading,
     printPdf,
+    pageNumber,
+    setPageNumber,
+    numPages,
+    onDocumentLoadSuccess,
   }
 }

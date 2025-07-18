@@ -1,13 +1,16 @@
 import { CloseOutlined, DownloadOutlined, LoadingOutlined, MinusOutlined, PlusOutlined, PrinterOutlined } from '@ant-design/icons'
-import { Button, Divider, Modal, type ModalProps, Space, Spin } from 'antd'
+import { Button, Divider, Modal, Space, Spin } from 'antd'
 import { type FC, useMemo, useState } from 'react'
 import { Document, Page, type PageProps, pdfjs } from 'react-pdf'
+import { PdfPagination } from './PdfPagination'
 import styles from './PdfViewer.module.less'
 import { usePdfBlob } from './usePdfBlob'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
-interface ExportPdfProps extends ModalProps {
+interface ExportPdfProps {
+  open: boolean
+  onClose?: () => void
 }
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -18,9 +21,10 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 interface ModalTitleProps {
   onDownload?: () => void
   onPrint?: () => void
+  onClose?: () => void
 }
 
-function ModalTitle({ onPrint, onDownload }: ModalTitleProps) {
+function ModalTitle({ onPrint, onDownload, onClose }: ModalTitleProps) {
   return (
     <div className={styles.pdfViewerModalTitle}>
       <span>D9999 产品制作单.pdf</span>
@@ -28,7 +32,7 @@ function ModalTitle({ onPrint, onDownload }: ModalTitleProps) {
         <Button icon={<DownloadOutlined />} type="text" onClick={() => onDownload && onDownload()}>下载</Button>
         <Button icon={<PrinterOutlined />} type="text" onClick={() => onPrint && onPrint()}>打印</Button>
         <Divider type="vertical" style={{ borderInlineStart: '1px solid rgba(23, 45, 69, 20%)' }} />
-        <Button type="text" icon={<CloseOutlined />} />
+        <Button type="text" icon={<CloseOutlined />} onClick={() => onClose && onClose()} />
       </Space>
     </div>
   )
@@ -43,11 +47,10 @@ function PdfLoading() {
   )
 }
 
-export const PDFViewer: FC<ExportPdfProps> = ({ open }) => {
-  const { pdfBlobUrl, printPdf } = usePdfBlob()
+export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
+  const { pdfBlobUrl, printPdf, onDocumentLoadSuccess, pageNumber, setPageNumber, numPages } = usePdfBlob()
   const [pageProps, setPageProps] = useState<PageProps>({
     scale: 1,
-    pageNumber: 1,
     canvasBackground: '#f3f5f7',
     loading: null,
   })
@@ -71,7 +74,7 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open }) => {
   return (
     <Modal
       open={open}
-      title={<ModalTitle onPrint={printPdf} />}
+      title={<ModalTitle onPrint={printPdf} onClose={onClose} />}
       classNames={{
         content: styles.pdfViewerModalContent,
         body: styles.pdfViewerModalBody,
@@ -88,26 +91,42 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open }) => {
       closable={false}
       width="100%"
       footer={null}
+      destroyOnClose
     >
 
       <div className={styles.pdfViewerPager}>
         <Document
           file={pdfBlobUrl}
           loading={<PdfLoading />}
+          onLoadSuccess={onDocumentLoadSuccess}
         >
-          <Page {...pageProps} />
+          <Page {...pageProps} pageNumber={pageNumber} />
         </Document>
       </div>
 
       <div className={styles.pdfViewerModalFooter}>
-        <Button size="small" icon={<MinusOutlined />} type="text" onClick={() => handleZoom(-0.05)} />
-        <div className={styles.pdfViewerModalFooter__zoomLevel}>
-          <span>
-            {scaleLevel}
-            %
-          </span>
+        <div className={styles.pdfViewerModalFooter__left}>
+          <PdfPagination
+            pageNumber={pageNumber}
+            numPages={numPages}
+            onFirstPageNumber={() => setPageNumber(1)}
+            onPrevPageNumber={page => setPageNumber(Math.max(1, page))}
+            onLastPageNumber={() => setPageNumber(numPages)}
+            onNextPageNumber={page => setPageNumber(Math.min(numPages, page))}
+            onPagerChange={page => setPageNumber(Math.max(1, Math.min(numPages, page)))}
+          />
         </div>
-        <Button size="small" icon={<PlusOutlined />} type="text" onClick={() => handleZoom(0.05)} />
+
+        <div className={styles.pdfViewerModalFooter__right}>
+          <Button size="small" icon={<MinusOutlined />} type="text" onClick={() => handleZoom(-0.05)} />
+          <div className={styles.pdfViewerModalFooter__zoomLevel}>
+            <span>
+              {scaleLevel}
+              %
+            </span>
+          </div>
+          <Button size="small" icon={<PlusOutlined />} type="text" onClick={() => handleZoom(0.05)} />
+        </div>
       </div>
     </Modal>
   )
