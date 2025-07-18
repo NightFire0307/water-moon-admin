@@ -135,8 +135,9 @@ const styles = StyleSheet.create({
     padding: 4,
     borderRadius: 4,
     border: '1px solid #dbeafe',
-    marginRight: 4,
-    marginBottom: 4,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   footer: {
     marginTop: 30,
@@ -172,21 +173,36 @@ export function PdfDocument() {
       type: '相框',
       count: 1,
       perCount: 1,
-      photoIds: ['001', '002'],
+      photoIds: ['CZCZ0001'],
     },
     {
       name: '摆台',
       type: '摆台',
       count: 2,
       perCount: 1,
-      photoIds: ['003', '005', '006'],
+      photoIds: ['CZCZ0001', 'CZCZ0007', 'CZCZ0008'],
     },
     {
       name: '入册',
       type: '相册',
       count: 1,
       perCount: 20,
-      photoIds: ['007', '008', '009', '010'],
+      photoIds: [
+        'CZCZ0001',
+        'CZCZ0007',
+        'CZCZ0008',
+        'CZCZ0002',
+        'CZCZ0003',
+        'CZCZ0004',
+        'CZCZ0005',
+        'CZCZ0006',
+        'CZCZ0009',
+        'CZCZ0010',
+        'CZCZ0011',
+        'CZCZ0012',
+        'CZCZ0013',
+        'CZCZ0014',
+      ],
     },
   ]
 
@@ -210,13 +226,13 @@ export function PdfDocument() {
       <Page size="A4" style={styles.page}>
         {/* 页面头部 */}
         <View style={styles.header}>
-          <Text style={styles.title}>客户产品制作单</Text>
-          <Text style={styles.subtitle}>Customer Information Sheet</Text>
+          <Text style={styles.title}>产品制作单</Text>
+          <Text style={styles.subtitle}>Product Production Sheet</Text>
         </View>
 
         {/* 客户基本信息 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>客户基本信息</Text>
+          <Text style={styles.sectionTitle}>客户信息</Text>
           <View style={styles.infoGrid}>
             {fields.map(({ label, key }, index) => (
               <View key={index} style={styles.infoItem}>
@@ -229,7 +245,7 @@ export function PdfDocument() {
 
         {/* 产品选择详情 */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>产品选择详情</Text>
+          <Text style={styles.sectionTitle}>产品详情</Text>
           {products.map((product, index) => (
             <View key={index} style={styles.productCard}>
               <View style={styles.productHeader}>
@@ -257,7 +273,6 @@ export function PdfDocument() {
                 <View style={styles.photoIds}>
                   {product.photoIds.map((id, i) => (
                     <Text key={i} style={styles.photoId}>
-                      #
                       {id}
                     </Text>
                   ))}

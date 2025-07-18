@@ -1,6 +1,6 @@
 import { CloseOutlined, DownloadOutlined, LoadingOutlined, MinusOutlined, PlusOutlined, PrinterOutlined } from '@ant-design/icons'
 import { Button, Divider, Modal, Space, Spin } from 'antd'
-import { type FC, useMemo, useState } from 'react'
+import { type FC, useEffect, useMemo, useState } from 'react'
 import { Document, Page, type PageProps, pdfjs } from 'react-pdf'
 import { PdfPagination } from './PdfPagination'
 import styles from './PdfViewer.module.less'
@@ -48,7 +48,15 @@ function PdfLoading() {
 }
 
 export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
-  const { pdfBlobUrl, printPdf, onDocumentLoadSuccess, pageNumber, setPageNumber, numPages } = usePdfBlob()
+  const {
+    pdfBlobUrl,
+    printPdf,
+    onDocumentLoadSuccess,
+    pageNumber,
+    setPageNumber,
+    numPages,
+    generatePdfBlob,
+  } = usePdfBlob({ options: { manual: true } })
   const [pageProps, setPageProps] = useState<PageProps>({
     scale: 1,
     canvasBackground: '#f3f5f7',
@@ -70,6 +78,12 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
   const scaleLevel = useMemo(() => {
     return ((pageProps.scale ?? 1) * 100).toFixed(0)
   }, [pageProps.scale])
+
+  useEffect(() => {
+    if (open) {
+      generatePdfBlob()
+    }
+  }, [open])
 
   return (
     <Modal

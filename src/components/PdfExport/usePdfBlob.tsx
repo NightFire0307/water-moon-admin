@@ -3,7 +3,15 @@ import { message } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 import { PdfDocument } from './PdfDocument'
 
-export function usePdfBlob() {
+interface usePdfBlobProps {
+  options?: {
+    manual?: boolean
+  }
+}
+
+export function usePdfBlob({ options = {} }: usePdfBlobProps = {}) {
+  const { manual = false } = options
+
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [pageNumber, setPageNumber] = useState(1)
@@ -26,29 +34,33 @@ export function usePdfBlob() {
     setPageNumber(1)
   }
 
-  useEffect(() => {
-    const generatePdfBlob = async () => {
-      try {
-        setLoading(true)
+  // 生成 PDF Blob
+  const generatePdfBlob = async () => {
+    try {
+      setLoading(true)
 
-        if (currentBlobUrl.current) {
-          URL.revokeObjectURL(currentBlobUrl.current)
-          currentBlobUrl.current = null
-        }
+      if (currentBlobUrl.current) {
+        URL.revokeObjectURL(currentBlobUrl.current)
+        currentBlobUrl.current = null
+      }
 
-        const blob = await pdf(<PdfDocument />).toBlob()
-        const url = URL.createObjectURL(blob)
-        setPdfBlobUrl(url)
-        currentBlobUrl.current = url
-      }
-      catch (err) {
-        message.error('PDF生成失败，请稍后重试')
-        console.error('PDF generation error:', err)
-      }
-      finally {
-        setLoading(false)
-      }
+      const blob = await pdf(<PdfDocument />).toBlob()
+      const url = URL.createObjectURL(blob)
+      setPdfBlobUrl(url)
+      currentBlobUrl.current = url
     }
+    catch (err) {
+      message.error('PDF生成失败，请稍后重试')
+      console.error('PDF generation error:', err)
+    }
+    finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (manual)
+      return
 
     generatePdfBlob()
   }, [])
@@ -71,5 +83,6 @@ export function usePdfBlob() {
     setPageNumber,
     numPages,
     onDocumentLoadSuccess,
+    generatePdfBlob,
   }
 }
