@@ -58,6 +58,21 @@ export function usePdfBlob({ options = {} }: usePdfBlobProps = {}) {
     }
   }
 
+  /**
+   * 下载 PDF Blob
+   * @param fileName 文件名，默认为 '产品制作单'
+   * @returns {void}
+   */
+  const downloadBlobAsPdf = (fileName?: string) => {
+    if (!currentBlobUrl.current)
+      return
+
+    const a = document.createElement('a')
+    a.href = currentBlobUrl.current
+    a.download = `${fileName ?? '产品制作单'}.pdf`
+    a.click()
+  }
+
   useEffect(() => {
     if (manual)
       return
@@ -84,5 +99,6 @@ export function usePdfBlob({ options = {} }: usePdfBlobProps = {}) {
     numPages,
     onDocumentLoadSuccess,
     generatePdfBlob,
+    downloadBlobAsPdf,
   }
 }

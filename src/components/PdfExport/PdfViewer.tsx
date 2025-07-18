@@ -56,6 +56,7 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
     setPageNumber,
     numPages,
     generatePdfBlob,
+    downloadBlobAsPdf,
   } = usePdfBlob({ options: { manual: true } })
   const [pageProps, setPageProps] = useState<PageProps>({
     scale: 1,
@@ -88,7 +89,13 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
   return (
     <Modal
       open={open}
-      title={<ModalTitle onPrint={printPdf} onClose={onClose} />}
+      title={(
+        <ModalTitle
+          onPrint={printPdf}
+          onDownload={downloadBlobAsPdf}
+          onClose={onClose}
+        />
+      )}
       classNames={{
         content: styles.pdfViewerModalContent,
         body: styles.pdfViewerModalBody,
