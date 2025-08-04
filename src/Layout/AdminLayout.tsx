@@ -97,10 +97,6 @@ function AdminLayout() {
     navigate(route)
   }
 
-  useEffect(() => {
-    navigate('/dashboard')
-  }, [])
-
   return (
     <Layout style={{ minHeight: '100vh' }}>
       <Sider style={{ position: 'relative' }} width={250} collapsedWidth={65} trigger={null} collapsible collapsed={collapsed} theme="light">

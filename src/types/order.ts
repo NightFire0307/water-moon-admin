@@ -29,8 +29,8 @@ interface OrderProducts {
   id: number
   name: string
   type: string
-  photo_limit: number
-  is_published: boolean
+  photoLimit: number
+  isPublished: boolean
   count: number
   createdAt: string
   updatedAt: string
@@ -53,18 +53,18 @@ export interface IOrder {
 // 订单详情
 export interface IOrderDetail {
   id: number
-  order_number: string
-  customer_name: string
-  customer_phone: string
-  select_photos: number
-  max_select_photos: number
-  order_products: OrderProducts[]
+  orderNumber: string
+  customerName: string
+  customerPhone: string
+  selectPhotos: number
+  maxSelectPhotos: number
+  orderProducts: OrderProducts[]
   links: ILink[]
-  total_photos: number
-  extra_photo_price: number
+  totalPhotos: number
+  extraPhotoPrice: number
   status: OrderStatus
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface IOrderResultPhoto {
