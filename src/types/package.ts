@@ -12,7 +12,7 @@ export interface IPackageItem {
   id: number
   count: number
   product: {
-    productId: number
+    id: number
     name: string
     is_published: boolean
     photo_limit: number

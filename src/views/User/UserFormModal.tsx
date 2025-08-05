@@ -154,11 +154,6 @@ function UserFormModal(props: UserFormModalProps) {
 
         <Row gutter={8}>
           <Col>
-            <Form.Item name="isAdmin" label="是否管理员">
-              <Switch />
-            </Form.Item>
-          </Col>
-          <Col>
             <Form.Item name="isFrozen" label="是否冻结">
               <Switch />
             </Form.Item>

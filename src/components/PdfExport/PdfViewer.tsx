@@ -1,6 +1,6 @@
 import { CloseOutlined, DownloadOutlined, LoadingOutlined, MinusOutlined, PlusOutlined, PrinterOutlined } from '@ant-design/icons'
 import { Button, Divider, Modal, Space, Spin } from 'antd'
-import { type FC, useEffect, useMemo, useState } from 'react'
+import { type FC, useEffect, useMemo, useRef, useState } from 'react'
 import { Document, Page, type PageProps, pdfjs } from 'react-pdf'
 import { PdfPagination } from './PdfPagination'
 import styles from './PdfViewer.module.less'
@@ -59,10 +59,11 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
     downloadBlobAsPdf,
   } = usePdfBlob({ options: { manual: true } })
   const [pageProps, setPageProps] = useState<PageProps>({
-    scale: 1,
+    scale: 1.2,
     canvasBackground: '#f3f5f7',
     loading: null,
   })
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // 放大缩小处理
   function handleZoom(delta: number) {
@@ -74,6 +75,11 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
         scale: Number.parseFloat(newScale),
       }
     })
+
+    // 缩放后重置滚动位置
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTop = 0
+    }
   }
 
   const scaleLevel = useMemo(() => {
@@ -115,7 +121,7 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
       destroyOnClose
     >
 
-      <div className={styles.pdfViewerPager}>
+      <div className={styles.pdfViewerPager} ref={scrollContainerRef}>
         <Document
           file={pdfBlobUrl}
           loading={<PdfLoading />}

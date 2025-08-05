@@ -7,7 +7,7 @@ import IconPencil from '@/assets/icons/pencil.svg?react'
 import IconRotateCcw from '@/assets/icons/rotate-ccw.svg?react'
 import IconTrash from '@/assets/icons/trash.svg?react'
 import { type IOrder, OrderStatus } from '@/types/order.ts'
-import { MoreOutlined } from '@ant-design/icons'
+import { FilePdfOutlined, MoreOutlined } from '@ant-design/icons'
 import { Button, Dropdown, message, Modal } from 'antd'
 
 const { confirm } = Modal
@@ -20,6 +20,7 @@ export enum OrderAction {
   VIEW_SELECT_RESULT = 'view_select_result',
   RESET = 'reset',
   DELETE = 'delete',
+  EXPORT_PDF = 'export_pdf',
 }
 
 interface ActionButtonsProps {
@@ -31,6 +32,7 @@ interface ActionButtonsProps {
   onResetStatus: (record: AnyObject) => void
   onViewSelectionResult: (record: AnyObject) => void
   onDelete: (record: AnyObject) => void
+  onExportPdf: (record: AnyObject) => void
 }
 
 export function ActionButtons(props: ActionButtonsProps) {
@@ -43,6 +45,7 @@ export function ActionButtons(props: ActionButtonsProps) {
     onResetStatus,
     onViewSelectionResult,
     onDelete,
+    onExportPdf,
   } = props
 
   function handleMenuClick(key: OrderAction, record: AnyObject) {
@@ -75,6 +78,9 @@ export function ActionButtons(props: ActionButtonsProps) {
           },
         })
         break
+      case OrderAction.EXPORT_PDF:
+        onExportPdf(record)
+        break
       default:
         break
     }
@@ -97,9 +103,14 @@ export function ActionButtons(props: ActionButtonsProps) {
           },
           {
             key: OrderAction.VIEW_SELECT_RESULT,
-            label: '查看选片结果',
+            label: '查看选片',
             icon: <IconImage />,
             disabled: ![OrderStatus.SUBMITTED, OrderStatus.FINISHED].includes((record as IOrder).status),
+          },
+          {
+            key: OrderAction.EXPORT_PDF,
+            label: '导出PDF',
+            icon: <FilePdfOutlined />,
           },
           {
             type: 'divider',
