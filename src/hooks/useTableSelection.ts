@@ -10,6 +10,9 @@ interface UseTableSelectionProps {
  * useTableSelection
  * @description Table 选择器
  * @param props
+ * @returns { rowSelection, selectedRows, selectedRowKeys, clearSelection }
+ * @example
+ * const { rowSelection, selectedRows, selectedRowKeys, clearSelection } = useTableSelection({ type: 'checkbox' })
  */
 function useTableSelection<RecordType extends object = any>(props: UseTableSelectionProps) {
   const { type } = props

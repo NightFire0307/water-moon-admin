@@ -12,6 +12,13 @@ export function getUserList(params: UserParams): UserResponseData {
   })
 }
 
+export function getUserDetailById(userId: number) {
+  return request({
+    url: `/admin/users/${userId}`,
+    method: 'GET',
+  })
+}
+
 export function createUser(data: any) {
   return request({
     url: '/admin/users',

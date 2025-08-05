@@ -17,6 +17,7 @@ import { TaskCenter } from '@/views/Order/components/TaskCenter'
 import { ExclamationCircleOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Checkbox, Divider, Flex, FloatButton, message, Modal, Table, Tag, Tooltip } from 'antd'
 import { useEffect, useRef, useState } from 'react'
+import { PDFViewer } from '../../components/PdfExport/PdfViewer'
 import PhotoReviewResult from './components/PhotoReviewResult'
 import { ShareLinkModal } from './components/sharing/ShareLinkModal'
 
@@ -33,6 +34,7 @@ export function Order() {
   const [photoMgrOpen, setPhotoMgrOpen] = useState(false)
   const [shareLinkMgrOpen, setShareLinkMgrOpen] = useState(false)
   const [photoReviewOpen, setPhotoReviewOpen] = useState(false)
+  const [pdfExportOpen, setPdfExportOpen] = useState(false)
   const [curOrderInfo, setCurOrderInfo] = useState<IOrder>({} as IOrder)
   const [incompleteFileCount, setIncompleteFileCount] = useState(0)
   const resetSelection = useRef<boolean>(false)
@@ -161,6 +163,9 @@ export function Order() {
             await removeOrder(record.id)
             refetch()
           }}
+          onExportPdf={() => {
+            setPdfExportOpen(true)
+          }}
         />
       ),
     },
@@ -242,6 +247,7 @@ export function Order() {
         <PhotoMgrModal open={photoMgrOpen} onClose={() => setPhotoMgrOpen(false)} />
         <ShareLinkModal open={shareLinkMgrOpen} onClose={() => setShareLinkMgrOpen(false)} />
         <PhotoReviewResult open={photoReviewOpen} onClose={() => setPhotoReviewOpen(false)} />
+        <PDFViewer open={pdfExportOpen} onClose={() => setPdfExportOpen(false)} />
       </OrderInfoContext.Provider>
     </div>
   )
