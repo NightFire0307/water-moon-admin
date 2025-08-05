@@ -1,5 +1,5 @@
-import { Order } from '@/views/Order/index.tsx'
 import { SelectionResult } from '@/views/Order/components/SelectionResult.tsx'
+import { Order } from '@/views/Order/index.tsx'
 import PackageManager from '@/views/Package/index.tsx'
 import { Profile } from '@/views/Profile/index.tsx'
 import Role from '@/views/Role/Role.tsx'

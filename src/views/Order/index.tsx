@@ -57,11 +57,11 @@ export function Order() {
   const columns: TableColumnProps[] = [
     {
       title: '订单号',
-      dataIndex: 'order_number',
+      dataIndex: 'orderNumber',
       render: value => <span style={{ fontWeight: '500' }}>{value}</span>,
     },
-    { title: '客户', dataIndex: 'customer_name' },
-    { title: '客户手机', dataIndex: 'customer_phone' },
+    { title: '客户', dataIndex: 'customerName' },
+    { title: '客户手机', dataIndex: 'customerPhone' },
     {
       title: '订单状态',
       dataIndex: 'status',
@@ -100,17 +100,17 @@ export function Order() {
     },
     {
       title: '可选（张数）',
-      dataIndex: 'max_select_photos',
+      dataIndex: 'maxSelectPhotos',
       render: value => <span style={{ color: '#52c41a' }}>{value}</span>,
     },
     {
       title: '总共（张数）',
-      dataIndex: 'total_photos',
+      dataIndex: 'totalPhotos',
       render: value => <span style={{ color: '#faad14' }}>{value}</span>,
     },
     {
       title: '链接状态',
-      dataIndex: 'link_status',
+      dataIndex: 'linkStatus',
       render: value => <Tag color={value ? 'green' : 'red'}>{ value ? '已生成' : '未生成'}</Tag>,
     },
     {

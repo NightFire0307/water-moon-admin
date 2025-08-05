@@ -1,3 +1,4 @@
+import type { IOrderDetail } from '@/types/order'
 import type { IPackage } from '@/types/package'
 import type { IProduct } from '@/types/product'
 import type { GetRef, TableProps } from 'antd'
@@ -9,7 +10,6 @@ import IconTrash from '@/assets/icons/trash.svg?react'
 import { PlusOutlined } from '@ant-design/icons'
 import { Button, Card, Col, Divider, Flex, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Table } from 'antd'
 import { useForm } from 'antd/es/form/Form'
-import { options } from 'node_modules/axios/index.d.cts'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 // 获取 Form 实例类型
@@ -89,20 +89,7 @@ interface OrderModalFormProps {
   mode: 'create' | 'edit'
   onClose: () => void
   // 添加初始数据属性
-  initialValues?: {
-    id?: number
-    order_number?: string
-    customer_name?: string
-    customer_phone?: string
-    max_select_photos?: number
-    extra_photo_price?: number
-    order_products?: Array<{
-      id: number
-      name: string
-      type: string
-      count: number
-    }>
-  }
+  initialValues?: Partial<IOrderDetail>
 }
 
 type ColumnTypes = Exclude<TableProps<Item>['columns'], undefined>
@@ -202,8 +189,6 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
 
     setSelectedProduct(undefined)
     setSelectedCount(1)
-
-    console.log(dataSource)
   }
 
   // 添加套餐
@@ -216,11 +201,11 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
       ...prev,
       ...pkg.items.map(item => ({
         key: prev.length + 1 + item.id,
-        id: item.product.id,
+        id: item.id,
         name: item.product.name,
         type: item.product_type,
         count: item.count,
-      }))
+      })),
     ]))
   }
 
@@ -249,7 +234,7 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
       if (mode === 'create') {
         const response = await createOrder({
           ...values,
-          order_products: dataSource.map(item => ({ id: item.id, count: item.count })),
+          orderProducts: dataSource.map(item => ({ id: item.id, count: item.count })),
         })
         message.success(response.msg || '创建订单成功')
         handleCancel()
@@ -257,7 +242,7 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
       else {
         const response = await updateOrder(initialValues!.id!, {
           ...values,
-          order_products: dataSource.map(item => ({ id: item.id, count: item.count })),
+          orderProducts: dataSource.map(item => ({ id: item.id, count: item.count })),
         })
         message.success(response.msg || '更新订单成功')
         handleCancel()
@@ -294,7 +279,7 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
     if (mode === 'edit' && initialValues) {
       form.setFieldsValue(initialValues)
 
-      setDataSource(initialValues.order_products?.map((item, index) => ({
+      setDataSource(initialValues.orderProducts?.map((item, index) => ({
         key: index,
         id: item.id,
         name: item.name,
@@ -321,18 +306,18 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
       >
         <Row gutter={16}>
           <Col span={8}>
-            <Form.Item name="order_number" label="订单号" required>
+            <Form.Item name="orderNumber" label="订单号" required>
               <Input placeholder="请输入订单号" disabled={mode === 'edit'} />
             </Form.Item>
           </Col>
           <Col span={8}>
-            <Form.Item name="customer_name" label="客户姓名" required>
+            <Form.Item name="customerName" label="客户姓名" required>
               <Input placeholder="请输入客户姓名" disabled={mode === 'edit'} />
             </Form.Item>
           </Col>
           <Col span={8}>
             <Form.Item
-              name="customer_phone"
+              name="customerPhone"
               label="客户手机"
               rules={[
                 {
@@ -356,12 +341,12 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item label="可选精修张数" name="max_select_photos">
+            <Form.Item label="可选精修张数" name="maxSelectPhotos">
               <InputNumber min={1} style={{ width: '100%' }} addonAfter="张" />
             </Form.Item>
           </Col>
           <Col span={12}>
-            <Form.Item label="加选单价" name="extra_photo_price">
+            <Form.Item label="加选单价" name="extraPhotoPrice">
               <InputNumber min={0} step={50} style={{ width: '100%' }} addonBefore="￥" addonAfter="元" />
             </Form.Item>
           </Col>
