@@ -22,7 +22,7 @@ export function PhotoMgrModal(props: PhotoMgrProps) {
     if (!open)
       return
     getOrderDetailById(orderId).then((res) => {
-      setOrderNumber(res.data.order_number)
+      setOrderNumber(res.data.orderNumber)
     })
   }, [open, orderId])
 

@@ -15,36 +15,12 @@ interface PhotoReviewResultProps {
 
 const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
   const [originalData, setOriginalData] = useState<IOrderResultPhoto[]>([])
-  const [selectedStatus, setSelectedStatus] = useState<'all' | 'selected' | 'unSelected'>('all')
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false)
   const { order_number, id } = useOrderInfoContext()
 
-  const formFields: FieldSchema[] = [
-    {
-      type: 'select',
-      name: 'selectedStatus',
-      prefix: <Filter size={14} />,
-      options: [
-        {
-          label: '全部照片',
-          value: 'all',
-        },
-        {
-          label: '已选照片',
-          value: 'selected',
-        },
-        {
-          label: '未选照片',
-          value: 'unSelected',
-        },
-      ],
-      onChange: (value: 'all' | 'selected' | 'unSelected') => setSelectedStatus(value),
-    },
-  ]
-
   const columns: TableProps<IOrderResultPhoto>['columns'] = [
     {
-      dataIndex: 'thumbnail_url',
+      dataIndex: 'thumbnailUrl',
       title: '照片',
       render: (src) => {
         return (
@@ -55,14 +31,14 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
       },
     },
     {
-      dataIndex: 'name',
+      dataIndex: 'fileName',
       title: '编号',
       render: (name) => {
         return <span style={{ fontWeight: 500 }}>{name}</span>
       },
     },
     {
-      dataIndex: 'order_products',
+      dataIndex: 'orderProducts',
       title: '所选产品',
       render: (orderProduct: { id: number, name: string }[]) => {
         return (
@@ -78,13 +54,6 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
       render: remark => <div style={{ fontSize: '12px', maxWidth: '50px' }} className={styles.ellipsis}>{remark}</div>,
     },
     {
-      dataIndex: 'status',
-      title: '状态',
-      render: (status) => {
-        return <Tag color={status === 'selected' ? 'success' : 'red'}>{ status === 'selected' ? '已选中' : '未选中' }</Tag>
-      },
-    },
-    {
       title: '操作',
       render: () => {
         return (
@@ -97,23 +66,10 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
     },
   ]
 
-  const filteredData = useMemo(() => {
-    return originalData.filter((photo) => {
-      if (selectedStatus === 'all') {
-        return true
-      }
-
-      if (photo.status === selectedStatus) {
-        return true
-      }
-
-      return false
-    })
-  }, [originalData, selectedStatus])
-
   const fetchOrderResult = async () => {
     const { data } = await getOrderResult(id)
-    setOriginalData(data.list.photos)
+    setOriginalData(data.list)
+    console.log(data.list)
   }
 
   // 导出选片记录
@@ -159,13 +115,9 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
         },
       }}
     >
-      <Flex justify="space-between" style={{ padding: '16px 24px' }}>
-        <SimpleForm layout="inline" fields={formFields} initialValues={{ selectedStatus: 'all' }} />
-      </Flex>
-      <Divider style={{ margin: 0 }} />
 
       <div style={{ padding: '24px' }}>
-        <Table columns={columns} dataSource={filteredData} rowKey="id" />
+        <Table columns={columns} dataSource={originalData} rowKey="id" />
       </div>
 
     </Drawer>

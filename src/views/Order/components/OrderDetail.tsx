@@ -21,17 +21,17 @@ export function OrderDetail(props: OrderDetailProps) {
     const { data } = await getOrderDetailById(id)
 
     setItems([
-      { label: '订单号', children: data.order_number },
-      { label: '客户', children: data.customer_name },
-      { label: '客户手机', children: data.customer_phone },
-      { label: '总照片数（张）', children: data.total_photos },
-      { label: '可选数量（张）', children: data.max_select_photos },
-      { label: '已选数量（张）', children: data.select_photos },
+      { label: '订单号', children: data.orderNumber },
+      { label: '客户', children: data.customerName },
+      { label: '客户手机', children: data.customerPhone },
+      { label: '总照片数（张）', children: data.totalPhotos },
+      { label: '可选数量（张）', children: data.maxSelectPhotos },
+      { label: '已选数量（张）', children: data.selectPhotos },
       { label: '加选单价', children: (
         <span>
           ￥
           {' '}
-          {data.extra_photo_price}
+          {data.extraPhotoPrice}
         </span>
       ) },
       { label: '订单状态', children: (
@@ -45,7 +45,7 @@ export function OrderDetail(props: OrderDetailProps) {
       ) },
       {
         label: '产品信息',
-        children: data.order_products.map((product) => {
+        children: data.orderProducts.map((product) => {
           return (
             <div key={product.id}>
               <p>
@@ -65,8 +65,8 @@ export function OrderDetail(props: OrderDetailProps) {
         children: data.links.length > 0 ? <Tag color="green">已生成</Tag> : <Tag color="red">未生成</Tag>,
         span: 'filled',
       },
-      { label: '创建时间', children: formatDate(data.created_at), span: 2 },
-      { label: '更新时间', children: formatDate(data.updated_at), span: 2 },
+      { label: '创建时间', children: formatDate(data.createdAt), span: 2 },
+      { label: '更新时间', children: formatDate(data.updatedAt), span: 2 },
     ])
   }
 

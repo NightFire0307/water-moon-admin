@@ -12,8 +12,8 @@ export function OrderQueryForm(props: IOrderQueryFormProps) {
   const { onQuery, onReset } = props
 
   const options = [
-    { label: <Badge status="default" text="选片未开始" />, value: OrderStatus.NOT_STARTED.toString() },
-    { label: <Badge status="processing" text="选片进行中" />, value: OrderStatus.IN_PROGRESS.toString() },
+    { label: <Badge status="default" text="选片未开始" />, value: OrderStatus.PENDING.toString() },
+    { label: <Badge status="processing" text="预选阶段" />, value: OrderStatus.PRE_SELECT.toString() },
     { label: <Badge status="success" text="选片已完成" />, value: OrderStatus.SUBMITTED.toString() },
     { label: <Badge status="error" text="订单已取消" />, value: OrderStatus.CANCEL.toString() },
   ]

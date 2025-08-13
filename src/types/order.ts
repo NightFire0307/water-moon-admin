@@ -2,12 +2,12 @@ import type { ApiResponse, Pagination } from '@/types/common.ts'
 import type { ILink } from '@/types/link.ts'
 
 export enum OrderStatus {
-  // 未开始、进行中、已提交、已过期
-  NOT_STARTED = 0,
-  IN_PROGRESS = 1,
-  SUBMITTED = 2,
-  CANCEL = 3,
-  FINISHED = 4,
+  PENDING = 'pending', // 订单已创建，等待用户选片
+  PRE_SELECT = 'pre_select', // 预选阶段
+  PRODUCT_SELECT = 'product_select', // 产品选片阶段
+  SUBMITTED = 'submitted', // 已提交，订单锁定
+  CANCEL = 'cancel', // 订单取消
+  FINISHED = 'finished', // 订单完成
 }
 
 export interface ProductsInfo {
@@ -82,11 +82,10 @@ export interface IOrderResultPhoto {
 // 订单结果
 export interface IOrderResult {
   id: number
-  photos: IOrderResultPhoto[]
-  status: number
-  order_number: string
-  extra_photo_price: number
-  max_select_photos: number
+  fileName: string
+  thumbnailUrl: string
+  remark: string
+  orderProduct: { id: number, name: string }[]
 }
 
 // 订单统计

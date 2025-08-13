@@ -70,14 +70,19 @@ export function Order() {
         let color: string
         let text: string
         switch (value) {
-          case OrderStatus.NOT_STARTED:
+          case OrderStatus.PENDING:
             color = 'blue'
             text = '待选片'
             break
-          case OrderStatus.IN_PROGRESS:
+          case OrderStatus.PRE_SELECT:
             status = 'processing'
             color = 'gold'
-            text = '选片中'
+            text = '预选阶段'
+            break
+          case OrderStatus.PRODUCT_SELECT:
+            status = 'processing'
+            color = 'purple'
+            text = '产品选片阶段'
             break
           case OrderStatus.SUBMITTED:
             color = 'orange'
