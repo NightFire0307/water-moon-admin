@@ -148,7 +148,7 @@ export function Order() {
               centered: true,
               content: <Checkbox onChange={e => resetSelection.current = e.target.checked}>重置所有选片结果</Checkbox>,
               async onOk() {
-                await resetOrderStatus(record.id, { resetSelection: resetSelection.current })
+                await resetOrderStatus(record.id, { reset: resetSelection.current })
                 message.success('重置成功')
                 refetch()
               },

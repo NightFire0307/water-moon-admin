@@ -18,10 +18,6 @@ export function OrderQueryForm(props: IOrderQueryFormProps) {
     { label: <Badge status="error" text="订单已取消" />, value: OrderStatus.CANCEL.toString() },
   ]
 
-  useEffect(() => {
-    console.log(onQuery, onReset)
-  }, [])
-
   return (
     <SimpleForm
       layout="inline"

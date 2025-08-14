@@ -1,5 +1,6 @@
 import type { IPhoto } from '@/types/photo.ts'
 import type { UploadProps } from 'antd'
+import { getOrderPhotoIds } from '@/apis/order'
 import { getPhotosByOrderId, removePhotos, updatePhotosRecommend } from '@/apis/photo.ts'
 import CustomMask from '@/components/CustomMask.tsx'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
@@ -14,7 +15,7 @@ import {
 } from '@ant-design/icons'
 import { Button, ConfigProvider, Divider, Flex, Image, message, Popconfirm, Progress, Space, Upload } from 'antd'
 import cs from 'classnames'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import styles from './ImageGallery.module.less'
 
 // 上传进度
@@ -49,6 +50,7 @@ export function ImageGallery(props: ImageGalleryProps) {
   const { orderId, orderNumber } = props
   const [selectedPhotos, setSelectedPhotos] = useState<number[]>([])
   const [photosList, setPhotoList] = useState<IPhoto[]>([])
+  const cachePhotoIds = useRef<number[]>([])
   const { generateUploadTask, removeUploadTask, uploadQueue } = useMinioUpload()
 
   useEffect(() => {
@@ -66,9 +68,10 @@ export function ImageGallery(props: ImageGalleryProps) {
     },
   }
 
-  async function fetchPhotos() {
-    const { data } = await getPhotosByOrderId({ orderId, pageSize: 20 })
-    setPhotoList(data.list)
+  async function fetchPhotos(params?: { current?: number, pageSize?: number }) {
+    const { current = 1, pageSize = 20 } = params ?? {}
+    const { data } = await getPhotosByOrderId({ orderId, current, pageSize })
+    setPhotoList(prev => [...prev, ...data.list])
   }
 
   function handleSelect(photoId: number) {
@@ -81,13 +84,16 @@ export function ImageGallery(props: ImageGalleryProps) {
     })
   }
 
-  function handleSelectAll() {
-    setSelectedPhotos((prev) => {
-      if (prev.length === photosList.length) {
-        return []
-      }
-      return photosList.map(photo => photo.id)
-    })
+  async function handleSelectAll() {
+    // 判断是否有缓存照片ID
+    if (cachePhotoIds.current.length === 0) {
+      const { data } = await getOrderPhotoIds(orderId)
+      cachePhotoIds.current = data.photoIds
+    }
+
+    selectedPhotos.length > 0
+      ? setSelectedPhotos([])
+      : setSelectedPhotos([...cachePhotoIds.current])
   }
 
   async function handleUpdateRecommend(photoId: number | number[], isRecommended: boolean) {
@@ -103,11 +109,24 @@ export function ImageGallery(props: ImageGalleryProps) {
     await fetchPhotos()
   }
 
+  function handleScroll(e: React.UIEvent<HTMLDivElement>) {
+    const currentTarget = e.currentTarget
+    console.log(currentTarget.scrollHeight)
+
+    // 判断滚动是否即将到达底部
+    if (currentTarget.scrollHeight - currentTarget.scrollTop <= currentTarget.clientHeight + 250) {
+      console.log('到达加载高度阈值')
+    }
+  }
+
+  // 使用 SSE 实时接收照片上传完成事件
+  // 注意：此处的 URL 需要根据实际情况调整
   useEffect(() => {
     const eventSource = new EventSource('http://localhost:3000/admin/photos/completions')
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data) as IPhoto
       console.log(data)
+      console.log(photosList)
 
       // 更新照片列表
       setPhotoList(prev => [data, ...prev])
@@ -153,7 +172,10 @@ export function ImageGallery(props: ImageGalleryProps) {
         </Space>
       </Flex>
       <Divider />
-      <div style={{ height: 'calc(100% - 82px)', overflowY: 'auto' }}>
+      <div
+        style={{ height: 'calc(100% - 82px)', overflowY: 'auto' }}
+        onScroll={handleScroll}
+      >
         <div className={styles['photos-preview']}>
           {
             uploadQueue.map(task => (
@@ -164,12 +186,12 @@ export function ImageGallery(props: ImageGalleryProps) {
             photosList.map(photo => (
               <div
                 className={cs(styles['photos-preview-item'], selectedPhotos.includes(photo.id) && styles.select)}
-                key={photo.id}
+                key={`${photo.file_name}-${photo.id}`}
               >
                 <Image
                   style={{ borderRadius: '8px', objectFit: 'contain' }}
                   src={photo.thumbnail_url}
-                  alt="placeholder"
+                  alt={photo.file_name}
                   height={250}
                   preview={{
                     src: photo.original_url,

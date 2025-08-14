@@ -40,11 +40,10 @@ export function removeOrder(id: number): Promise<ApiResponse<string>> {
   })
 }
 
-export function resetOrderStatus(id: number, data: { resetSelection: boolean }): Promise<ApiResponse<number>> {
+export function resetOrderStatus(id: number, data: { reset: boolean }): Promise<ApiResponse<number>> {
   return request({
-    url: `/admin/orders/${id}`,
-    method: 'patch',
-    data,
+    url: `/admin/orders/${id}?reset=${data.reset}`,
+    method: 'post',
   })
 }
 
@@ -73,6 +72,14 @@ export function getOrderSummary(): OrderSummaryResponse {
 export function getWeeklyOrderStats() {
   return request({
     url: '/admin/orders/weekly-stats',
+    method: 'GET',
+  })
+}
+
+// 获取订单下所有的照片ID
+export function getOrderPhotoIds(orderId: number) {
+  return request({
+    url: `/admin/orders/${orderId}/photo-ids`,
     method: 'GET',
   })
 }

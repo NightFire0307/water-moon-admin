@@ -1,4 +1,4 @@
-import type { PaginationParams, ApiResponse } from '@/types/common.ts'
+import type { ApiResponse, PaginationParams } from '@/types/common.ts'
 import type { PhotosResponse } from '@/types/photo.ts'
 import request from '@/utils/request'
 

@@ -1,8 +1,9 @@
+import type { PaginationParams } from '@/types/common'
 import type { IOrderDetail } from '@/types/order'
 import type { IPackage } from '@/types/package'
 import type { IProduct } from '@/types/product'
 import type { GetRef, TableProps } from 'antd'
-import type { FC, PropsWithChildren, ReactNode } from 'react'
+import type { FC, PropsWithChildren, ReactNode, UIEvent } from 'react'
 import { createOrder, updateOrder } from '@/apis/order'
 import { getPackageList } from '@/apis/package'
 import { getProductList } from '@/apis/product'
@@ -201,7 +202,7 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
       ...prev,
       ...pkg.items.map(item => ({
         key: prev.length + 1 + item.id,
-        id: item.id,
+        id: item.product.id,
         name: item.product.name,
         type: item.product_type,
         count: item.count,
@@ -214,9 +215,14 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
     setProductOptions(data.list)
   }
 
-  async function fetchPackages() {
-    const { data } = await getPackageList({})
-    setPackageState(prev => ({ ...prev, options: data }))
+  async function fetchPackages(params?: PaginationParams) {
+    const { data } = await getPackageList(params)
+    setPackageState(prev => ({ ...prev, options: data.list }))
+  }
+
+  // 处理下拉框滚动事件
+  function handlePopupScroll(e: UIEvent<HTMLDivElement>) {
+    // TODO: 此处添加加载更多逻辑
   }
 
   async function handleOk() {
@@ -363,6 +369,7 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
                 style={{ flex: 1 }}
                 options={packageState.options}
                 onChange={value => setPackageState(prev => ({ ...prev, selectedId: value }))}
+                onPopupScroll={handlePopupScroll}
               />
               <Button type="primary" icon={<PlusOutlined />} onClick={handleAddPackage} />
             </Flex>
