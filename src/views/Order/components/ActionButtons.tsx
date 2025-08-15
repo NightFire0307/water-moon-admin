@@ -1,4 +1,5 @@
 import type { AnyObject } from 'antd/es/_util/type'
+import { updateOrderStatus } from '@/apis/order'
 import IconEye from '@/assets/icons/eye.svg?react'
 import IconImage from '@/assets/icons/image.svg?react'
 import IconImages from '@/assets/icons/images.svg?react'
@@ -7,7 +8,7 @@ import IconPencil from '@/assets/icons/pencil.svg?react'
 import IconRotateCcw from '@/assets/icons/rotate-ccw.svg?react'
 import IconTrash from '@/assets/icons/trash.svg?react'
 import { type IOrder, OrderStatus } from '@/types/order.ts'
-import { FilePdfOutlined, MoreOutlined } from '@ant-design/icons'
+import { FileDoneOutlined, FilePdfOutlined, MoreOutlined } from '@ant-design/icons'
 import { Button, Dropdown, message, Modal } from 'antd'
 
 const { confirm } = Modal
@@ -21,6 +22,7 @@ export enum OrderAction {
   RESET = 'reset',
   DELETE = 'delete',
   EXPORT_PDF = 'export_pdf',
+  CONFIRM = 'confirm',
 }
 
 interface ActionButtonsProps {
@@ -33,6 +35,7 @@ interface ActionButtonsProps {
   onViewSelectionResult: (record: AnyObject) => void
   onDelete: (record: AnyObject) => void
   onExportPdf: (record: AnyObject) => void
+  onConfirm: (record: AnyObject) => void
 }
 
 export function ActionButtons(props: ActionButtonsProps) {
@@ -46,7 +49,10 @@ export function ActionButtons(props: ActionButtonsProps) {
     onViewSelectionResult,
     onDelete,
     onExportPdf,
+    onConfirm,
   } = props
+
+  const status = (record as IOrder).status
 
   function handleMenuClick(key: OrderAction, record: AnyObject) {
     switch (key) {
@@ -81,6 +87,20 @@ export function ActionButtons(props: ActionButtonsProps) {
       case OrderAction.EXPORT_PDF:
         onExportPdf(record)
         break
+      case OrderAction.CONFIRM:
+        confirm({
+          title: '确认完成订单',
+          content: '确认完成后，订单状态将变更为已完成，且不可修改！',
+          onOk: async () => {
+            await updateOrderStatus(record.id, OrderStatus.FINISHED)
+            onConfirm(record)
+            message.success('订单已确认完成')
+          },
+          onCancel: () => {
+            message.info('已取消操作')
+          },
+        })
+        break
       default:
         break
     }
@@ -105,7 +125,7 @@ export function ActionButtons(props: ActionButtonsProps) {
             key: OrderAction.VIEW_SELECT_RESULT,
             label: '查看选片',
             icon: <IconImage />,
-            disabled: ![OrderStatus.SUBMITTED, OrderStatus.FINISHED].includes((record as IOrder).status),
+            disabled: ![OrderStatus.SUBMITTED, OrderStatus.FINISHED].includes(status),
           },
           {
             key: OrderAction.EXPORT_PDF,
@@ -129,10 +149,16 @@ export function ActionButtons(props: ActionButtonsProps) {
             type: 'divider',
           },
           {
+            key: OrderAction.CONFIRM,
+            label: '确认完成',
+            icon: <FileDoneOutlined />,
+            disabled: status !== OrderStatus.SUBMITTED,
+          },
+          {
             key: OrderAction.RESET,
             label: '重置状态',
             icon: <IconRotateCcw />,
-            disabled: [OrderStatus.NOT_STARTED, OrderStatus.CANCEL, OrderStatus.FINISHED].includes((record as IOrder).status),
+            disabled: [OrderStatus.PENDING, OrderStatus.CANCEL, OrderStatus.FINISHED].includes(status),
           },
           {
             key: OrderAction.DELETE,

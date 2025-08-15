@@ -1,5 +1,5 @@
 import type { ApiResponse } from '@/types/common.ts'
-import type { CreateOrderData, IOrder, OrderDetailResponse, OrderResponse, OrderResultResponse, OrderSummaryResponse } from '@/types/order.ts'
+import type { CreateOrderData, IOrder, OrderDetailResponse, OrderResponse, OrderResultResponse, OrderStatus, OrderSummaryResponse } from '@/types/order.ts'
 import request from '@/utils/request.ts'
 
 export function getOrderList(params = {}): OrderResponse {
@@ -81,5 +81,14 @@ export function getOrderPhotoIds(orderId: number) {
   return request({
     url: `/admin/orders/${orderId}/photo-ids`,
     method: 'GET',
+  })
+}
+
+// 更新订单状态
+export function updateOrderStatus(orderId: number, status: OrderStatus) {
+  return request({
+    url: `/admin/orders/${orderId}/status`,
+    method: 'PATCH',
+    data: { status },
   })
 }

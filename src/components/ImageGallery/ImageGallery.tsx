@@ -9,6 +9,7 @@ import {
   CheckSquareOutlined,
   ClearOutlined,
   DeleteOutlined,
+  LoadingOutlined,
   StarFilled,
   StarOutlined,
   UploadOutlined,
@@ -17,6 +18,7 @@ import { Button, ConfigProvider, Divider, Flex, Image, message, Popconfirm, Prog
 import cs from 'classnames'
 import { useEffect, useRef, useState } from 'react'
 import styles from './ImageGallery.module.less'
+import useInfiniteScroll from '@/hooks/useInfiniteScroll'
 
 // 上传进度
 function UploadProgress(props: { percent: number, fileName: string }) {
@@ -51,11 +53,11 @@ export function ImageGallery(props: ImageGalleryProps) {
   const [selectedPhotos, setSelectedPhotos] = useState<number[]>([])
   const [photosList, setPhotoList] = useState<IPhoto[]>([])
   const cachePhotoIds = useRef<number[]>([])
+  const { observerRef, hasMore, data } = useInfiniteScroll(
+    (page) => getPhotosByOrderId({ orderId, current: page })
+  )
   const { generateUploadTask, removeUploadTask, uploadQueue } = useMinioUpload()
 
-  useEffect(() => {
-    fetchPhotos()
-  }, [orderId])
 
   const uploadProps: UploadProps = {
     // action: postData.postURL,
@@ -66,12 +68,6 @@ export function ImageGallery(props: ImageGalleryProps) {
       generateUploadTask(file, { orderId, orderNumber })
       return false
     },
-  }
-
-  async function fetchPhotos(params?: { current?: number, pageSize?: number }) {
-    const { current = 1, pageSize = 20 } = params ?? {}
-    const { data } = await getPhotosByOrderId({ orderId, current, pageSize })
-    setPhotoList(prev => [...prev, ...data.list])
   }
 
   function handleSelect(photoId: number) {
@@ -98,7 +94,7 @@ export function ImageGallery(props: ImageGalleryProps) {
 
   async function handleUpdateRecommend(photoId: number | number[], isRecommended: boolean) {
     const { msg } = await updatePhotosRecommend(orderId, { photoIds: Array.isArray(photoId) ? photoId : [photoId], isRecommended })
-    await fetchPhotos()
+    // await fetchPhotos()
     message.success(msg)
     setSelectedPhotos([])
   }
@@ -106,17 +102,7 @@ export function ImageGallery(props: ImageGalleryProps) {
   async function handleRemove(photoIds: number | number[]) {
     const ids = Array.isArray(photoIds) ? photoIds : [photoIds]
     await removePhotos(orderId, { photoIds: ids })
-    await fetchPhotos()
-  }
-
-  function handleScroll(e: React.UIEvent<HTMLDivElement>) {
-    const currentTarget = e.currentTarget
-    console.log(currentTarget.scrollHeight)
-
-    // 判断滚动是否即将到达底部
-    if (currentTarget.scrollHeight - currentTarget.scrollTop <= currentTarget.clientHeight + 250) {
-      console.log('到达加载高度阈值')
-    }
+    // await fetchPhotos()
   }
 
   // 使用 SSE 实时接收照片上传完成事件
@@ -126,7 +112,7 @@ export function ImageGallery(props: ImageGalleryProps) {
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data) as IPhoto
       console.log(data)
-      console.log(photosList)
+      // console.log(photosList)
 
       // 更新照片列表
       setPhotoList(prev => [data, ...prev])
@@ -174,7 +160,6 @@ export function ImageGallery(props: ImageGalleryProps) {
       <Divider />
       <div
         style={{ height: 'calc(100% - 82px)', overflowY: 'auto' }}
-        onScroll={handleScroll}
       >
         <div className={styles['photos-preview']}>
           {
@@ -183,23 +168,23 @@ export function ImageGallery(props: ImageGalleryProps) {
             ))
           }
           {
-            photosList.map(photo => (
+            data.map(photo => (
               <div
                 className={cs(styles['photos-preview-item'], selectedPhotos.includes(photo.id) && styles.select)}
-                key={`${photo.file_name}-${photo.id}`}
+                key={`${photo.fileName}-${photo.id}`}
               >
                 <Image
                   style={{ borderRadius: '8px', objectFit: 'contain' }}
-                  src={photo.thumbnail_url}
-                  alt={photo.file_name}
+                  src={photo.thumbnailUrl}
+                  alt={photo.fileName}
                   height={250}
                   preview={{
-                    src: photo.original_url,
+                    src: photo.originalUrl,
                     mask: (
                       <CustomMask
                         photoId={photo.id}
                         isSelect={selectedPhotos.includes(photo.id)}
-                        isRecommend={photo.is_recommend}
+                        isRecommend={photo.isRecommend}
                         onSelect={handleSelect}
                         onRecommend={handleUpdateRecommend}
                         onRemove={handleRemove}
@@ -209,15 +194,24 @@ export function ImageGallery(props: ImageGalleryProps) {
                   }}
                 />
                 {
-                  photo.is_recommend && <StarFilled style={{ color: 'gold', position: 'absolute', top: '8px', right: '8px' }} />
+                  photo.isRecommend && <StarFilled style={{ color: 'gold', position: 'absolute', top: '8px', right: '8px' }} />
                 }
                 <span style={{ fontWeight: 500, textAlign: 'center' }}>
-                  { photo.file_name }
+                  { photo.fileName }
                 </span>
               </div>
             ))
           }
+
+
         </div>
+          {
+            hasMore ? <div ref={observerRef}>
+              <LoadingOutlined spin />
+              <span>加载更多</span>
+            </div>
+            : <div style={{ padding: '16px', color: '#888' }}>没有更多了</div>
+          }
       </div>
     </>
   )

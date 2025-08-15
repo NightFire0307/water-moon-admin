@@ -1,6 +1,6 @@
 import type { TableColumnProps } from 'antd'
 import type { AnyObject } from 'antd/es/_util/type'
-import { getOrderDetailById, getOrderList, removeOrder, resetOrderStatus } from '@/apis/order.ts'
+import { getOrderDetailById, getOrderList, removeOrder, resetOrderStatus, updateOrderStatus } from '@/apis/order.ts'
 import { OrderInfoContext } from '@/contexts/OrderInfoContext'
 import { useFetch } from '@/hooks/useFetch'
 import usePagination from '@/hooks/usePagination.ts'
@@ -170,6 +170,9 @@ export function Order() {
           }}
           onExportPdf={() => {
             setPdfExportOpen(true)
+          }}
+          onConfirm={async () => {
+            await refetch()
           }}
         />
       ),
