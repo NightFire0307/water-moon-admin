@@ -1,8 +1,9 @@
-import type { IPhoto } from '@/types/photo.ts'
+import type { GetPhotoListResult, IPhoto } from '@/types/photo.ts'
 import type { UploadProps } from 'antd'
 import { getOrderPhotoIds } from '@/apis/order'
 import { getPhotosByOrderId, removePhotos, updatePhotosRecommend } from '@/apis/photo.ts'
 import CustomMask from '@/components/CustomMask.tsx'
+import useInfiniteScroll from '@/hooks/useInfiniteScroll'
 import { useMinioUpload } from '@/store/useMinioUpload.tsx'
 import {
   BorderOutlined,
@@ -18,7 +19,6 @@ import { Button, ConfigProvider, Divider, Flex, Image, message, Popconfirm, Prog
 import cs from 'classnames'
 import { useEffect, useRef, useState } from 'react'
 import styles from './ImageGallery.module.less'
-import useInfiniteScroll from '@/hooks/useInfiniteScroll'
 
 // 上传进度
 function UploadProgress(props: { percent: number, fileName: string }) {
@@ -53,11 +53,15 @@ export function ImageGallery(props: ImageGalleryProps) {
   const [selectedPhotos, setSelectedPhotos] = useState<number[]>([])
   const [photosList, setPhotoList] = useState<IPhoto[]>([])
   const cachePhotoIds = useRef<number[]>([])
-  const { observerRef, hasMore, data } = useInfiniteScroll(
-    (page) => getPhotosByOrderId({ orderId, current: page })
+  const { observerRef, hasMore, data } = useInfiniteScroll<GetPhotoListResult>(
+    (page, pageSize) => getPhotosByOrderId({ orderId, current: page, pageSize }),
+    {
+      threshold: 0.5,
+      rootMargin: '0px 0px 100px 0px',
+      pageSize: 20,
+    },
   )
   const { generateUploadTask, removeUploadTask, uploadQueue } = useMinioUpload()
-
 
   const uploadProps: UploadProps = {
     // action: postData.postURL,
@@ -203,15 +207,20 @@ export function ImageGallery(props: ImageGalleryProps) {
             ))
           }
 
-
         </div>
+
+        <div style={{ textAlign: 'center' }}>
           {
-            hasMore ? <div ref={observerRef}>
-              <LoadingOutlined spin />
-              <span>加载更多</span>
-            </div>
-            : <div style={{ padding: '16px', color: '#888' }}>没有更多了</div>
+            hasMore
+              ? (
+                  <div ref={observerRef}>
+                    <LoadingOutlined spin />
+                    <span>加载更多</span>
+                  </div>
+                )
+              : <span style={{ color: '#888' }}>没有更多了</span>
           }
+        </div>
       </div>
     </>
   )

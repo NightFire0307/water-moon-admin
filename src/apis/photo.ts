@@ -1,12 +1,12 @@
 import type { ApiResponse, PaginationParams } from '@/types/common.ts'
-import type { PhotosResponse } from '@/types/photo.ts'
+import type { GetPhotoListRes, PhotosResponse } from '@/types/photo.ts'
 import request from '@/utils/request'
 
 interface GetPhotosByOrderIdParams extends PaginationParams {
   orderId: number
 }
 
-export function getPhotosByOrderId(params: GetPhotosByOrderIdParams) {
+export function getPhotosByOrderId(params: GetPhotosByOrderIdParams): GetPhotoListRes {
   return request({
     url: `/admin/photos`,
     method: 'get',
