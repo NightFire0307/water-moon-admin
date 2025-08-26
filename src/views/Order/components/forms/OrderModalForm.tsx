@@ -9,8 +9,10 @@ import { getPackageList } from '@/apis/package'
 import { getProductList } from '@/apis/product'
 import IconTrash from '@/assets/icons/trash.svg?react'
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Card, Col, Divider, Flex, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Table } from 'antd'
+import { Button, Card, Col, Divider, Flex, Form, Input, InputNumber, message, Modal, Popconfirm, Radio, Row, Select, Table } from 'antd'
 import { useForm } from 'antd/es/form/Form'
+import dayjs from 'dayjs'
+import { JapaneseYen } from 'lucide-react'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 // 获取 Form 实例类型
@@ -240,6 +242,7 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
       if (mode === 'create') {
         const response = await createOrder({
           ...values,
+          validUntil: dayjs().add(values.validUntil, 'day').toDate(),
           orderProducts: dataSource.map(item => ({ id: item.id, count: item.count })),
         })
         message.success(response.msg || '创建订单成功')
@@ -248,6 +251,7 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
       else {
         const response = await updateOrder(initialValues!.id!, {
           ...values,
+          validUntil: dayjs().add(values.validUntil, 'day').toDate(),
           orderProducts: dataSource.map(item => ({ id: item.id, count: item.count })),
         })
         message.success(response.msg || '更新订单成功')
@@ -308,7 +312,7 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
       <Form
         form={form}
         layout="vertical"
-        initialValues={{ max_select_photos: 1, extra_photo_price: 0 }}
+        initialValues={{ maxSelectPhotos: 1, extraPhotoPrice: 100, validUntil: 7 }}
       >
         <Row gutter={16}>
           <Col span={8}>
@@ -354,6 +358,20 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
           <Col span={12}>
             <Form.Item label="加选单价" name="extraPhotoPrice">
               <InputNumber min={0} step={50} style={{ width: '100%' }} addonBefore="￥" addonAfter="元" />
+            </Form.Item>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col span={12}>
+            <Form.Item label="有效期" name="validUntil">
+              <Radio.Group
+                options={[
+                  { label: '7天', value: 7 },
+                  { label: '15天', value: 15 },
+                  { label: '30天', value: 30 },
+                ]}
+              />
             </Form.Item>
           </Col>
         </Row>
