@@ -37,3 +37,18 @@ export function removePhotos(orderId: number, data: { photoIds: number[] }) {
     data,
   })
 }
+
+export function removeAllPhotos(orderId: number) {
+  return request({
+    url: `/admin/photos/all/${orderId}`,
+    method: 'delete',
+  })
+}
+
+// 通知服务端照片上传完成
+export function notifyUploadComplete(orderId: number) {
+  return request({
+    url: `/admin/photos/upload/commit/${orderId}`,
+    method: 'post',
+  })
+}

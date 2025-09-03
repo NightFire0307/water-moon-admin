@@ -10,13 +10,12 @@ export interface IPhoto {
 }
 
 export interface GetPhotoListResult {
-  id: number
-  fileName: string
-  originalUrl: string
-  thumbnailUrl: string
-  mediumUrl: string
-  isRecommend: boolean
-  expires: number
+  uuid: number
+  name: string
+  ossKey: string
+  ossUrlThumbnail: string
+  ossUrlMedium: string
+  expiresAt: number
   remark?: string
 }
 

@@ -1,7 +1,7 @@
 import type { QueueTask } from '@/store/useUploadFile'
 import type { TableColumnProps } from 'antd'
 import type { AnyObject } from 'antd/es/_util/type'
-import { useMinioUpload } from '@/store/useMinioUpload.tsx'
+import { useMinioUpload } from '@/store/useMinioUpload'
 import { UploadStatus } from '@/store/useUploadFile'
 import { Button, Drawer, Flex, Space, Table, Tag } from 'antd'
 

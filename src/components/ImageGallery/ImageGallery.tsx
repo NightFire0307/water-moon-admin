@@ -1,44 +1,116 @@
-import type { GetPhotoListResult, IPhoto } from '@/types/photo.ts'
+import type { GetPhotoListResult } from '@/types/photo.ts'
 import type { UploadProps } from 'antd'
-import { getOrderPhotoIds } from '@/apis/order'
-import { getPhotosByOrderId, removePhotos, updatePhotosRecommend } from '@/apis/photo.ts'
-import CustomMask from '@/components/CustomMask.tsx'
+import type { ReactNode } from 'react'
+import { getPhotosByOrderId, removeAllPhotos } from '@/apis/photo.ts'
 import useInfiniteScroll from '@/hooks/useInfiniteScroll'
-import { useMinioUpload } from '@/store/useMinioUpload.tsx'
+import { type UploadStatus, useMinioUpload } from '@/store/useMinioUpload'
 import {
-  BorderOutlined,
-  CheckSquareOutlined,
+  CheckCircleTwoTone,
   ClearOutlined,
-  DeleteOutlined,
+  ClockCircleTwoTone,
   LoadingOutlined,
-  StarFilled,
-  StarOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
-import { Button, ConfigProvider, Divider, Flex, Image, message, Popconfirm, Progress, Space, Upload } from 'antd'
-import cs from 'classnames'
-import { useEffect, useRef, useState } from 'react'
+import { Button, Card, Divider, Flex, Image, Modal, Progress, Space, Typography, Upload } from 'antd'
+
+import { useEffect, useMemo, useState } from 'react'
+
 import styles from './ImageGallery.module.less'
 
-// 上传进度
-function UploadProgress(props: { percent: number, fileName: string }) {
-  const { percent, fileName } = props
+// 图片组件
+function PhotoItem(props: { fileName: string, status: UploadStatus, percent?: number, ossUrls: { ossUrlMedium?: string, ossUrlThumbnail?: string } }) {
+  const { percent, fileName, status, ossUrls } = props
+  const [displayStatus, setDisplayStatus] = useState<UploadStatus>(status)
+
+  const statusMap: Record<string, { statusNode: ReactNode, statusText: string, statusContent: ReactNode }> = {
+    pending: {
+      statusNode: <ClockCircleTwoTone twoToneColor="#faad14" style={{ fontSize: 20, marginRight: 8 }} />,
+      statusText: '待上传',
+      statusContent: (
+        <Progress
+          percent={Math.round(percent ? percent * 100 : 100)}
+          type="circle"
+          status={status === 'uploading' ? 'active' : undefined}
+        />
+      ),
+    },
+    compress: {
+      statusNode: <LoadingOutlined style={{ color: '#faad14', fontSize: 20, marginRight: 8 }} spin />,
+      statusText: '压缩中',
+      statusContent: <LoadingOutlined style={{ fontSize: 48, color: '#595959' }} spin />,
+    },
+    uploading: {
+      statusNode: <LoadingOutlined style={{ color: '#1890ff', fontSize: 20, marginRight: 8 }} spin />,
+      statusText: '上传中',
+      statusContent: (
+        <Progress
+          percent={Math.round(percent ? percent * 100 : 100)}
+          type="circle"
+        />
+      ),
+    },
+    done: {
+      statusNode: <CheckCircleTwoTone twoToneColor="#52c41a" style={{ fontSize: 20, marginRight: 8 }} />,
+      statusText: '已上传',
+      statusContent: (
+        <Image
+          src={ossUrls.ossUrlThumbnail}
+          alt={fileName}
+          height={194}
+          width="100%"
+          style={{
+            maxHeight: '100%',
+            objectFit: 'contain',
+          }}
+          preview={{
+            src: ossUrls.ossUrlMedium,
+          }}
+        />
+      ),
+    },
+  }
+
+  useEffect(() => {
+    if (status === 'done' && percent === 0.1) {
+      const timer = setTimeout(() => {
+        setDisplayStatus('done')
+      }, 800)
+
+      return () => clearTimeout(timer)
+    }
+    else {
+      setDisplayStatus(status)
+    }
+  }, [status])
+
+  const { statusNode, statusText, statusContent } = statusMap[displayStatus] ?? { node: null, text: '' }
 
   return (
-    <div className={styles['upload-progress-wrapper']}>
-      <div className={styles['upload-progress']}>
-        <ConfigProvider theme={{
-          components: {
-            Progress: {
-              circleTextColor: '#fff',
-            },
+    <div>
+      <Card
+        size="small"
+        style={{ width: 250, height: 250, background: '#fafafa', boxShadow: '0 2px 8px #f0f1f2' }}
+        styles={{
+          body: {
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
           },
         }}
-        >
-          <Progress percent={percent * 100} type="circle" />
-        </ConfigProvider>
+      >
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+          {statusNode}
+          <Typography.Text strong>{statusText}</Typography.Text>
+        </div>
+
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {statusContent}
+        </div>
+
+      </Card>
+      <div style={{ marginTop: 8, textAlign: 'center', wordBreak: 'break-all' }}>
+        <Typography.Text strong ellipsis>{fileName}</Typography.Text>
       </div>
-      <div className={styles['upload-text']}>{fileName}</div>
     </div>
   )
 }
@@ -50,9 +122,6 @@ interface ImageGalleryProps {
 
 export function ImageGallery(props: ImageGalleryProps) {
   const { orderId, orderNumber } = props
-  const [selectedPhotos, setSelectedPhotos] = useState<number[]>([])
-  const [photosList, setPhotoList] = useState<IPhoto[]>([])
-  const cachePhotoIds = useRef<number[]>([])
   const { observerRef, hasMore, data } = useInfiniteScroll<GetPhotoListResult>(
     (page, pageSize) => getPhotosByOrderId({ orderId, current: page, pageSize }),
     {
@@ -61,52 +130,34 @@ export function ImageGallery(props: ImageGalleryProps) {
       pageSize: 20,
     },
   )
-  const { generateUploadTask, removeUploadTask, uploadQueue } = useMinioUpload()
+  const { addTask, tasks, startUpload, setTaskOssUrl } = useMinioUpload()
+
+  // 获取当前订单号的上传任务
+  const orderTasks = useMemo(() => {
+    return tasks[orderNumber] || []
+  }, [tasks])
 
   const uploadProps: UploadProps = {
-    // action: postData.postURL,
-    // data: postData.formData,
     multiple: true,
     showUploadList: false,
     beforeUpload: (file) => {
-      generateUploadTask(file, { orderId, orderNumber })
+      addTask(file, { orderId, orderNumber })
+      // generateUploadTask(file, { orderId, orderNumber })
       return false
     },
   }
 
-  function handleSelect(photoId: number) {
-    setSelectedPhotos((prev) => {
-      const index = prev.indexOf(photoId)
-      if (index > -1) {
-        return prev.filter(id => id !== photoId)
-      }
-      return [...prev, photoId]
+  // 清空所有照片
+  async function handleRemoveAllPhoto() {
+    Modal.confirm({
+      title: '确认清空所有照片吗？',
+      content: '清空后，照片将无法恢复！',
+      centered: true,
+      okText: '确认',
+      onOk: async () => {
+        await removeAllPhotos(orderId)
+      },
     })
-  }
-
-  async function handleSelectAll() {
-    // 判断是否有缓存照片ID
-    if (cachePhotoIds.current.length === 0) {
-      const { data } = await getOrderPhotoIds(orderId)
-      cachePhotoIds.current = data.photoIds
-    }
-
-    selectedPhotos.length > 0
-      ? setSelectedPhotos([])
-      : setSelectedPhotos([...cachePhotoIds.current])
-  }
-
-  async function handleUpdateRecommend(photoId: number | number[], isRecommended: boolean) {
-    const { msg } = await updatePhotosRecommend(orderId, { photoIds: Array.isArray(photoId) ? photoId : [photoId], isRecommended })
-    // await fetchPhotos()
-    message.success(msg)
-    setSelectedPhotos([])
-  }
-
-  async function handleRemove(photoIds: number | number[]) {
-    const ids = Array.isArray(photoIds) ? photoIds : [photoIds]
-    await removePhotos(orderId, { photoIds: ids })
-    // await fetchPhotos()
   }
 
   // 使用 SSE 实时接收照片上传完成事件
@@ -114,14 +165,11 @@ export function ImageGallery(props: ImageGalleryProps) {
   useEffect(() => {
     const eventSource = new EventSource('http://localhost:3000/admin/photos/completions')
     eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data) as IPhoto
-      console.log(data)
-      // console.log(photosList)
-
-      // 更新照片列表
-      setPhotoList(prev => [data, ...prev])
-      // 移除上传队列
-      data.uid && removeUploadTask(data.uid)
+      const data = JSON.parse(event.data)
+      if (data.type === 'done') {
+        const { uid, orderNumber, ossUrlMedium, ossUrlThumbnail } = data
+        setTaskOssUrl(orderNumber, uid, { ossUrlMedium, ossUrlThumbnail })
+      }
     }
 
     eventSource.onerror = (error) => {
@@ -139,23 +187,15 @@ export function ImageGallery(props: ImageGalleryProps) {
     <>
       <Flex justify="space-between">
         <Space>
-          <Button
-            icon={selectedPhotos.length === photosList.length ? <CheckSquareOutlined /> : <BorderOutlined />}
-            onClick={handleSelectAll}
-            disabled={photosList.length === 0}
-          >
-            {
-              selectedPhotos.length === photosList.length && photosList.length !== 0 ? '取消全选' : '全选'
-            }
-          </Button>
-          <Button icon={<ClearOutlined />} onClick={() => setSelectedPhotos([])}>清空选中</Button>
-          <Button color="gold" variant="solid" icon={<StarFilled />} onClick={() => handleUpdateRecommend(selectedPhotos, true)}>标记精选</Button>
-          <Button color="gold" variant="outlined" icon={<StarOutlined />} onClick={() => handleUpdateRecommend(selectedPhotos, false)}>取消精选</Button>
-          <Popconfirm placement="left" title={`确定删除选中的${selectedPhotos.length}张照片吗？`} onConfirm={() => handleRemove(selectedPhotos)} okText="确定" cancelText="取消">
-            <Button icon={<DeleteOutlined />} danger disabled={selectedPhotos.length === 0}>删除</Button>
-          </Popconfirm>
+          <Button icon={<ClearOutlined />} onClick={handleRemoveAllPhoto} danger>清空所有照片</Button>
+          {/* <Button color="gold" variant="solid" icon={<StarFilled />} onClick={() => handleUpdateRecommend(selectedPhotos, true)}>标记精选</Button> */}
+          {/* <Button color="gold" variant="outlined" icon={<StarOutlined />} onClick={() => handleUpdateRecommend(selectedPhotos, false)}>取消精选</Button> */}
+          {/* <Popconfirm placement="left" title={`确定删除选中的${selectedPhotos.length}张照片吗？`} onConfirm={() => handleRemove(selectedPhotos)} okText="确定" cancelText="取消"> */}
+          {/*  <Button icon={<DeleteOutlined />} danger disabled={selectedPhotos.length === 0}>删除</Button> */}
+          {/* </Popconfirm> */}
         </Space>
         <Space>
+          <Button onClick={() => startUpload(orderNumber, orderId)}>开始上传</Button>
           <Upload {...uploadProps}>
             <Button type="primary" icon={<UploadOutlined />}>上传照片</Button>
           </Upload>
@@ -167,49 +207,25 @@ export function ImageGallery(props: ImageGalleryProps) {
       >
         <div className={styles['photos-preview']}>
           {
-            uploadQueue.map(task => (
-              <UploadProgress percent={task.progress} fileName={task.fileName} key={task.uid} />
-            ))
-          }
-          {
-            data.map(photo => (
-              <div
-                className={cs(styles['photos-preview-item'], selectedPhotos.includes(photo.id) && styles.select)}
-                key={`${photo.fileName}-${photo.id}`}
-              >
-                <Image
-                  style={{ borderRadius: '8px', objectFit: 'contain' }}
-                  src={photo.thumbnailUrl}
-                  alt={photo.fileName}
-                  height={250}
-                  preview={{
-                    src: photo.originalUrl,
-                    mask: (
-                      <CustomMask
-                        photoId={photo.id}
-                        isSelect={selectedPhotos.includes(photo.id)}
-                        isRecommend={photo.isRecommend}
-                        onSelect={handleSelect}
-                        onRecommend={handleUpdateRecommend}
-                        onRemove={handleRemove}
-                      />
-                    ),
-                    maskClassName: styles['custom-mask'],
-                  }}
-                />
-                {
-                  photo.isRecommend && <StarFilled style={{ color: 'gold', position: 'absolute', top: '8px', right: '8px' }} />
-                }
-                <span style={{ fontWeight: 500, textAlign: 'center' }}>
-                  { photo.fileName }
-                </span>
-              </div>
+            orderTasks.map(task => (
+              <PhotoItem
+                percent={task.progress}
+                fileName={task.fileName}
+                key={task.uid}
+                status={task.status}
+                ossUrls={{ ossUrlMedium: task.ossUrlMedium, ossUrlThumbnail: task.ossUrlThumbnail }}
+              />
             ))
           }
 
+          {
+            data.map(item => (
+              <PhotoItem percent={1} fileName={item.name} status="done" ossUrls={{ ossUrlMedium: item.ossUrlMedium, ossUrlThumbnail: item.ossUrlThumbnail }} />
+            ))
+          }
         </div>
 
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ textAlign: 'center', marginTop: '16px' }}>
           {
             hasMore
               ? (
