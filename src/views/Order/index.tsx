@@ -1,19 +1,17 @@
 import type { TableColumnProps } from 'antd'
 import type { AnyObject } from 'antd/es/_util/type'
-import { getOrderDetailById, getOrderList, removeOrder, resetOrderStatus, updateOrderStatus } from '@/apis/order.ts'
+import { getOrderDetailById, getOrderList, removeOrder, resetOrderStatus } from '@/apis/order.ts'
 import { OrderInfoContext } from '@/contexts/OrderInfoContext'
 import { useFetch } from '@/hooks/useFetch'
 import usePagination from '@/hooks/usePagination.ts'
 import useTableSelection from '@/hooks/useTableSelection.ts'
 import { useMinioUpload } from '@/store/useMinioUpload'
-import { UploadStatus } from '@/store/useUploadFile.tsx'
 import { type IOrder, OrderStatus } from '@/types/order.ts'
 import { ActionButtons } from '@/views/Order/components/ActionButtons'
 import { OrderModalForm } from '@/views/Order/components/forms/OrderModalForm.tsx'
 import { OrderQueryForm } from '@/views/Order/components/forms/OrderQueryForm.tsx'
 import { OrderDetail } from '@/views/Order/components/OrderDetail'
 import { PhotoMgrModal } from '@/views/Order/components/PhotoMgrModal'
-import { TaskCenter } from '@/views/Order/components/TaskCenter'
 import { ExclamationCircleOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
 import { Badge, Button, Checkbox, Divider, Flex, FloatButton, message, Modal, Table, Tag, Tooltip } from 'antd'
 import { useEffect, useRef, useState } from 'react'
@@ -52,7 +50,7 @@ export function Order() {
       },
     },
   )
-  const uploadQueue = useMinioUpload(state => state.uploadQueue)
+  const uploadTasks = useMinioUpload(state => state.tasks)
 
   const columns: TableColumnProps[] = [
     {
@@ -183,17 +181,17 @@ export function Order() {
     refetch()
   }, [current, pageSize])
 
-  useEffect(() => {
-    const unsubscribe = useMinioUpload.subscribe(
-      state => state.uploadQueue,
-      (uploadFiles) => {
-        const count = uploadFiles.filter(file => file.status !== UploadStatus.Done).length
-        setIncompleteFileCount(count)
-      },
-    )
-
-    return () => unsubscribe()
-  }, [])
+  // useEffect(() => {
+  //   const unsubscribe = useMinioUpload.subscribe(
+  //     state => state.uploadQueue,
+  //     (uploadFiles) => {
+  //       const count = uploadFiles.filter(file => file.status !== UploadStatus.Done).length
+  //       setIncompleteFileCount(count)
+  //     },
+  //   )
+  //
+  //   return () => unsubscribe()
+  // }, [])
 
   return (
     <div style={{ padding: '24px' }}>
@@ -228,17 +226,14 @@ export function Order() {
         pagination={pagination}
       />
 
-      {
-        uploadQueue.length > 0 && (
-          <FloatButton
-            shape="square"
-            tooltip="任务中心"
-            badge={{ count: incompleteFileCount, color: 'red' }}
-            style={{ zIndex: 1001 }}
-            onClick={() => setTaskCenterOpen(true)}
-          />
-        )
-      }
+      <FloatButton
+        shape="square"
+        tooltip="任务中心"
+        badge={{ count: incompleteFileCount, color: 'red' }}
+        style={{ zIndex: 1001 }}
+        onClick={() => setTaskCenterOpen(true)}
+      />
+
       <OrderModalForm
         open={orderModal.open}
         mode={orderModal.mode}
@@ -250,7 +245,7 @@ export function Order() {
       />
 
       <OrderInfoContext.Provider value={curOrderInfo}>
-        <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} />
+        {/* <TaskCenter open={taskCenterOpen} onClose={() => setTaskCenterOpen(false)} /> */}
         <OrderDetail open={orderDetailOpen} onClose={() => setOrderDetailOpen(false)} />
         <PhotoMgrModal open={photoMgrOpen} onClose={() => setPhotoMgrOpen(false)} />
         <ShareLinkModal open={shareLinkMgrOpen} onClose={() => setShareLinkMgrOpen(false)} />

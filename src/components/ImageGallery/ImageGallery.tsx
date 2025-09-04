@@ -13,8 +13,9 @@ import {
 } from '@ant-design/icons'
 import { Button, Card, Divider, Flex, Image, Modal, Progress, Space, Typography, Upload } from 'antd'
 
-import { useEffect, useMemo, useState } from 'react'
+import { CameraIcon } from 'lucide-react'
 
+import { useEffect, useState } from 'react'
 import styles from './ImageGallery.module.less'
 
 // 图片组件
@@ -28,7 +29,7 @@ function PhotoItem(props: { fileName: string, status: UploadStatus, percent?: nu
       statusText: '待上传',
       statusContent: (
         <Progress
-          percent={Math.round(percent ? percent * 100 : 100)}
+          percent={Math.round(percent ? percent * 100 : 0)}
           type="circle"
           status={status === 'uploading' ? 'active' : undefined}
         />
@@ -130,19 +131,14 @@ export function ImageGallery(props: ImageGalleryProps) {
       pageSize: 20,
     },
   )
-  const { addTask, tasks, startUpload, setTaskOssUrl } = useMinioUpload()
-
-  // 获取当前订单号的上传任务
-  const orderTasks = useMemo(() => {
-    return tasks[orderNumber] || []
-  }, [tasks])
+  const { addTask, startUpload, setTaskOssUrl, isUploading, getTasksByOrderNumber } = useMinioUpload()
+  const orderTasks = getTasksByOrderNumber(orderNumber)
 
   const uploadProps: UploadProps = {
     multiple: true,
     showUploadList: false,
     beforeUpload: (file) => {
       addTask(file, { orderId, orderNumber })
-      // generateUploadTask(file, { orderId, orderNumber })
       return false
     },
   }
@@ -188,16 +184,18 @@ export function ImageGallery(props: ImageGalleryProps) {
       <Flex justify="space-between">
         <Space>
           <Button icon={<ClearOutlined />} onClick={handleRemoveAllPhoto} danger>清空所有照片</Button>
-          {/* <Button color="gold" variant="solid" icon={<StarFilled />} onClick={() => handleUpdateRecommend(selectedPhotos, true)}>标记精选</Button> */}
-          {/* <Button color="gold" variant="outlined" icon={<StarOutlined />} onClick={() => handleUpdateRecommend(selectedPhotos, false)}>取消精选</Button> */}
-          {/* <Popconfirm placement="left" title={`确定删除选中的${selectedPhotos.length}张照片吗？`} onConfirm={() => handleRemove(selectedPhotos)} okText="确定" cancelText="取消"> */}
-          {/*  <Button icon={<DeleteOutlined />} danger disabled={selectedPhotos.length === 0}>删除</Button> */}
-          {/* </Popconfirm> */}
         </Space>
         <Space>
-          <Button onClick={() => startUpload(orderNumber, orderId)}>开始上传</Button>
+          <Button
+            icon={<UploadOutlined />}
+            onClick={() => startUpload(orderNumber, orderId)}
+            loading={isUploading}
+            disabled={orderTasks.length === 0}
+          >
+            开始上传
+          </Button>
           <Upload {...uploadProps}>
-            <Button type="primary" icon={<UploadOutlined />}>上传照片</Button>
+            <Button type="primary" icon={<CameraIcon size={16} />} loading={isUploading}>上传照片</Button>
           </Upload>
         </Space>
       </Flex>
@@ -220,7 +218,13 @@ export function ImageGallery(props: ImageGalleryProps) {
 
           {
             data.map(item => (
-              <PhotoItem percent={1} fileName={item.name} status="done" ossUrls={{ ossUrlMedium: item.ossUrlMedium, ossUrlThumbnail: item.ossUrlThumbnail }} />
+              <PhotoItem
+                key={item.id}
+                percent={1}
+                fileName={item.name}
+                status="done"
+                ossUrls={{ ossUrlMedium: item.ossUrlMedium, ossUrlThumbnail: item.ossUrlThumbnail }}
+              />
             ))
           }
         </div>

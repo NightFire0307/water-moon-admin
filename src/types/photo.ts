@@ -10,9 +10,8 @@ export interface IPhoto {
 }
 
 export interface GetPhotoListResult {
-  uuid: number
+  id: number
   name: string
-  ossKey: string
   ossUrlThumbnail: string
   ossUrlMedium: string
   expiresAt: number

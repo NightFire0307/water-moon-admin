@@ -89,6 +89,7 @@ function useInfiniteScroll<T>(
 
   return {
     data,
+    setPage,
     hasMore,
     loadMore,
     observerRef,
