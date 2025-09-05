@@ -11,11 +11,12 @@ import {
   LoadingOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
-import { Button, Card, Divider, Flex, Image, Modal, Progress, Space, Typography, Upload } from 'antd'
+import { Button, Card, Divider, Flex, Image, message, Modal, Progress, Space, Typography, Upload } from 'antd'
 
 import { CameraIcon } from 'lucide-react'
 
 import { useEffect, useState } from 'react'
+
 import styles from './ImageGallery.module.less'
 
 // 图片组件
@@ -138,7 +139,14 @@ export function ImageGallery(props: ImageGalleryProps) {
     multiple: true,
     showUploadList: false,
     beforeUpload: (file) => {
-      addTask(file, { orderId, orderNumber })
+      const isJPG = file.type === 'image/jpeg'
+      if (!isJPG) {
+        message.error(`${file.name} 不是 JPG 格式的文件`)
+      }
+      else {
+        addTask(file, { orderId, orderNumber })
+      }
+
       return false
     },
   }
