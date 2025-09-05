@@ -5,7 +5,6 @@ import { OrderInfoContext } from '@/contexts/OrderInfoContext'
 import { useFetch } from '@/hooks/useFetch'
 import usePagination from '@/hooks/usePagination.ts'
 import useTableSelection from '@/hooks/useTableSelection.ts'
-import { useMinioUpload } from '@/store/useMinioUpload'
 import { type IOrder, OrderStatus } from '@/types/order.ts'
 import { ActionButtons } from '@/views/Order/components/ActionButtons'
 import { OrderModalForm } from '@/views/Order/components/forms/OrderModalForm.tsx'
@@ -13,7 +12,7 @@ import { OrderQueryForm } from '@/views/Order/components/forms/OrderQueryForm.ts
 import { OrderDetail } from '@/views/Order/components/OrderDetail'
 import { PhotoMgrModal } from '@/views/Order/components/PhotoMgrModal'
 import { ExclamationCircleOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
-import { Badge, Button, Checkbox, Divider, Flex, FloatButton, message, Modal, Table, Tag, Tooltip } from 'antd'
+import { Badge, Button, Checkbox, Divider, Flex, message, Modal, Table, Tag, Tooltip } from 'antd'
 import { useEffect, useRef, useState } from 'react'
 import { PDFViewer } from '../../components/PdfExport/PdfViewer'
 import PhotoReviewResult from './components/PhotoReviewResult'
@@ -27,14 +26,12 @@ export function Order() {
     mode: 'create',
     initialValues: {},
   })
-  const [taskCenterOpen, setTaskCenterOpen] = useState(false)
   const [orderDetailOpen, setOrderDetailOpen] = useState(false)
   const [photoMgrOpen, setPhotoMgrOpen] = useState(false)
   const [shareLinkMgrOpen, setShareLinkMgrOpen] = useState(false)
   const [photoReviewOpen, setPhotoReviewOpen] = useState(false)
   const [pdfExportOpen, setPdfExportOpen] = useState(false)
   const [curOrderInfo, setCurOrderInfo] = useState<IOrder>({} as IOrder)
-  const [incompleteFileCount, setIncompleteFileCount] = useState(0)
   const resetSelection = useRef<boolean>(false)
   const { rowSelection } = useTableSelection({ type: 'checkbox' })
   const { pagination, current, pageSize, setTotal, reset } = usePagination()
@@ -50,7 +47,6 @@ export function Order() {
       },
     },
   )
-  const uploadTasks = useMinioUpload(state => state.tasks)
 
   const columns: TableColumnProps[] = [
     {
@@ -226,13 +222,13 @@ export function Order() {
         pagination={pagination}
       />
 
-      <FloatButton
-        shape="square"
-        tooltip="任务中心"
-        badge={{ count: incompleteFileCount, color: 'red' }}
-        style={{ zIndex: 1001 }}
-        onClick={() => setTaskCenterOpen(true)}
-      />
+      {/* <FloatButton */}
+      {/*  shape="square" */}
+      {/*  tooltip="任务中心" */}
+      {/*  badge={{ count: Object.values(pendingCount).reduce((acc, count) => acc + count, 0), color: 'red' }} */}
+      {/*  style={{ zIndex: 1001 }} */}
+      {/*  onClick={() => setTaskCenterOpen(true)} */}
+      {/* /> */}
 
       <OrderModalForm
         open={orderModal.open}
