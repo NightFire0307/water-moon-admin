@@ -142,8 +142,9 @@ export function ActionButtons(props: ActionButtonsProps) {
           },
           {
             key: OrderAction.MANAGE_LINKS,
-            label: '链接管理',
+            label: '链接管理(暂不可用)',
             icon: <IconLink />,
+            disabled: true,
           },
           {
             type: 'divider',

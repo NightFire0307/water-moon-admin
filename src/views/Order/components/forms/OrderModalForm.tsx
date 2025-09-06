@@ -3,7 +3,7 @@ import type { IOrderDetail } from '@/types/order'
 import type { IPackage } from '@/types/package'
 import type { IProduct } from '@/types/product'
 import type { GetRef, TableProps } from 'antd'
-import type { FC, PropsWithChildren, ReactNode, UIEvent } from 'react'
+import type { FC, PropsWithChildren, ReactNode } from 'react'
 import { createOrder, updateOrder } from '@/apis/order'
 import { getPackageList } from '@/apis/package'
 import { getProductList } from '@/apis/product'
@@ -12,7 +12,6 @@ import { PlusOutlined } from '@ant-design/icons'
 import { Button, Card, Col, Divider, Flex, Form, Input, InputNumber, message, Modal, Popconfirm, Radio, Row, Select, Table } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import dayjs from 'dayjs'
-import { JapaneseYen } from 'lucide-react'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 // 获取 Form 实例类型
@@ -222,11 +221,6 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
     setPackageState(prev => ({ ...prev, options: data.list }))
   }
 
-  // 处理下拉框滚动事件
-  function handlePopupScroll(e: UIEvent<HTMLDivElement>) {
-    // TODO: 此处添加加载更多逻辑
-  }
-
   async function handleOk() {
     setConfirmLoading(true)
     try {
@@ -371,6 +365,7 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
                   { label: '15天', value: 15 },
                   { label: '30天', value: 30 },
                 ]}
+                disabled={mode === 'edit'}
               />
             </Form.Item>
           </Col>
@@ -387,7 +382,6 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
                 style={{ flex: 1 }}
                 options={packageState.options}
                 onChange={value => setPackageState(prev => ({ ...prev, selectedId: value }))}
-                onPopupScroll={handlePopupScroll}
               />
               <Button type="primary" icon={<PlusOutlined />} onClick={handleAddPackage} />
             </Flex>

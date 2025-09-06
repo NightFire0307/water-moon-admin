@@ -167,7 +167,7 @@ export function ImageGallery(props: ImageGalleryProps) {
   // 使用 SSE 实时接收照片上传完成事件
   // 注意：此处的 URL 需要根据实际情况调整
   useEffect(() => {
-    const eventSource = new EventSource('http://localhost:3000/admin/photos/completions')
+    const eventSource = new EventSource(`${import.meta.env.VITE_API_BASE_URL}/admin/photos/completions`)
     eventSource.onmessage = (event) => {
       const data = JSON.parse(event.data)
       if (data.type === 'done') {
