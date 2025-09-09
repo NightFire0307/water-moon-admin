@@ -1,10 +1,13 @@
+import { getOrderPdfData } from '@/apis/order.ts'
+import { PdfDocument } from '@/components/PdfExport/PdfDocument.tsx'
+import { useOrderInfoContext } from '@/contexts/OrderInfoContext.ts'
 import { CloseOutlined, DownloadOutlined, LoadingOutlined, MinusOutlined, PlusOutlined, PrinterOutlined } from '@ant-design/icons'
 import { Button, Divider, Modal, Space, Spin } from 'antd'
 import { type FC, useEffect, useMemo, useRef, useState } from 'react'
 import { Document, Page, type PageProps, pdfjs } from 'react-pdf'
 import { PdfPagination } from './PdfPagination'
 import styles from './PdfViewer.module.less'
-import { usePdfBlob } from './usePdfBlob'
+import { usePdfBlob } from './usePdfBlob.ts'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
 import 'react-pdf/dist/Page/TextLayer.css'
 
@@ -24,10 +27,17 @@ interface ModalTitleProps {
   onClose?: () => void
 }
 
+// 模态框标题
 function ModalTitle({ onPrint, onDownload, onClose }: ModalTitleProps) {
+  const { orderNumber } = useOrderInfoContext()
+
   return (
     <div className={styles.pdfViewerModalTitle}>
-      <span>D9999 产品制作单.pdf</span>
+      <span>
+        { orderNumber }
+        {' - '}
+        产品制作单
+      </span>
       <Space>
         <Button icon={<DownloadOutlined />} type="text" onClick={() => onDownload && onDownload()}>下载</Button>
         <Button icon={<PrinterOutlined />} type="text" onClick={() => onPrint && onPrint()}>打印</Button>
@@ -57,13 +67,14 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
     numPages,
     generatePdfBlob,
     downloadBlobAsPdf,
-  } = usePdfBlob({ options: { manual: true } })
+  } = usePdfBlob()
   const [pageProps, setPageProps] = useState<PageProps>({
     scale: 1.2,
     canvasBackground: '#f3f5f7',
     loading: null,
   })
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const { id, orderNumber } = useOrderInfoContext()
 
   // 放大缩小处理
   function handleZoom(delta: number) {
@@ -82,13 +93,20 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
     }
   }
 
+  // 计算缩放百分比
   const scaleLevel = useMemo(() => {
     return ((pageProps.scale ?? 1) * 100).toFixed(0)
   }, [pageProps.scale])
 
+  // 获取订单PDF数据
+  const fetchDocumentData = async () => {
+    const res = await getOrderPdfData(id)
+    await generatePdfBlob(<PdfDocument data={res.data} />)
+  }
+
   useEffect(() => {
     if (open) {
-      generatePdfBlob()
+      fetchDocumentData()
     }
   }, [open])
 
@@ -98,7 +116,7 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
       title={(
         <ModalTitle
           onPrint={printPdf}
-          onDownload={downloadBlobAsPdf}
+          onDownload={() => downloadBlobAsPdf(orderNumber)}
           onClose={onClose}
         />
       )}

@@ -92,3 +92,11 @@ export function updateOrderStatus(orderId: number, status: OrderStatus) {
     data: { status },
   })
 }
+
+// 获取订单导出PDF数据
+export function getOrderPdfData(orderId: number) {
+  return request({
+    url: `/admin/orders/${orderId}/export-data`,
+    method: 'GET',
+  })
+}

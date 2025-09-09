@@ -38,16 +38,16 @@ interface OrderProducts {
 
 export interface IOrder {
   id: number
-  order_number: string
-  customer_name: string
-  customer_phone: string
-  selected_photos: number
-  max_select_photos: number
-  total_photos: number
-  extra_photo_price: number
+  orderNumber: string
+  customerName: string
+  customerPhone: string
+  selectedPhotos: number
+  maxSelectPhotos: number
+  totalPhotos: number
+  extraPhotoPrice: number
   status: OrderStatus
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 // 订单详情
@@ -69,11 +69,11 @@ export interface IOrderDetail {
 
 export interface IOrderResultPhoto {
   id: number
-  name: string
+  fileName: string
   remark: string
   status: 'selected' | 'unselected'
   thumbnail: string
-  order_products: {
+  orderProducts: {
     id: number
     name: string
   }[]
@@ -98,5 +98,5 @@ export interface IOrderSummary {
 
 export type OrderResponse = Promise<ApiResponse<{ list: IOrder[] } & Pagination>>
 export type OrderDetailResponse = Promise<ApiResponse<IOrderDetail>>
-export type OrderResultResponse = Promise<ApiResponse<{ list: IOrderResult } & Pagination>>
+export type OrderResultResponse = Promise<ApiResponse<{ list: IOrderResult[] } & Pagination>>
 export type OrderSummaryResponse = Promise<ApiResponse<IOrderSummary>>

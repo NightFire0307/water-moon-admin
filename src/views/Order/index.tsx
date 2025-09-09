@@ -163,6 +163,7 @@ export function Order() {
             refetch()
           }}
           onExportPdf={() => {
+            setCurOrderInfo(record as IOrder)
             setPdfExportOpen(true)
           }}
           onConfirm={async () => {

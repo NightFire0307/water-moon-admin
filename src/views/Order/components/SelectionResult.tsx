@@ -26,7 +26,7 @@ function ImageGrid(props: ImageGridProps) {
           <div style={{ position: 'relative' }}>
             <Image
               alt="placeholder"
-              src={photo.thumbnail_url}
+              src={photo.thumbnailUrl}
               preview={{
                 mask: null,
               }}
@@ -76,10 +76,10 @@ export function SelectionResult() {
       for (let i = 0; i < 10; i++) {
         newPhotos.push({
           id: i,
-          file_name: `照片名称${i}`,
-          thumbnail_url: '/src/assets/placeholder.svg',
-          original_url: '/src/assets/placeholder.svg',
-          is_recommend: false,
+          fileName: `照片名称${i}`,
+          thumbnailUrl: '/src/assets/placeholder.svg',
+          originalUrl: '/src/assets/placeholder.svg',
+          isRecommend: false,
         })
       }
       return newPhotos

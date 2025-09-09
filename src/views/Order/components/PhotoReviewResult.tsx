@@ -1,11 +1,10 @@
-import type { IOrderResultPhoto } from '@/types/order'
+import type { IOrderResult } from '@/types/order'
 import type { TableProps } from 'antd/lib'
 import { downloadResult, getOrderResult } from '@/apis/order'
-import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
 import { useOrderInfoContext } from '@/contexts/OrderInfoContext'
-import { Button, Divider, Drawer, Flex, Space, Table, Tag } from 'antd'
-import { Download, DownloadIcon, Filter, ZoomInIcon } from 'lucide-react'
-import { type FC, useEffect, useMemo, useState } from 'react'
+import { Button, Drawer, Space, Table, Tag } from 'antd'
+import { Download, DownloadIcon, ZoomInIcon } from 'lucide-react'
+import { type FC, useEffect, useState } from 'react'
 import styles from './PhotoReviewResult.module.less'
 
 interface PhotoReviewResultProps {
@@ -14,11 +13,11 @@ interface PhotoReviewResultProps {
 }
 
 const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
-  const [originalData, setOriginalData] = useState<IOrderResultPhoto[]>([])
+  const [originalData, setOriginalData] = useState<IOrderResult[]>([])
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false)
   const { order_number, id } = useOrderInfoContext()
 
-  const columns: TableProps<IOrderResultPhoto>['columns'] = [
+  const columns: TableProps<IOrderResult>['columns'] = [
     {
       dataIndex: 'thumbnailUrl',
       title: '照片',
@@ -69,22 +68,29 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
   const fetchOrderResult = async () => {
     const { data } = await getOrderResult(id)
     setOriginalData(data.list)
-    console.log(data.list)
   }
 
   // 导出选片记录
   const handleExport = async () => {
-    setDownloadLoading(true)
-    const data = await downloadResult(id)
-    const blob = new Blob([data], { type: 'application/zip' })
-    const url = URL.createObjectURL(blob)
+    try {
+      setDownloadLoading(true)
+      const data = await downloadResult(id)
+      const blob = new Blob([data], { type: 'application/zip' })
+      const url = URL.createObjectURL(blob)
 
-    const a = document.createElement('a')
-    a.href = url
-    a.download = '订单选片结果.zip'
-    a.click()
-    URL.revokeObjectURL(url)
-    setDownloadLoading(false)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = '订单选片结果.zip'
+      a.click()
+      URL.revokeObjectURL(url)
+      setDownloadLoading(false)
+    }
+    catch (e) {
+      console.error(e)
+    }
+    finally {
+      setDownloadLoading(false)
+    }
   }
 
   useEffect(() => {

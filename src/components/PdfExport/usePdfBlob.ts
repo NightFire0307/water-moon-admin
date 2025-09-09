@@ -1,17 +1,9 @@
+import type { ReactElement } from 'react'
 import { pdf } from '@react-pdf/renderer'
 import { message } from 'antd'
 import { useEffect, useRef, useState } from 'react'
-import { PdfDocument } from './PdfDocument'
 
-interface usePdfBlobProps {
-  options?: {
-    manual?: boolean
-  }
-}
-
-export function usePdfBlob({ options = {} }: usePdfBlobProps = {}) {
-  const { manual = false } = options
-
+export function usePdfBlob() {
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [pageNumber, setPageNumber] = useState(1)
@@ -35,7 +27,7 @@ export function usePdfBlob({ options = {} }: usePdfBlobProps = {}) {
   }
 
   // 生成 PDF Blob
-  const generatePdfBlob = async () => {
+  const generatePdfBlob = async (el: ReactElement) => {
     try {
       setLoading(true)
 
@@ -44,7 +36,7 @@ export function usePdfBlob({ options = {} }: usePdfBlobProps = {}) {
         currentBlobUrl.current = null
       }
 
-      const blob = await pdf(<PdfDocument />).toBlob()
+      const blob = await pdf(el).toBlob()
       const url = URL.createObjectURL(blob)
       setPdfBlobUrl(url)
       currentBlobUrl.current = url
@@ -69,16 +61,9 @@ export function usePdfBlob({ options = {} }: usePdfBlobProps = {}) {
 
     const a = document.createElement('a')
     a.href = currentBlobUrl.current
-    a.download = `${fileName ?? '产品制作单'}.pdf`
+    a.download = `${fileName}-产品制作单.pdf`
     a.click()
   }
-
-  useEffect(() => {
-    if (manual)
-      return
-
-    generatePdfBlob()
-  }, [])
 
   useEffect(() => {
     return () => {
@@ -92,7 +77,6 @@ export function usePdfBlob({ options = {} }: usePdfBlobProps = {}) {
   return {
     pdfBlobUrl,
     loading,
-    setLoading,
     printPdf,
     pageNumber,
     setPageNumber,

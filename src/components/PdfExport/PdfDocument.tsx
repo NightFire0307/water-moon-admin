@@ -1,5 +1,47 @@
 import { Document, Font, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 
+interface PdfData {
+  id: number
+  orderNumber: string
+  customerName: string
+  customerPhone: string
+  selectDate: string
+  extraPhotoMoney: number
+  totalPhotos: number
+}
+
+export type DocumentData = PdfData & {
+  orderProducts: {
+    id: number
+    name: string
+    type: string
+    count: number
+    photoNames: {
+      name: string
+      remark: string
+    }[]
+  }[]
+}
+
+interface PdfDocumentProps {
+  data: DocumentData
+}
+
+const fields = [
+  { label: '客户编号', key: 'orderNumber' },
+  { label: '客户姓名', key: 'customerName' },
+  { label: '客户手机', key: 'customerPhone' },
+  { label: '门市', key: 'store' },
+  { label: '摄影师', key: 'photographer' },
+  { label: '造型师', key: 'stylist' },
+  { label: '选片师', key: 'selector' },
+  { label: '拍照日', key: 'shootDate' },
+  { label: '选片日', key: 'selectDate' },
+  { label: '取件日', key: 'pickupDate' },
+  { label: '加挑金额', key: 'extraMoney' },
+  { label: '总张数', key: 'totalPhotos' },
+]
+
 Font.register({
   family: 'NotoSansSC',
   src: '/public/fonts/NotoSansSC-Regular.ttf',
@@ -151,76 +193,7 @@ const styles = StyleSheet.create({
   },
 })
 
-export function PdfDocument() {
-  const data = {
-    customerId: 'A001',
-    customerName: '张三',
-    customerPhone: '13800138000',
-    store: '北京旗舰店',
-    photographer: '李老师',
-    stylist: '王老师',
-    selector: '赵老师',
-    shootDate: '2025-07-10',
-    selectDate: '2025-07-15',
-    pickupDate: '2025-08-01',
-    extraFee: '￥500',
-    totalPhotos: '50',
-  }
-
-  const products = [
-    {
-      name: '大框相框',
-      type: '相框',
-      count: 1,
-      perCount: 1,
-      photoIds: ['CZCZ0001'],
-    },
-    {
-      name: '摆台',
-      type: '摆台',
-      count: 2,
-      perCount: 1,
-      photoIds: ['CZCZ0001', 'CZCZ0007', 'CZCZ0008'],
-    },
-    {
-      name: '入册',
-      type: '相册',
-      count: 1,
-      perCount: 20,
-      photoIds: [
-        'CZCZ0001',
-        'CZCZ0007',
-        'CZCZ0008',
-        'CZCZ0002',
-        'CZCZ0003',
-        'CZCZ0004',
-        'CZCZ0005',
-        'CZCZ0006',
-        'CZCZ0009',
-        'CZCZ0010',
-        'CZCZ0011',
-        'CZCZ0012',
-        'CZCZ0013',
-        'CZCZ0014',
-      ],
-    },
-  ]
-
-  const fields = [
-    { label: '客户编号', key: 'customerId' },
-    { label: '客户姓名', key: 'customerName' },
-    { label: '客户手机', key: 'customerPhone' },
-    { label: '门市', key: 'store' },
-    { label: '摄影师', key: 'photographer' },
-    { label: '造型师', key: 'stylist' },
-    { label: '选片师', key: 'selector' },
-    { label: '拍照日', key: 'shootDate' },
-    { label: '选片日', key: 'selectDate' },
-    { label: '取件日', key: 'pickupDate' },
-    { label: '加挑金额', key: 'extraFee' },
-    { label: '总张数', key: 'totalPhotos' },
-  ]
-
+export function PdfDocument({ data }: PdfDocumentProps) {
   return (
     <Document>
       <Page size="A4" style={styles.page}>
@@ -237,7 +210,7 @@ export function PdfDocument() {
             {fields.map(({ label, key }, index) => (
               <View key={index} style={styles.infoItem}>
                 <Text style={styles.infoLabel}>{label}</Text>
-                <Text style={styles.infoValue}>{data[key as keyof typeof data] || '-'}</Text>
+                <Text style={styles.infoValue}>{data !== null ? data[key as keyof PdfData] || '-' : '-' }</Text>
               </View>
             ))}
           </View>
@@ -246,7 +219,7 @@ export function PdfDocument() {
         {/* 产品选择详情 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>产品详情</Text>
-          {products.map((product, index) => (
+          {data && data.orderProducts.map((product, index) => (
             <View key={index} style={styles.productCard}>
               <View style={styles.productHeader}>
                 <Text style={styles.productName}>{product.name}</Text>
@@ -260,20 +233,16 @@ export function PdfDocument() {
                 </View>
                 <View style={styles.productDetailItem}>
                   <Text style={styles.productDetailLabel}>单片数量</Text>
-                  <Text style={styles.productDetailValue}>{product.perCount}</Text>
-                </View>
-                <View style={styles.productDetailItem}>
-                  <Text style={styles.productDetailLabel}>总片数</Text>
-                  <Text style={styles.productDetailValue}>{product.count * product.perCount}</Text>
+                  <Text style={styles.productDetailValue}>{product.photoNames.length}</Text>
                 </View>
               </View>
 
               <View style={styles.photoIdsContainer}>
                 <Text style={styles.photoIdsLabel}>选择照片编号</Text>
                 <View style={styles.photoIds}>
-                  {product.photoIds.map((id, i) => (
+                  {product.photoNames.map((photoName, i) => (
                     <Text key={i} style={styles.photoId}>
-                      {id}
+                      {photoName.name}
                     </Text>
                   ))}
                 </View>
