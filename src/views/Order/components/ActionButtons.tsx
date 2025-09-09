@@ -131,6 +131,7 @@ export function ActionButtons(props: ActionButtonsProps) {
             key: OrderAction.EXPORT_PDF,
             label: '导出PDF',
             icon: <FilePdfOutlined />,
+            disabled: ![OrderStatus.SUBMITTED, OrderStatus.FINISHED].includes(status),
           },
           {
             type: 'divider',
