@@ -159,7 +159,8 @@ export function ImageGallery(props: ImageGalleryProps) {
       centered: true,
       okText: '确认',
       onOk: async () => {
-        await removeAllPhotos(orderId)
+        const { msg } = await removeAllPhotos(orderId)
+        message.success(msg)
       },
     })
   }

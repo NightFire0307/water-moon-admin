@@ -38,7 +38,7 @@ export function removePhotos(orderId: number, data: { photoIds: number[] }) {
   })
 }
 
-export function removeAllPhotos(orderId: number) {
+export function removeAllPhotos(orderId: number): Promise<ApiResponse<null>> {
   return request({
     url: `/admin/photos/all/${orderId}`,
     method: 'delete',

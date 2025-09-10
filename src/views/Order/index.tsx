@@ -178,18 +178,6 @@ export function Order() {
     refetch()
   }, [current, pageSize])
 
-  // useEffect(() => {
-  //   const unsubscribe = useMinioUpload.subscribe(
-  //     state => state.uploadQueue,
-  //     (uploadFiles) => {
-  //       const count = uploadFiles.filter(file => file.status !== UploadStatus.Done).length
-  //       setIncompleteFileCount(count)
-  //     },
-  //   )
-  //
-  //   return () => unsubscribe()
-  // }, [])
-
   return (
     <div style={{ padding: '24px' }}>
       <OrderQueryForm

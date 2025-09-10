@@ -19,7 +19,7 @@ export function PhotoMgrModal(props: PhotoMgrProps) {
   function handleBeforeClose() {
     const tasks = getTasksByOrderNumber(orderNumber)
 
-    const hasStart = tasks.some(task => task.status === 'uploading' || task.status === 'done')
+    const hasStart = tasks.some(task => task.status === 'uploading')
 
     // 如果有任务正在上传，关闭Modal时不清除任务
     if (!hasStart) {
