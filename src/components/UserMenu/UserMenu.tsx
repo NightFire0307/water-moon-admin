@@ -1,9 +1,11 @@
 import type { MenuProps } from 'antd'
+import { getCurrentUser, logout } from '@/apis/login'
 import ChevronsUpDown from '@/assets/icons/chevrons-up-down.svg?react'
 import { useUserInfo } from '@/store/useUserInfo.tsx'
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Dropdown, Flex } from 'antd'
 import { User2 } from 'lucide-react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './UserMenu.module.less'
 
@@ -35,7 +37,7 @@ const userMenuItems: MenuProps['items'] = [
 function UserMenu({ collapsed }: UserMenuProps) {
   const userStore = useUserInfo()
   const navigate = useNavigate()
-  const userInfo = useUserInfo(state => state.userInfo)
+  const { userInfo, setUserInfo } = useUserInfo()
 
   async function handleUserMenuClick({ key }: { key: string }) {
     switch (key) {
@@ -43,6 +45,7 @@ function UserMenu({ collapsed }: UserMenuProps) {
         navigate('profile')
         break
       case UserMenuKey.Logout:
+        await logout()
         await userStore.clearToken()
         navigate('/login')
         break
@@ -50,6 +53,13 @@ function UserMenu({ collapsed }: UserMenuProps) {
         break
     }
   }
+
+  useEffect(() => {
+    (async () => {
+      const res = await getCurrentUser()
+      setUserInfo(res.data)
+    })()
+  }, [])
 
   return (
     <div className={styles['user-info']}>

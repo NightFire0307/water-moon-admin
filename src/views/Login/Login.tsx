@@ -1,17 +1,16 @@
-import { login } from '@/apis/login.ts'
+import { login, refreshToken } from '@/apis/login.ts'
 import { useUserInfo } from '@/store/useUserInfo.tsx'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input, message } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { throttle } from 'lodash-es'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './Login.module.less'
 
 export function Login() {
   const [loading, setLoading] = useState(false)
-  const saveToken = useUserInfo(state => state.saveToken)
-  const saveUserInfo = useUserInfo(state => state.saveUserInfo)
+  const setAccessToken = useUserInfo(state => state.setAccessToken)
   const navigate = useNavigate()
   const [form] = useForm()
 
@@ -30,9 +29,9 @@ export function Login() {
     const values = form.getFieldsValue()
     try {
       const { data } = await login(values)
-      const { accessToken, userInfo } = data
-      await saveToken(accessToken)
-      await saveUserInfo(userInfo)
+      const { accessToken } = data
+
+      setAccessToken(accessToken)
 
       if (accessToken) {
         message.success('登录成功')
@@ -56,12 +55,18 @@ export function Login() {
     }
   }
 
+  useEffect(() => {
+    refreshToken().then(async ({ data }) => {
+      setAccessToken(data.accessToken)
+      navigate('/dashboard')
+    })
+  }, [])
+
   return (
     <div className={styles.loginContainer} onKeyDown={handleKeyDown}>
       <Card className={styles.loginCard}>
         <div className={styles.loginHeader}>
-          <h1>管理后台</h1>
-          <p className={styles.desc}>登录您的账户</p>
+          <h1>水月系统登录</h1>
         </div>
         <Form
           form={form}
@@ -70,21 +75,19 @@ export function Login() {
           requiredMark={false}
         >
           <Form.Item
-            label="用户名"
             name="username"
             rules={[{ required: true, message: '请输入用户名' }]}
           >
-            <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="请输入用户名" />
+            <Input prefix={<UserOutlined />} placeholder="用户名" />
           </Form.Item>
           <Form.Item
-            label="密码"
             name="password"
             rules={[{ required: true, message: '请输入密码' }]}
           >
             <Input
-              prefix={<LockOutlined className="site-form-item-icon" />}
+              prefix={<LockOutlined />}
               type="password"
-              placeholder="请输入密码"
+              placeholder="密码"
             />
           </Form.Item>
 

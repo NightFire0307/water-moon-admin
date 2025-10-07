@@ -61,3 +61,4 @@ export type LoginResponseData = Promise<ApiResponse<LoginResponse>>
 export type OssTokenResponseData = Promise<ApiResponse<OssTokenResponse>>
 export type PresignedUrlResponseData = Promise<ApiResponse<PresignedUrlResponse>>
 export type PresignedPolicyResponseData = Promise<ApiResponse<PresignedPolicyResponse>>
+export type CurrentUserResponseData = Promise<ApiResponse<LoginUserInfo>>

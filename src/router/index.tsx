@@ -7,7 +7,6 @@ import GeneralSetting from '@/views/SystemSetting/GeneralSetting.tsx'
 import User from '@/views/User/User.tsx'
 import { createBrowserRouter } from 'react-router'
 import App from '../App.tsx'
-import { ProtectedRoute } from '../components/ProtectedRoute.tsx'
 import { Dashboard } from '../views/Dashboard/Dashboard.tsx'
 import { Login } from '../views/Login/Login.tsx'
 import { Product } from '../views/Product/Product.tsx'
@@ -16,11 +15,7 @@ import { ProductType } from '../views/ProductType/ProductType.tsx'
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: (
-      <ProtectedRoute>
-        <App />
-      </ProtectedRoute>
-    ),
+    element: <App />,
     handle: {
       title: '首页',
     },
