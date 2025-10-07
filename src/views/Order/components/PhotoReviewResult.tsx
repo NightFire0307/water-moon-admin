@@ -1,6 +1,6 @@
 import type { IOrderResult } from '@/types/order'
 import type { TableProps } from 'antd/lib'
-import { downloadResult, getOrderResult } from '@/apis/order'
+import { getOrderResult } from '@/apis/order'
 import { useOrderInfoContext } from '@/contexts/OrderInfoContext'
 import { Button, Drawer, Space, Table, Tag } from 'antd'
 import { Download, DownloadIcon, ZoomInIcon } from 'lucide-react'
@@ -15,7 +15,7 @@ interface PhotoReviewResultProps {
 const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
   const [originalData, setOriginalData] = useState<IOrderResult[]>([])
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false)
-  const { order_number, id } = useOrderInfoContext()
+  const { orderNumber, id } = useOrderInfoContext()
 
   const columns: TableProps<IOrderResult>['columns'] = [
     {
@@ -74,15 +74,8 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
   const handleExport = async () => {
     try {
       setDownloadLoading(true)
-      const data = await downloadResult(id)
-      const blob = new Blob([data], { type: 'application/zip' })
-      const url = URL.createObjectURL(blob)
+      window.open(`${import.meta.env.VITE_API_BASE_URL}/admin/orders/${id}/result/download`, '_blank')
 
-      const a = document.createElement('a')
-      a.href = url
-      a.download = '订单选片结果.zip'
-      a.click()
-      URL.revokeObjectURL(url)
       setDownloadLoading(false)
     }
     catch (e) {
@@ -101,7 +94,7 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
 
   return (
     <Drawer
-      title={`订单 WK-${order_number} 选片结果`}
+      title={`订单 WK-${orderNumber} 选片结果`}
       open={open}
       onClose={() => onClose && onClose()}
       width={1000}
