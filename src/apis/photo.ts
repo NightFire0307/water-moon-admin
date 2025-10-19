@@ -1,3 +1,4 @@
+import type { AxiosRequestConfig } from 'axios'
 import type { ApiResponse, PaginationParams } from '@/types/common.ts'
 import type { GetPhotoListRes, PhotosResponse } from '@/types/photo.ts'
 import request from '@/utils/request'
@@ -30,7 +31,7 @@ export function savePhotos(orderId: number, data: { file_name: string, file_size
   })
 }
 
-export function removePhotos(orderId: number, data: { photoIds: number[] }) {
+export function removePhotos(orderId: string, data: { photoIds: number[] }) {
   return request({
     url: `/admin/photos/${orderId}`,
     method: 'delete',
@@ -42,6 +43,16 @@ export function removeAllPhotos(orderId: number): Promise<ApiResponse<null>> {
   return request({
     url: `/admin/photos/all/${orderId}`,
     method: 'delete',
+  })
+}
+
+// 上传照片
+export function uploadPhoto(orderId: string, data: any, config?: AxiosRequestConfig) {
+  return request({
+    url: `/admin/photos/upload/${orderId}`,
+    method: 'post',
+    data,
+    ...config,
   })
 }
 

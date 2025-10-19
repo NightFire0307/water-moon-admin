@@ -12,8 +12,8 @@ export interface UploadPhoto {
   status: UploadStatus
   progress: number
   retryCount: number
-  thumbnailUrl?: string
-  mediumUrl?: string
+  previewUrl?: string // 预览图
+  originalUrl?: string // 大图
   errorMsg?: string
 }
 

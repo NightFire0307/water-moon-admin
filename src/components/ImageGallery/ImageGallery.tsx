@@ -4,11 +4,13 @@ import {
   ClearOutlined,
   UploadOutlined,
 } from '@ant-design/icons'
-import { Button, Divider, Flex, message, Modal, Space, Table, Tag, Upload } from 'antd'
+import { Button, Divider, Flex, message, Modal, Progress, Space, Image, Table, Tag, Upload, Typography } from 'antd'
 import { CameraIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { getPhotosByOrderId, removeAllPhotos } from '@/apis/photo.ts'
+import { useEffect} from 'react'
+import { removeAllPhotos } from '@/apis/photo.ts'
 import { type UploadPhoto, type UploadStatus, uploadStore } from '@/store/uploadStore'
+
+const { Link } = Typography
 
 interface ImageGalleryProps {
   orderId: number
@@ -17,20 +19,22 @@ interface ImageGalleryProps {
 
 export function ImageGallery(props: ImageGalleryProps) {
   const { orderId, orderNumber } = props
-  const { createUploadOrder, getUploadPhotosByOrderId, startUpload } = uploadStore()
+  const { createUploadOrder, getUploadPhotosByOrderId, startUpload, abortPhoto, createPreviewUrl } = uploadStore()
 
   const uploadPhotos = getUploadPhotosByOrderId(String(orderId))?.photos || []
 
   const columns: TableProps<UploadPhoto>['columns'] = [
     {
-      title: '照片ID',
-      dataIndex: ['file', 'uid'],
-      key: 'uid',
-      width: 250,
-    },
-    {
       title: '缩略图',
-      dataIndex: 'thumbnailUrl',
+      dataIndex: 'previewUrl',
+      render: (url, record) => {
+        return <Image 
+          src={url ? url : URL.createObjectURL(record.file)} 
+          width={80}
+          height={60} // 固定高度
+          style={{ objectFit: 'contain' }}
+        />
+      }
     },
     {
       title: '照片名称',
@@ -40,6 +44,17 @@ export function ImageGallery(props: ImageGalleryProps) {
     {
       title: '上传进度',
       dataIndex: 'progress',
+      render: (progress: number) => (
+        <Progress
+          percent={progress}
+          percentPosition={{ align: 'center', type: 'inner' }}
+          strokeColor={
+            progress === 100 ? '#87d068' : { '0%': '#108ee9', '100%': '#87d068' }
+          }
+          showInfo={false}
+        />
+      ),
+      width: 150,
     },
     {
       title: '状态',
@@ -63,10 +78,12 @@ export function ImageGallery(props: ImageGalleryProps) {
       title: '操作',
       render: (_, record) => (
         <Space>
-          {record.status === 'Pending' && <Button type="link">取消</Button>}
-          {record.status === 'Uploading' && <Button danger>中止</Button>}
-          {record.status === 'Error' && <Button type="link">重试</Button>}
-          {record.status === 'Done' && <Button type="link">查看大图</Button>}
+          {record.status === 'Pending' && <Link>取消</Link>}
+          {record.status === 'Uploading' && <Link type="danger" onClick={() => abortPhoto(record.file.uid)}>中止</Link>}
+          {record.status === 'Error' && <Link>重试</Link>}
+          {record.status === 'Done' && (
+              <Link type="danger">删除</Link>
+          )}
         </Space>
       ),
     },
@@ -147,7 +164,12 @@ export function ImageGallery(props: ImageGalleryProps) {
       <div
         style={{ height: 'calc(100% - 82px)', overflowY: 'auto' }}
       >
-        <Table rowKey={record => record.file.uid} dataSource={uploadPhotos} columns={columns} />
+        <Table 
+          rowKey={record => record.file.uid} 
+          dataSource={uploadPhotos} 
+          columns={columns}
+          scroll={{ y: 80 * 10}}
+        />
       </div>
     </>
   )
