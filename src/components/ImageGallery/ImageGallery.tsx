@@ -1,16 +1,15 @@
-import type { UploadProps } from 'antd'
-import type { TableProps } from 'antd/lib'
 import {
   ClearOutlined,
-  UploadOutlined,
 } from '@ant-design/icons'
-import { Button, Divider, Flex, message, Modal, Progress, Space, Image, Table, Tag, Upload, Typography } from 'antd'
-import { CameraIcon } from 'lucide-react'
-import { useEffect} from 'react'
-import { removeAllPhotos } from '@/apis/photo.ts'
-import { type UploadPhoto, type UploadStatus, uploadStore } from '@/store/uploadStore'
+import { Button, Divider, Empty, Flex, message, Modal, Space, Spin, Image, Card } from 'antd'
+import { UploadIcon } from 'lucide-react'
+import { getPhotosByOrderId, removeAllPhotos } from '@/apis/photo.ts'
+import { uploadStore } from '@/store/uploadStore'
+import { useEffect } from 'react'
+import useInfiniteScroll from '@/hooks/useInfiniteScroll'
+import type { GetPhotoListResult } from '@/types/photo'
 
-const { Link } = Typography
+const { Meta } = Card
 
 interface ImageGalleryProps {
   orderId: number
@@ -18,92 +17,17 @@ interface ImageGalleryProps {
 }
 
 export function ImageGallery(props: ImageGalleryProps) {
-  const { orderId, orderNumber } = props
-  const { createUploadOrder, getUploadPhotosByOrderId, startUpload, abortPhoto, createPreviewUrl } = uploadStore()
-
-  const uploadPhotos = getUploadPhotosByOrderId(String(orderId))?.photos || []
-
-  const columns: TableProps<UploadPhoto>['columns'] = [
+  const { orderId } = props
+  const { openTaskCenter } = uploadStore()
+  const { observerRef, hasMore, data, reload } = useInfiniteScroll<GetPhotoListResult>(
+    (page, pageSize) => getPhotosByOrderId({ orderId, current: page, pageSize }),
     {
-      title: '缩略图',
-      dataIndex: 'previewUrl',
-      render: (url, record) => {
-        return <Image 
-          src={url ? url : URL.createObjectURL(record.file)} 
-          width={80}
-          height={60} // 固定高度
-          style={{ objectFit: 'contain' }}
-        />
-      }
+      threshold: 0.5,
+      rootMargin: '0px 0px 100px 0px',
+      pageSize: 20,
     },
-    {
-      title: '照片名称',
-      dataIndex: ['file', 'name'],
-      render: (name: string) => name.split('.')[0],
-    },
-    {
-      title: '上传进度',
-      dataIndex: 'progress',
-      render: (progress: number) => (
-        <Progress
-          percent={progress}
-          percentPosition={{ align: 'center', type: 'inner' }}
-          strokeColor={
-            progress === 100 ? '#87d068' : { '0%': '#108ee9', '100%': '#87d068' }
-          }
-          showInfo={false}
-        />
-      ),
-      width: 150,
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      render: (status: UploadStatus) => {
-        switch (status) {
-          case 'Pending':
-            return <Tag color="default">待上传</Tag>
-          case 'Uploading':
-            return <Tag color="blue">上传中</Tag>
-          case 'Done':
-            return <Tag color="green">已完成</Tag>
-          case 'Error':
-            return <Tag color="red">上传失败</Tag>
-          case 'Abort':
-            return <Tag color="orange">已中止</Tag>
-        }
-      },
-    },
-    {
-      title: '操作',
-      render: (_, record) => (
-        <Space>
-          {record.status === 'Pending' && <Link>取消</Link>}
-          {record.status === 'Uploading' && <Link type="danger" onClick={() => abortPhoto(record.file.uid)}>中止</Link>}
-          {record.status === 'Error' && <Link>重试</Link>}
-          {record.status === 'Done' && (
-              <Link type="danger">删除</Link>
-          )}
-        </Space>
-      ),
-    },
-  ]
-
-  const uploadProps: UploadProps = {
-    multiple: true,
-    showUploadList: false,
-    beforeUpload: (file) => {
-      const isJPG = file.type === 'image/jpeg'
-      if (!isJPG) {
-        message.error(`${file.name} 不是 JPG 格式的文件`)
-      }
-      else {
-        createUploadOrder(String(orderId), orderNumber, file)
-      }
-
-      return false
-    },
-  }
+  )
+  
 
   // 清空所有照片
   async function handleRemoveAllPhoto() {
@@ -115,31 +39,14 @@ export function ImageGallery(props: ImageGalleryProps) {
       onOk: async () => {
         const { msg } = await removeAllPhotos(orderId)
         message.success(msg)
+        // 重新加载照片列表
+        reload()
       },
     })
   }
 
-  // 使用 SSE 实时接收照片上传完成事件
-  // 注意：此处的 URL 需要根据实际情况调整
   useEffect(() => {
-    const eventSource = new EventSource(`${import.meta.env.VITE_API_BASE_URL}/admin/photos/completions`)
-    eventSource.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      if (data.type === 'done') {
-        const { uid, orderNumber, ossUrlMedium, ossUrlThumbnail } = data
-        // setTaskOssUrl(orderNumber, uid, { ossUrlMedium, ossUrlThumbnail })
-      }
-    }
-
-    eventSource.onerror = (error) => {
-      console.log('sse error', error)
-      eventSource.close()
-    }
-
-    return () => {
-      eventSource.close()
-      console.log('sse关闭')
-    }
+    getPhotosByOrderId({ orderId, current: 1, pageSize: 50})
   }, [])
 
   return (
@@ -150,26 +57,50 @@ export function ImageGallery(props: ImageGalleryProps) {
         </Space>
         <Space>
           <Button
-            icon={<UploadOutlined />}
-            onClick={() => startUpload(String(orderId))}
+            type="primary"
+            icon={<UploadIcon size={16} />}
+            onClick={openTaskCenter}
           >
-            开始上传
+            创建上传任务
           </Button>
-          <Upload {...uploadProps}>
-            <Button type="primary" icon={<CameraIcon size={16} />}>上传照片</Button>
-          </Upload>
         </Space>
       </Flex>
       <Divider />
       <div
         style={{ height: 'calc(100% - 82px)', overflowY: 'auto' }}
       >
-        <Table 
-          rowKey={record => record.file.uid} 
-          dataSource={uploadPhotos} 
-          columns={columns}
-          scroll={{ y: 80 * 10}}
-        />
+        {
+          data.length === 0
+            ? <Empty description="暂无照片" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            : <Flex align='center' wrap gap={16}>
+              {
+                data.map(photo => (
+                  <Card
+                    key={photo.uid}
+                    hoverable
+                    style={{ width: 250 }}
+                    cover={
+                      <img height={250} style={{ objectFit: 'contain'}} draggable={false} src={photo.ossUrlThumbnail} alt={photo.name} />
+                    }
+                  >
+                    <Meta title={photo.name}  />
+                  </Card>
+                ))
+              }
+            </Flex>
+        }
+
+        <div style={{ textAlign: 'center', marginTop: '16px' }}>
+        {
+          hasMore
+            ? (
+                <div ref={observerRef}>
+                  <Spin size='large' />
+                </div>
+              )
+            : <span style={{ color: '#888' }}>没有更多了</span>
+        }
+      </div>
       </div>
     </>
   )

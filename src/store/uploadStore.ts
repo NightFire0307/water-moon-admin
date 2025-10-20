@@ -1,17 +1,19 @@
 import type { RcFile } from 'antd/es/upload'
+import { AxiosError } from 'axios'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { uploadPhoto } from '@/apis/photo'
-import { AxiosError } from 'axios'
 
 export type UploadStatus = 'Pending' | 'Uploading' | 'Done' | 'Error' | 'Abort'
 
 export interface UploadPhoto {
-  file: RcFile
+  uid: string
+  name: string
   status: UploadStatus
   progress: number
   retryCount: number
+  file?: RcFile
   previewUrl?: string // 预览图
   originalUrl?: string // 大图
   errorMsg?: string
@@ -27,6 +29,7 @@ interface UploadOrder {
 }
 
 interface UploadState {
+  visible: boolean // 上传面板可见性
   orderQueues: UploadOrder[]
   currentUploadOrder?: UploadOrder
   photoControllers: Record<string, AbortController>
@@ -34,19 +37,23 @@ interface UploadState {
 
 interface UploadActions {
   createUploadOrder: (orderId: string, orderName: string, file: RcFile) => void
-  getUploadPhotosByOrderId: (orderId: string) => UploadOrder
+  getUploadPhotosByOrderId: (orderId: string) => UploadPhoto[] | undefined
   startUpload: (orderId: string) => void
   abortPhoto: (photoId: string) => void
+  removePhoto: (orderId: string, photoId: string) => void
   updatePhotoProgress: (orderId: string, photoId: string, progress: number) => void
   updatePhotoSuccess: (orderId: string, photoId: string) => void
   updatePhotoError: (orderId: string, photoId: string, error: any) => void
   updatePhotoCancel: (orderId: string, photoId: string) => void
   updateAbortPhotoController: (photoId: string, controller: AbortController) => void
   clearAbortPhotoController: (photoId: string) => void
+  openTaskCenter: () => void
+  closeTaskCenter: () => void
 }
 
 export const uploadStore = create<UploadState & UploadActions>()(
   devtools(immer((set, get) => ({
+    visible: false,
     orderQueues: [],
     currentUploadOrder: undefined,
     photoControllers: {},
@@ -56,6 +63,8 @@ export const uploadStore = create<UploadState & UploadActions>()(
         if (orderQueue) {
           orderQueue.photos.push({
             file,
+            uid: file.uid,
+            name: file.name,
             status: 'Pending',
             progress: 0,
             retryCount: 0,
@@ -67,6 +76,8 @@ export const uploadStore = create<UploadState & UploadActions>()(
             orderName,
             photos: [{
               file,
+              uid: file.uid,
+              name: file.name,
               status: 'Pending',
               progress: 0,
               retryCount: 0,
@@ -81,7 +92,8 @@ export const uploadStore = create<UploadState & UploadActions>()(
     },
     getUploadPhotosByOrderId: (orderId: string) => {
       const { orderQueues } = get()
-      return orderQueues.find(order => order.orderId === orderId)!
+      const order = orderQueues.find(order => order.orderId === orderId)
+      return order?.photos
     },
     startUpload: (orderId: string) => {
       const {
@@ -90,7 +102,7 @@ export const uploadStore = create<UploadState & UploadActions>()(
         updatePhotoSuccess,
         updatePhotoError,
         updatePhotoCancel,
-        clearAbortPhotoController
+        clearAbortPhotoController,
       } = get()
       const orderQueue = orderQueues.find(order => order.orderId === orderId)
 
@@ -101,12 +113,16 @@ export const uploadStore = create<UploadState & UploadActions>()(
 
       // 上传成功回调
       const onSuccess = ({ file }: UploadPhoto) => {
+        if (!file)
+          return
         updatePhotoSuccess(orderId, file.uid)
         clearAbortPhotoController(file.uid)
       }
 
       // 上传失败回调
       const onError = (photo: UploadPhoto, error: any) => {
+        if (!photo.file)
+          return
         updatePhotoError(orderId, photo.file.uid, error)
         clearAbortPhotoController(photo.file.uid)
       }
@@ -124,15 +140,23 @@ export const uploadStore = create<UploadState & UploadActions>()(
           onProgress,
           onSuccess,
           onError,
-          onCancel
-        }
+          onCancel,
+        },
       )
     },
     abortPhoto: (photoId: string) => set((state) => {
+      // 如果已经开始上传，则调用中止控制器
       const controller = state.photoControllers[photoId]
       if (controller) {
         controller.abort()
         delete state.photoControllers[photoId]
+      }
+      return state
+    }),
+    removePhoto: (orderId: string, photoId: string) => set((state) => {
+      const orderQueue = state.orderQueues.find(order => order.orderId === orderId)
+      if (orderQueue) {
+        orderQueue.photos = orderQueue.photos.filter(p => p.uid !== photoId)
       }
       return state
     }),
@@ -141,7 +165,7 @@ export const uploadStore = create<UploadState & UploadActions>()(
       if (!orderQueue)
         return state
 
-      const photo = orderQueue.photos.find(p => p.file.uid === photoId)
+      const photo = orderQueue.photos.find(p => p.file?.uid === photoId)
       if (photo) {
         photo.status = 'Uploading'
         photo.progress = progress
@@ -154,10 +178,11 @@ export const uploadStore = create<UploadState & UploadActions>()(
       if (!orderQueue)
         return state
 
-      const photo = orderQueue.photos.find(p => p.file.uid === photoId)
+      const photo = orderQueue.photos.find(p => p.file?.uid === photoId)
       if (photo) {
         photo.status = 'Done'
         photo.progress = 100
+        photo.file = undefined // 上传成功后释放文件对象
       }
 
       // 更新订单整体进度
@@ -172,11 +197,12 @@ export const uploadStore = create<UploadState & UploadActions>()(
       if (!orderQueue)
         return state
 
-      const photo = orderQueue.photos.find(p => p.file.uid === photoId)
+      const photo = orderQueue.photos.find(p => p.file?.uid === photoId)
       if (photo) {
         photo.progress = 0
         photo.status = 'Error'
         photo.errorMsg = error?.message || '上传失败'
+        photo.file = undefined // 上传失败后释放文件对象
       }
 
       return state
@@ -200,7 +226,19 @@ export const uploadStore = create<UploadState & UploadActions>()(
     clearAbortPhotoController: (photoId: string) => set((state) => {
       delete state.photoControllers[photoId]
       return state
-    })
+    }),
+    openTaskCenter: () => {
+      set((state) => {
+        state.visible = true
+        return state
+      })
+    },
+    closeTaskCenter: () => {
+      set((state) => {
+        state.visible = false
+        return state
+      })
+    },
   })), { name: 'upload-store' }),
 )
 
@@ -249,7 +287,7 @@ async function uploadFile(
       // 启动下一个任务
       function next() {
         if (completed + failed === total) {
-          resolve(tasks)
+          resolve({ total, completed, failed })
           return
         }
 
@@ -265,9 +303,19 @@ async function uploadFile(
               next()
             })
             .catch(() => {
-              failed += 1
-              console.log('任务失败数:', failed)
-              next()
+              console.error('任务失败，准备重试')
+              // 尝试重试
+              uploadWithRetry(task)
+                .then(() => {
+                  completed += 1
+                })
+                .catch(() => {
+                  failed += 1
+                })
+                .finally(() => {
+                  active -= 1
+                  next()
+                })
             })
             .finally(() => {
               active -= 1
@@ -280,49 +328,88 @@ async function uploadFile(
     })
   }
 
+  // 重试上传
+  function uploadWithRetry(task: () => Promise<void>, maxRetry: number = 3) {
+    let attempt = 1
+
+    async function retryUpload() {
+      try {
+        await task()
+      }
+      catch {
+        if (attempt < maxRetry) {
+          console.info(`上传失败，正在进行第 ${attempt} 次重试...`)
+          attempt++
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt)) // 指数退避等待
+          return retryUpload()
+        }
+        else {
+          throw new Error('达到最大重试次数，上传失败')
+        }
+      }
+    }
+
+    return retryUpload()
+  }
+
   const photoBatches = batchPhotos(photos)
   for (const batch of photoBatches) {
     // 创建上传任务
-    const uploadTasks = batch.map((photo) => {
-      return () => {
-        return new Promise((resolve) => {
-          const controller = new AbortController()
-          uploadStore.getState().updateAbortPhotoController(photo.file.uid, controller)
+    const uploadTasks = batch
+      .filter(photo => photo.status === 'Pending') // 只上传待上传状态的照片
+      .map((photo) => {
+        return () => {
+          return new Promise((resolve, reject) => {
+            if (!photo.file) {
+              reject(new Error('文件不存在'))
+              return
+            }
 
-          const formData = new FormData() // 创建表单数据
-          formData.append('file', photo.file)
-          formData.append('uid', photo.file.uid)
+            const controller = new AbortController()
+            uploadStore.getState().updateAbortPhotoController(photo.file.uid, controller)
 
-          uploadPhoto(orderId, formData, {
-            timeout: 60000, // 60秒超时
-            onUploadProgress: (progressEvent) => {
-              const percent = Math.round((progressEvent.loaded / progressEvent.total!) * 100)
-              onProgress?.(photo.file.uid, percent)
-            },
-            signal: controller.signal,
-          })
-            .then(() => {
-              resolve(photo)
-              onSuccess?.(photo)
+            const formData = new FormData() // 创建表单数据
+            formData.append('file', photo.file)
+            formData.append('uid', photo.file.uid)
+
+            uploadPhoto(orderId, formData, {
+              timeout: 60000, // 60秒超时
+              onUploadProgress: (progressEvent) => {
+                const percent = Math.round((progressEvent.loaded / progressEvent.total!) * 100)
+                onProgress?.(photo.file.uid, percent)
+              },
+              signal: controller.signal,
             })
-            .catch((error) => {
-              if (error instanceof AxiosError) {
-                if (error.code === 'ERR_CANCELED') {
-                  console.info('单张照片上传已中止:', photo.file.uid)
-                  onCancel?.(photo.file.uid)
-                  resolve(photo)
+              .then(() => {
+                resolve(photo)
+                onSuccess?.(photo)
+              })
+              .catch((error) => {
+                if (error instanceof AxiosError) {
+                  if (error.code === 'ERR_CANCELED') {
+                    console.info('单张照片上传已中止:', photo.file.uid)
+                    onCancel?.(photo.file.uid)
+                    resolve(photo)
+                  }
+
+                  if (error.code === 'ERR_NETWORK') {
+                    console.error('单张照片上传网络错误:', photo.file.uid)
+                    reject(error)
+                  }
+                  resolve(error)
                 }
-              } else {
-                console.error('单张照片上传失败:', photo.file.uid, error)
-                resolve(error)
-                onError?.(photo, error)
-              }
-            })
-        })
-      }
-    })
+                else {
+                  console.error('单张照片上传失败:', photo.file.uid, error)
+                  resolve(error)
+                  onError?.(photo, error)
+                }
+              })
+          })
+        }
+      })
 
     // 执行上传任务，限制并发数
-    await runWithConcurrencyLimit(uploadTasks)
+    const batchResult = runWithConcurrencyLimit(uploadTasks)
+    console.log('本批次上传结果:', await batchResult)
   }
 }

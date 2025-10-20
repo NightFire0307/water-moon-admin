@@ -51,7 +51,7 @@ export function PhotoMgrModal(props: PhotoMgrProps) {
       styles={{
         body: { overflow: 'hidden' },
       }}
-      destroyOnClose
+      destroyOnHidden
     >
       <ImageGallery orderId={orderId} orderNumber={orderNumber} />
     </Drawer>

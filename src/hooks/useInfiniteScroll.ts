@@ -61,6 +61,13 @@ function useInfiniteScroll<T>(
     }
   }
 
+  // 重新加载
+  const reload = () => {
+    setData([])
+    setPage(1)
+    setHasMore(true)
+  }
+
   // 设置交叉侦听器
   useEffect(() => {
     if (observerRef.current === null)
@@ -92,6 +99,7 @@ function useInfiniteScroll<T>(
     setPage,
     hasMore,
     loadMore,
+    reload,
     observerRef,
   }
 }
