@@ -1,13 +1,13 @@
+import type { GetPhotoListResult } from '@/types/photo'
 import {
   ClearOutlined,
 } from '@ant-design/icons'
-import { Button, Divider, Empty, Flex, message, Modal, Space, Spin, Image, Card } from 'antd'
+import { Button, Card, Divider, Empty, Flex, message, Modal, Space, Spin } from 'antd'
 import { UploadIcon } from 'lucide-react'
-import { getPhotosByOrderId, removeAllPhotos } from '@/apis/photo.ts'
-import { uploadStore } from '@/store/uploadStore'
 import { useEffect } from 'react'
+import { getPhotosByOrderId, removeAllPhotos } from '@/apis/photo.ts'
 import useInfiniteScroll from '@/hooks/useInfiniteScroll'
-import type { GetPhotoListResult } from '@/types/photo'
+import { uploadStore } from '@/store/uploadStore'
 
 const { Meta } = Card
 
@@ -27,7 +27,6 @@ export function ImageGallery(props: ImageGalleryProps) {
       pageSize: 20,
     },
   )
-  
 
   // 清空所有照片
   async function handleRemoveAllPhoto() {
@@ -46,7 +45,7 @@ export function ImageGallery(props: ImageGalleryProps) {
   }
 
   useEffect(() => {
-    getPhotosByOrderId({ orderId, current: 1, pageSize: 50})
+    getPhotosByOrderId({ orderId, current: 1, pageSize: 50 })
   }, [])
 
   return (
@@ -72,35 +71,47 @@ export function ImageGallery(props: ImageGalleryProps) {
         {
           data.length === 0
             ? <Empty description="暂无照片" image={Empty.PRESENTED_IMAGE_SIMPLE} />
-            : <Flex align='center' wrap gap={16}>
-              {
-                data.map(photo => (
-                  <Card
-                    key={photo.uid}
-                    hoverable
-                    style={{ width: 250 }}
-                    cover={
-                      <img height={250} style={{ objectFit: 'contain'}} draggable={false} src={photo.ossUrlThumbnail} alt={photo.name} />
-                    }
-                  >
-                    <Meta title={photo.name}  />
-                  </Card>
-                ))
-              }
-            </Flex>
+            : (
+                <Flex align="center" wrap gap={16}>
+                  {
+                    data.map(photo => (
+                      <Card
+                        key={photo.id}
+                        hoverable
+                        style={{ width: 240 }}
+                        cover={(
+                          <img
+                            style={{ height: 200, maxHeight: 240, objectFit: 'contain' }}
+                            draggable={false}
+                            src={photo.ossUrlThumbnail}
+                            alt={photo.name}
+                          />
+                        )}
+                        styles={{
+                          body: {
+                            padding: '12px',
+                          },
+                        }}
+                      >
+                        <Meta title={photo.name} style={{ textAlign: 'center' }} />
+                      </Card>
+                    ))
+                  }
+                </Flex>
+              )
         }
 
         <div style={{ textAlign: 'center', marginTop: '16px' }}>
-        {
-          hasMore
-            ? (
-                <div ref={observerRef}>
-                  <Spin size='large' />
-                </div>
-              )
-            : <span style={{ color: '#888' }}>没有更多了</span>
-        }
-      </div>
+          {
+            hasMore
+              ? (
+                  <div ref={observerRef}>
+                    <Spin size="large" />
+                  </div>
+                )
+              : <span style={{ color: '#888' }}>没有更多了</span>
+          }
+        </div>
       </div>
     </>
   )
