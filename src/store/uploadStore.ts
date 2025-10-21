@@ -3,7 +3,7 @@ import { AxiosError } from 'axios'
 import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
-import { uploadPhoto } from '@/apis/photo'
+import { notifyUploadComplete, uploadPhoto } from '@/apis/photo'
 
 export type UploadStatus = 'Pending' | 'Uploading' | 'Done' | 'Error' | 'Abort'
 
@@ -22,7 +22,7 @@ export interface UploadPhoto {
 interface UploadOrder {
   orderId: string
   orderName: string
-  photos: UploadPhoto[]
+  photos: UploadPhoto[] // 照片级上传队列
   status: UploadStatus
   progress: number
   errorMsg?: string
@@ -30,15 +30,17 @@ interface UploadOrder {
 
 interface UploadState {
   visible: boolean // 上传面板可见性
-  orderQueues: UploadOrder[]
-  currentUploadOrder?: UploadOrder
+  uploading: boolean // 是否有正在上传的任务
+  orderQueues: UploadOrder[] // 订单级队列
+  pendingOrderIds: string[] // 待上传订单ID列表
+  uploadingOrderId: string | null // 当前正在上传的订单ID
   photoControllers: Record<string, AbortController>
 }
 
 interface UploadActions {
   createUploadOrder: (orderId: string, orderName: string, file: RcFile) => void
   getUploadPhotosByOrderId: (orderId: string) => UploadPhoto[] | undefined
-  startUpload: (orderId: string) => void
+  _startUpload: (orderId: string) => void
   abortPhoto: (photoId: string) => void
   removePhoto: (orderId: string, photoId: string) => void
   updatePhotoProgress: (orderId: string, photoId: string, progress: number) => void
@@ -49,13 +51,18 @@ interface UploadActions {
   clearAbortPhotoController: (photoId: string) => void
   openTaskCenter: () => void
   closeTaskCenter: () => void
+  setUploading: (val: boolean) => void
+  addQueueOrder: (orderId: string) => void // 将订单加入待上传队列
+  startNextOrderUpload: () => void // 开始下一个订单的上传
 }
 
 export const uploadStore = create<UploadState & UploadActions>()(
   devtools(immer((set, get) => ({
     visible: false,
+    uploading: false,
     orderQueues: [],
-    currentUploadOrder: undefined,
+    pendingOrderIds: [],
+    uploadingOrderId: null,
     photoControllers: {},
     createUploadOrder: (orderId: string, orderName: string, file: RcFile) => {
       set((state) => {
@@ -95,7 +102,7 @@ export const uploadStore = create<UploadState & UploadActions>()(
       const order = orderQueues.find(order => order.orderId === orderId)
       return order?.photos
     },
-    startUpload: (orderId: string) => {
+    _startUpload: (orderId: string) => {
       const {
         orderQueues,
         updatePhotoProgress,
@@ -143,6 +150,11 @@ export const uploadStore = create<UploadState & UploadActions>()(
           onCancel,
         },
       )
+
+      set((state) => {
+        state.uploading = true
+        return state
+      })
     },
     abortPhoto: (photoId: string) => set((state) => {
       // 如果已经开始上传，则调用中止控制器
@@ -239,6 +251,38 @@ export const uploadStore = create<UploadState & UploadActions>()(
         return state
       })
     },
+    setUploading: val => set((state) => {
+      state.uploading = val
+      return state
+    }),
+    addQueueOrder: (orderId: string) => {
+      set((state) => {
+        if (!state.pendingOrderIds.includes(orderId)) {
+          state.pendingOrderIds.push(orderId)
+        }
+
+        // 如果没有正在上传的订单，立即开始上传
+        if (state.uploadingOrderId === null) {
+          get().startNextOrderUpload()
+        }
+
+        return state
+      })
+    },
+    startNextOrderUpload: () => {
+      set((state) => {
+        if (state.pendingOrderIds.length === 0) {
+          state.uploading = false
+          state.uploadingOrderId = null
+          return state
+        }
+
+        const nextOrderId = state.pendingOrderIds.shift()!
+        state.uploadingOrderId = nextOrderId
+        get()._startUpload(nextOrderId)
+        return state
+      })
+    },
   })), { name: 'upload-store' }),
 )
 
@@ -255,6 +299,7 @@ async function uploadFile(
   options?: UploadOptions,
 ) {
   const { onProgress, onSuccess, onError, onCancel } = options || {}
+  const batchResult = { total: photos.length, completed: 0, failed: 0 }
 
   /**
    * 将照片列表分批
@@ -274,9 +319,9 @@ async function uploadFile(
    * 限制并发执行的任务
    * @param tasks 任务列表
    * @param limit 最大并发数
-   * @returns Promise<void>
+   * @returns Promise<{ total: number; completed: number; failed: number }>
    */
-  function runWithConcurrencyLimit(tasks: (() => Promise<void>)[], limit: number = 2) {
+  function runWithConcurrencyLimit(tasks: (() => Promise<void>)[], limit: number = 2): Promise<{ total: number, completed: number, failed: number }> {
     return new Promise((resolve) => {
       let active = 0 // 当前活跃的任务数
       let index = 0 // 当前任务索引
@@ -409,7 +454,18 @@ async function uploadFile(
       })
 
     // 执行上传任务，限制并发数
-    const batchResult = runWithConcurrencyLimit(uploadTasks)
-    console.log('本批次上传结果:', await batchResult)
+    const { completed, failed } = await runWithConcurrencyLimit(uploadTasks)
+
+    batchResult.completed += completed
+    batchResult.failed += failed
+  }
+
+  // 判断整体上传结果
+  if (batchResult.completed + batchResult.failed === batchResult.total) {
+    // 通知服务器所有照片上传完成
+    await notifyUploadComplete(orderId)
+
+    // 调度下一个订单上传
+    uploadStore.getState().startNextOrderUpload()
   }
 }
