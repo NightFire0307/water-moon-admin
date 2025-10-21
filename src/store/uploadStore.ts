@@ -54,6 +54,7 @@ interface UploadActions {
   setUploading: (val: boolean) => void
   addQueueOrder: (orderId: string) => void // 将订单加入待上传队列
   startNextOrderUpload: () => void // 开始下一个订单的上传
+  clearOrderPhotoQueue: (orderId: string) => void // 清空订单下所有上传队列
 }
 
 export const uploadStore = create<UploadState & UploadActions>()(
@@ -261,13 +262,13 @@ export const uploadStore = create<UploadState & UploadActions>()(
           state.pendingOrderIds.push(orderId)
         }
 
-        // 如果没有正在上传的订单，立即开始上传
-        if (state.uploadingOrderId === null) {
-          get().startNextOrderUpload()
-        }
-
         return state
       })
+
+      // 如果没有正在上传的订单，立即开始上传
+      if (get().uploadingOrderId === null) {
+        get().startNextOrderUpload()
+      }
     },
     startNextOrderUpload: () => {
       set((state) => {
@@ -280,6 +281,16 @@ export const uploadStore = create<UploadState & UploadActions>()(
         const nextOrderId = state.pendingOrderIds.shift()!
         state.uploadingOrderId = nextOrderId
         get()._startUpload(nextOrderId)
+        return state
+      })
+    },
+    clearOrderPhotoQueue: (orderId) => {
+      set((state) => {
+        const orderQueue = state.orderQueues.find(order => order.orderId === orderId)
+        if (orderQueue) {
+          orderQueue.photos.length = 0
+        }
+
         return state
       })
     },

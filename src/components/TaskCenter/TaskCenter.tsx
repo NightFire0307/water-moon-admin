@@ -8,7 +8,7 @@ const { Link } = Typography
 
 export function TaskCenter() {
   const { orderNumber, id } = useOrderInfoContext()
-  const { visible, createUploadOrder, startUpload, removePhoto, closeTaskCenter } = uploadStore()
+  const { visible, createUploadOrder, addQueueOrder, removePhoto, closeTaskCenter } = uploadStore()
   const uploadPhotos = uploadStore(
     state => state.getUploadPhotosByOrderId(String(id)),
   )
@@ -102,7 +102,7 @@ export function TaskCenter() {
       <Space>
         <Button
           icon={<CloudUploadIcon size={16} />}
-          onClick={() => startUpload(String(id))}
+          onClick={() => addQueueOrder(String(id))}
         >
           开始上传
         </Button>

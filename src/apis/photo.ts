@@ -57,7 +57,7 @@ export function uploadPhoto(orderId: string, data: any, config?: AxiosRequestCon
 }
 
 // 通知服务端照片上传完成
-export function notifyUploadComplete(orderId: number) {
+export function notifyUploadComplete(orderId: string | number) {
   return request({
     url: `/admin/photos/upload/commit/${orderId}`,
     method: 'post',

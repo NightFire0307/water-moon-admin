@@ -74,14 +74,14 @@ export function ImageGallery(props: ImageGalleryProps) {
             : (
                 <Flex align="center" wrap gap={16}>
                   {
-                    data.map(photo => (
+                    data.map((photo, index) => (
                       <Card
                         key={photo.id}
                         hoverable
                         style={{ width: 240 }}
                         cover={(
                           <img
-                            style={{ height: 200, maxHeight: 240, objectFit: 'contain' }}
+                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
                             draggable={false}
                             src={photo.ossUrlThumbnail}
                             alt={photo.name}
@@ -93,7 +93,7 @@ export function ImageGallery(props: ImageGalleryProps) {
                           },
                         }}
                       >
-                        <Meta title={photo.name} style={{ textAlign: 'center' }} />
+                        <Meta title={photo.name} description={`${index + 1}`} style={{ textAlign: 'center' }} />
                       </Card>
                     ))
                   }
