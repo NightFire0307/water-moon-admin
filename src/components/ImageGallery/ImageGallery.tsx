@@ -1,13 +1,14 @@
 import type { GetPhotoListResult } from '@/types/photo'
 import {
   ClearOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons'
 import { Button, Card, Divider, Empty, Flex, message, Modal, Space, Spin } from 'antd'
 import { UploadIcon } from 'lucide-react'
-import { useEffect } from 'react'
 import { getPhotosByOrderId, removeAllPhotos } from '@/apis/photo.ts'
 import useInfiniteScroll from '@/hooks/useInfiniteScroll'
 import { uploadStore } from '@/store/uploadStore'
+import styles from './ImageGallery.module.less'
 
 const { Meta } = Card
 
@@ -44,10 +45,6 @@ export function ImageGallery(props: ImageGalleryProps) {
     })
   }
 
-  useEffect(() => {
-    getPhotosByOrderId({ orderId, current: 1, pageSize: 50 })
-  }, [])
-
   return (
     <>
       <Flex justify="space-between">
@@ -55,6 +52,7 @@ export function ImageGallery(props: ImageGalleryProps) {
           <Button icon={<ClearOutlined />} onClick={handleRemoveAllPhoto} danger>清空所有照片</Button>
         </Space>
         <Space>
+          <Button icon={<ReloadOutlined />} onClick={() => reload()}>刷新照片</Button>
           <Button
             type="primary"
             icon={<UploadIcon size={16} />}
@@ -65,9 +63,7 @@ export function ImageGallery(props: ImageGalleryProps) {
         </Space>
       </Flex>
       <Divider />
-      <div
-        style={{ height: 'calc(100% - 82px)', overflowY: 'auto' }}
-      >
+      <div className={styles['gallery-container']}>
         {
           data.length === 0
             ? <Empty description="暂无照片" image={Empty.PRESENTED_IMAGE_SIMPLE} />
@@ -78,22 +74,42 @@ export function ImageGallery(props: ImageGalleryProps) {
                       <Card
                         key={photo.id}
                         hoverable
-                        style={{ width: 240 }}
+                        style={{
+                          width: 260,
+                        }}
                         cover={(
-                          <img
-                            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                            draggable={false}
-                            src={photo.ossUrlThumbnail}
-                            alt={photo.name}
-                          />
+                          <div className={styles['img-preview']}>
+                            <img
+                              draggable={false}
+                              src={photo.ossUrlThumbnail}
+                              alt={photo.name}
+                            />
+                          </div>
                         )}
                         styles={{
                           body: {
-                            padding: '12px',
+                            padding: '16px',
+                            background: '#fafafa',
                           },
                         }}
                       >
-                        <Meta title={photo.name} description={`${index + 1}`} style={{ textAlign: 'center' }} />
+                        <Meta
+                          title={(
+                            <div className={styles['card-title']}>
+                              {photo.name}
+                            </div>
+                          )}
+                          description={(
+                            <div className={styles['card-description']}>
+                              第
+                              {' '}
+                              {index + 1}
+                              {' '}
+                              张
+                            </div>
+                          )}
+                          style={{ textAlign: 'center' }}
+                        />
                       </Card>
                     ))
                   }
@@ -101,7 +117,7 @@ export function ImageGallery(props: ImageGalleryProps) {
               )
         }
 
-        <div style={{ textAlign: 'center', marginTop: '16px' }}>
+        <div className={styles['loading-container']}>
           {
             hasMore
               ? (
@@ -109,7 +125,7 @@ export function ImageGallery(props: ImageGalleryProps) {
                     <Spin size="large" />
                   </div>
                 )
-              : <span style={{ color: '#888' }}>没有更多了</span>
+              : <span className={styles['no-more']}>没有更多了</span>
           }
         </div>
       </div>
