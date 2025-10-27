@@ -1,6 +1,10 @@
 import type { TableColumnProps } from 'antd'
 import type { AnyObject } from 'antd/es/_util/type'
+import { ExclamationCircleOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
+import { Badge, Button, Checkbox, Divider, Flex, message, Modal, Table, Tag, Tooltip } from 'antd'
+import { useEffect, useRef, useState } from 'react'
 import { getOrderDetailById, getOrderList, removeOrder, resetOrderStatus } from '@/apis/order.ts'
+import { TaskCenter } from '@/components/TaskCenter/TaskCenter'
 import { OrderInfoContext } from '@/contexts/OrderInfoContext'
 import { useFetch } from '@/hooks/useFetch'
 import usePagination from '@/hooks/usePagination.ts'
@@ -11,9 +15,6 @@ import { OrderModalForm } from '@/views/Order/components/forms/OrderModalForm.ts
 import { OrderQueryForm } from '@/views/Order/components/forms/OrderQueryForm.tsx'
 import { OrderDetail } from '@/views/Order/components/OrderDetail'
 import { PhotoMgrModal } from '@/views/Order/components/PhotoMgrModal'
-import { ExclamationCircleOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
-import { Badge, Button, Checkbox, Divider, Flex, message, Modal, Table, Tag, Tooltip } from 'antd'
-import { useEffect, useRef, useState } from 'react'
 import { PDFViewer } from '../../components/PdfExport/PdfViewer'
 import PhotoReviewResult from './components/PhotoReviewResult'
 import { ShareLinkModal } from './components/sharing/ShareLinkModal'
@@ -211,14 +212,6 @@ export function Order() {
         pagination={pagination}
       />
 
-      {/* <FloatButton */}
-      {/*  shape="square" */}
-      {/*  tooltip="任务中心" */}
-      {/*  badge={{ count: Object.values(pendingCount).reduce((acc, count) => acc + count, 0), color: 'red' }} */}
-      {/*  style={{ zIndex: 1001 }} */}
-      {/*  onClick={() => setTaskCenterOpen(true)} */}
-      {/* /> */}
-
       <OrderModalForm
         open={orderModal.open}
         mode={orderModal.mode}
@@ -236,7 +229,9 @@ export function Order() {
         <ShareLinkModal open={shareLinkMgrOpen} onClose={() => setShareLinkMgrOpen(false)} />
         <PhotoReviewResult open={photoReviewOpen} onClose={() => setPhotoReviewOpen(false)} />
         <PDFViewer open={pdfExportOpen} onClose={() => setPdfExportOpen(false)} />
+        <TaskCenter />
       </OrderInfoContext.Provider>
+
     </div>
   )
 }

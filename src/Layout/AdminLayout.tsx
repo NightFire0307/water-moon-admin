@@ -1,7 +1,4 @@
 import type { MenuProps } from 'antd'
-import PanelLeftClose from '@/assets/icons/panel-left-close.svg?react'
-import PanelLeftOpen from '@/assets/icons/panel-left-open.svg?react'
-import UserMenu from '@/components/UserMenu/UserMenu.tsx'
 import {
   DashboardOutlined,
   SafetyCertificateOutlined,
@@ -12,6 +9,10 @@ import {
 import { Breadcrumb, Button, Flex, Layout, Menu } from 'antd'
 import { useEffect, useState } from 'react'
 import { Outlet, useMatches, useNavigate } from 'react-router-dom'
+import PanelLeftClose from '@/assets/icons/panel-left-close.svg?react'
+import PanelLeftOpen from '@/assets/icons/panel-left-open.svg?react'
+import { TaskCenter } from '@/components/TaskCenter/TaskCenter'
+import UserMenu from '@/components/UserMenu/UserMenu.tsx'
 import styles from './AdminLayout.module.less'
 
 type MenuItem = Required<MenuProps>['items'][number]

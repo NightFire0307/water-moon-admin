@@ -1,10 +1,10 @@
 import type { GetProp, UploadProps } from 'antd'
 import type { AxiosRequestConfig } from 'axios'
-import { notifyUploadComplete } from '@/apis/photo.ts'
-import request from '@/utils/request.ts'
 import { cloneDeep } from 'lodash-es'
 import { create } from 'zustand'
 import { devtools, subscribeWithSelector } from 'zustand/middleware'
+import { notifyUploadComplete } from '@/apis/photo.ts'
+import request from '@/utils/request.ts'
 
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0]
 

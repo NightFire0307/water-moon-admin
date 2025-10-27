@@ -1,9 +1,9 @@
+import { Drawer } from 'antd'
+import { useEffect, useState } from 'react'
 import { getOrderDetailById } from '@/apis/order.ts'
 import { ImageGallery } from '@/components/ImageGallery/ImageGallery.tsx'
 import { useOrderInfoContext } from '@/contexts/OrderInfoContext'
 import { useMinioUpload } from '@/store/useMinioUpload.ts'
-import { Drawer } from 'antd'
-import { useEffect, useState } from 'react'
 
 interface PhotoMgrProps {
   open: boolean
@@ -51,7 +51,7 @@ export function PhotoMgrModal(props: PhotoMgrProps) {
       styles={{
         body: { overflow: 'hidden' },
       }}
-      destroyOnClose
+      destroyOnHidden
     >
       <ImageGallery orderId={orderId} orderNumber={orderNumber} />
     </Drawer>
