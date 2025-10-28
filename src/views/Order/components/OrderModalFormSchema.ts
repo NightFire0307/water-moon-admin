@@ -15,8 +15,10 @@ export const getOrderModalFormSchema = (params: Params): FormSchema[] => {
       },
       fieldName: 'orderNumber',
       label: '订单号',
-      required: true,
       disabled: mode === 'edit',
+      rules: [
+        { required: true, message: '请输入订单号' }
+      ]
     },
     {
       component: 'Input',
@@ -25,8 +27,10 @@ export const getOrderModalFormSchema = (params: Params): FormSchema[] => {
       },
       fieldName: 'customerName',
       label: '客户姓名',
-      required: true,
       disabled: mode === 'edit',
+      rules: [
+        { required: true, message: '请输入客户姓名' }
+      ]
     },
     {
       component: 'Input',
