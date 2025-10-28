@@ -1,5 +1,11 @@
+import { useImperativeHandle } from 'react'
 import type { ActionButtonOptions, FormSchema } from './types'
-import { Button, Form, type FormProps, Input, Select, Space } from 'antd'
+import { Button, Form, type FormProps, Input, InputNumber, Radio, Select, Space } from 'antd'
+
+export interface BasicFormRef {
+  validate: () => Promise<void>
+  getValues: () => Record<string, any>
+}
 
 export interface BasicFormProps {
   schema: FormSchema[]
@@ -8,6 +14,8 @@ export interface BasicFormProps {
   handleSubmit?: (values: Record<string, any>) => void
   resetButtonOptions?: ActionButtonOptions
   submitButtonOptions?: ActionButtonOptions
+  showDefaultButtons?: boolean // 是否显示默认的重置和提交按钮，默认为 true
+  ref?: React.Ref<BasicFormRef>
 }
 
 export function BasicForm(props: BasicFormProps) {
@@ -18,8 +26,15 @@ export function BasicForm(props: BasicFormProps) {
     handleSubmit,
     resetButtonOptions,
     submitButtonOptions,
+    showDefaultButtons = true,
+    ref
   } = props
   const [form] = Form.useForm()
+
+  useImperativeHandle(ref, () => ({
+    validate: () => form.validateFields(),
+    getValues: () => form.getFieldsValue(),
+  }))
 
   return (
     <Form
@@ -35,15 +50,26 @@ export function BasicForm(props: BasicFormProps) {
             label={item.label}
             name={item.fieldName}
             required={item.required}
+            rules={item.rules}
           >
             {
               item.component === 'Input' && (
-                <Input {...item.componentProps} />
+                <Input {...item.componentProps} disabled={item.disabled} />
               )
             }
             {
               item.component === 'Select' && (
-                <Select {...item.componentProps} />
+                <Select {...item.componentProps} disabled={item.disabled} />
+              )
+            }
+            {
+              item.component === 'InputNumber' && (
+                <InputNumber {...item.componentProps} disabled={item.disabled} />
+              )
+            }
+            {
+              item.component === 'RadioGroup' && (
+                <Radio.Group {...item.componentProps} disabled={item.disabled} />
               )
             }
           </Form.Item>
@@ -51,31 +77,35 @@ export function BasicForm(props: BasicFormProps) {
       }
 
       {/* 操作按钮部分 */}
-      <Space>
-        {
-          resetButtonOptions?.show !== false && (
-            <Button
-              disabled={resetButtonOptions?.disabled}
-              loading={resetButtonOptions?.loading}
-              onClick={() => form.resetFields()}
-            >
-              { resetButtonOptions?.content || '重置' }
-            </Button>
-          )
-        }
-        {
-          submitButtonOptions?.show !== false && (
-            <Button
-              type="primary"
-              disabled={submitButtonOptions?.disabled}
-              loading={submitButtonOptions?.loading}
-              htmlType="submit"
-            >
-              { submitButtonOptions?.content || '提交' }
-            </Button>
-          )
-        }
-      </Space>
+      {
+        showDefaultButtons && (
+          <Space>
+            {
+              resetButtonOptions?.show !== false && (
+                <Button
+                  disabled={resetButtonOptions?.disabled}
+                  loading={resetButtonOptions?.loading}
+                  onClick={() => form.resetFields()}
+                >
+                  { resetButtonOptions?.content || '重置' }
+                </Button>
+              )
+            }
+            {
+              submitButtonOptions?.show !== false && (
+                <Button
+                  type="primary"
+                  disabled={submitButtonOptions?.disabled}
+                  loading={submitButtonOptions?.loading}
+                  htmlType="submit"
+                >
+                  { submitButtonOptions?.content || '提交' }
+                </Button>
+              )
+            }
+          </Space>
+        )
+      }
     </Form>
   )
 }

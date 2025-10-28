@@ -5,14 +5,16 @@ import type { IOrderDetail } from '@/types/order'
 import type { IPackage } from '@/types/package'
 import type { IProduct } from '@/types/product'
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Card, Col, Divider, Flex, Form, Input, InputNumber, message, Modal, Popconfirm, Radio, Row, Select, Table } from 'antd'
-import { useForm } from 'antd/es/form/Form'
+import { Button, Card, Col, Divider, Flex, Form, InputNumber, message, Modal, Popconfirm, Row, Select, Table } from 'antd'
 import dayjs from 'dayjs'
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { createOrder, updateOrder } from '@/apis/order'
 import { getPackageList } from '@/apis/package'
 import { getProductList } from '@/apis/product'
 import IconTrash from '@/assets/icons/trash.svg?react'
+import { BasicForm } from '@/components/BasicForm'
+import { getOrderModalFormSchema } from './orderModalFormSchema'
+import type { BasicFormRef } from '@/components/BasicForm/BasicForm'
 
 // 获取 Form 实例类型
 type FormInstance<T> = GetRef<typeof Form<T>>
@@ -106,7 +108,11 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
   const [selectedCount, setSelectedCount] = useState<number>(1)
   const [dataSource, setDataSource] = useState<Item[]>([])
   const [confirmLoading, setConfirmLoading] = useState(false)
-  const [form] = useForm()
+  const basicFormRef = useRef<BasicFormRef>(null)
+
+  const formSchema = useMemo(() => {
+    return getOrderModalFormSchema({ mode })
+  }, [mode])
 
   const handleSave = (row: Item) => {
     const newData = [...dataSource]
@@ -224,8 +230,8 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
   async function handleOk() {
     setConfirmLoading(true)
     try {
-      await form.validateFields()
-      const values = form.getFieldsValue()
+      await basicFormRef.current?.validate()
+      const values = basicFormRef.current?.getValues()
 
       // 检查是否添加产品
       if (dataSource.length === 0) {
@@ -267,7 +273,7 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
 
   function handleCancel() {
     onClose()
-    form.resetFields()
+    basicFormRef.current?.getValues()
     setDataSource([])
     setSelectedProduct(undefined)
     setSelectedCount(1)
@@ -281,7 +287,7 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
     }
 
     if (mode === 'edit' && initialValues) {
-      form.setFieldsValue(initialValues)
+      basicFormRef.current?.getValues()
 
       setDataSource(initialValues.orderProducts?.map((item, index) => ({
         key: index,
@@ -303,74 +309,14 @@ export function OrderModalForm(props: Readonly<OrderModalFormProps>) {
       onOk={handleOk}
       onCancel={handleCancel}
     >
-      <Form
-        form={form}
-        layout="vertical"
+
+      <BasicForm
+        ref={basicFormRef}
+        schema={formSchema}
         initialValues={{ maxSelectPhotos: 1, extraPhotoPrice: 100, validUntil: 7 }}
-      >
-        <Row gutter={16}>
-          <Col span={8}>
-            <Form.Item name="orderNumber" label="订单号" required>
-              <Input placeholder="请输入订单号" disabled={mode === 'edit'} />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item name="customerName" label="客户姓名" required>
-              <Input placeholder="请输入客户姓名" disabled={mode === 'edit'} />
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item
-              name="customerPhone"
-              label="客户手机"
-              rules={[
-                {
-                  required: true,
-                  message: '请输入客户手机',
-                },
-                () => ({
-                  validator(_, value) {
-                    if (!value || /^1[3-9]\d{9}$/.test(value)) {
-                      return Promise.resolve()
-                    }
-                    return Promise.reject(new Error('请输入正确的手机号码'))
-                  },
-                }),
-              ]}
-            >
-              <Input placeholder="请输入客户手机" disabled={mode === 'edit'} />
-            </Form.Item>
-          </Col>
-        </Row>
+        showDefaultButtons={false}
+      />
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item label="可选精修张数" name="maxSelectPhotos">
-              <InputNumber min={1} style={{ width: '100%' }} addonAfter="张" />
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item label="加选单价" name="extraPhotoPrice">
-              <InputNumber min={0} step={50} style={{ width: '100%' }} addonBefore="￥" addonAfter="元" />
-            </Form.Item>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col span={12}>
-            <Form.Item label="有效期" name="validUntil">
-              <Radio.Group
-                options={[
-                  { label: '7天', value: 7 },
-                  { label: '15天', value: 15 },
-                  { label: '30天', value: 30 },
-                ]}
-                disabled={mode === 'edit'}
-              />
-            </Form.Item>
-          </Col>
-        </Row>
-      </Form>
       <Divider>添加产品</Divider>
       <Row gutter={16}>
         <Col span={12}>
