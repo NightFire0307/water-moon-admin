@@ -1,11 +1,11 @@
-import { login, refreshToken } from '@/apis/login.ts'
-import { useUserInfo } from '@/store/useUserInfo.tsx'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input, message } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { throttle } from 'lodash-es'
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { login, refreshToken } from '@/apis/login.ts'
+import { useUserInfo } from '@/store/useUserStore'
 import styles from './Login.module.less'
 
 export function Login() {

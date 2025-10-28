@@ -2,19 +2,19 @@ import { Drawer } from 'antd'
 import { useEffect, useState } from 'react'
 import { getOrderDetailById } from '@/apis/order.ts'
 import { ImageGallery } from '@/components/ImageGallery/ImageGallery.tsx'
-import { useOrderInfoContext } from '@/contexts/OrderInfoContext'
 import { useMinioUpload } from '@/store/useMinioUpload.ts'
+import { useOrderStore } from '@/store/useOrderStore'
 
 interface PhotoMgrProps {
   open: boolean
   onClose: () => void
 }
 
-export function PhotoMgrModal(props: PhotoMgrProps) {
+export function OrderPhotoMgrModal(props: PhotoMgrProps) {
   const { open, onClose } = props
   const [orderNumber, setOrderNumber] = useState('')
   const { getTasksByOrderNumber, clearTasks } = useMinioUpload()
-  const { id: orderId } = useOrderInfoContext()
+  const { orderInfo } = useOrderStore()
 
   function handleBeforeClose() {
     const tasks = getTasksByOrderNumber(orderNumber)
@@ -30,16 +30,16 @@ export function PhotoMgrModal(props: PhotoMgrProps) {
   }
 
   useEffect(() => {
-    if (!orderId) {
+    if (!orderInfo) {
       return
     }
 
     if (!open)
       return
-    getOrderDetailById(orderId).then((res) => {
+    getOrderDetailById(orderInfo.id).then((res) => {
       setOrderNumber(res.data.orderNumber)
     })
-  }, [open, orderId])
+  }, [open, orderInfo])
 
   return (
     <Drawer
@@ -53,7 +53,11 @@ export function PhotoMgrModal(props: PhotoMgrProps) {
       }}
       destroyOnHidden
     >
-      <ImageGallery orderId={orderId} orderNumber={orderNumber} />
+      {
+        orderInfo === null
+          ? <div>加载中</div>
+          : <ImageGallery orderId={orderInfo.id} orderNumber={orderNumber} />
+      }
     </Drawer>
   )
 }

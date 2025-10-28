@@ -1,21 +1,21 @@
-import type { IOrderResult } from '@/types/order'
 import type { TableProps } from 'antd/lib'
-import { getOrderResult } from '@/apis/order'
-import { useOrderInfoContext } from '@/contexts/OrderInfoContext'
+import type { IOrderResult } from '@/types/order'
 import { Button, Drawer, Space, Table, Tag } from 'antd'
 import { Download, DownloadIcon, ZoomInIcon } from 'lucide-react'
 import { type FC, useEffect, useState } from 'react'
-import styles from './PhotoReviewResult.module.less'
+import { getOrderResult } from '@/apis/order'
+import { useOrderStore } from '@/store/useOrderStore'
+import styles from './OrderPhotoReviewResultModal.module.less'
 
 interface PhotoReviewResultProps {
   open: boolean
   onClose?: () => void
 }
 
-const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
+export const OrderPhotoReviewResultModal: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
   const [originalData, setOriginalData] = useState<IOrderResult[]>([])
   const [downloadLoading, setDownloadLoading] = useState<boolean>(false)
-  const { orderNumber, id } = useOrderInfoContext()
+  const { orderInfo } = useOrderStore()
 
   const columns: TableProps<IOrderResult>['columns'] = [
     {
@@ -66,7 +66,9 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
   ]
 
   const fetchOrderResult = async () => {
-    const { data } = await getOrderResult(id)
+    if (!orderInfo)
+      return
+    const { data } = await getOrderResult(orderInfo.id)
     setOriginalData(data.list)
   }
 
@@ -74,8 +76,7 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
   const handleExport = async () => {
     try {
       setDownloadLoading(true)
-      window.open(`${import.meta.env.VITE_API_BASE_URL}/admin/orders/${id}/result/download`, '_blank')
-
+      window.open(`${import.meta.env.VITE_API_BASE_URL}/admin/orders/${orderInfo?.id}/result/download`, '_blank')
       setDownloadLoading(false)
     }
     catch (e) {
@@ -87,14 +88,14 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
   }
 
   useEffect(() => {
-    if (open) {
+    if (open && orderInfo) {
       fetchOrderResult()
     }
-  }, [open])
+  }, [open, orderInfo])
 
   return (
     <Drawer
-      title={`订单 WK-${orderNumber} 选片结果`}
+      title={`订单 WK-${orderInfo?.orderNumber} 选片结果`}
       open={open}
       onClose={() => onClose && onClose()}
       width={1000}
@@ -122,5 +123,3 @@ const PhotoReviewResult: FC<PhotoReviewResultProps> = ({ open, onClose }) => {
     </Drawer>
   )
 }
-
-export default PhotoReviewResult

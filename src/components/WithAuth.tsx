@@ -1,7 +1,7 @@
-import { refreshToken } from '@/apis/login.ts'
 import { type ComponentType, useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { useUserInfo } from '../store/useUserInfo.tsx'
+import { refreshToken } from '@/apis/login.ts'
+import { useUserInfo } from '../store/useUserStore.ts'
 
 export function WithAuth<T extends object>(WrapperComponent: ComponentType<T>) {
   const ComponentWithAuth = (props: T) => {

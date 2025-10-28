@@ -3,7 +3,7 @@ import type { ApiErrorResponse } from '@/types/common.ts'
 import { message } from 'antd'
 import axios from 'axios'
 import localforage from 'localforage'
-import { useUserInfo } from '../store/useUserInfo.tsx'
+import { useUserInfo } from '../store/useUserStore.ts'
 
 // create an axios instance
 const service = axios.create({

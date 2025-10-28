@@ -1,9 +1,9 @@
 import type { DescriptionsProps } from 'antd'
-import { getOrderDetailById } from '@/apis/order.ts'
-import { useOrderInfoContext } from '@/contexts/OrderInfoContext'
-import { formatDate } from '@/utils/formatDate.ts'
 import { Descriptions, Modal, Tag } from 'antd'
 import { useEffect, useState } from 'react'
+import { getOrderDetailById } from '@/apis/order.ts'
+import { useOrderStore } from '@/store/useOrderStore'
+import { formatDate } from '@/utils/formatDate.ts'
 
 interface OrderDetailProps {
   open: boolean
@@ -13,12 +13,12 @@ interface OrderDetailProps {
 export function OrderDetail(props: OrderDetailProps) {
   const { open, onClose } = props
   const [items, setItems] = useState<DescriptionsProps['items']>([])
-  const { id } = useOrderInfoContext()
+  const { orderInfo } = useOrderStore()
 
   async function fetchOrderDetail() {
-    if (!id)
+    if (!orderInfo)
       return
-    const { data } = await getOrderDetailById(id)
+    const { data } = await getOrderDetailById(orderInfo.id)
 
     setItems([
       { label: '订单号', children: data.orderNumber },
@@ -36,11 +36,11 @@ export function OrderDetail(props: OrderDetailProps) {
       ) },
       { label: '订单状态', children: (
         {
-          0: <Tag color="blue">待选片</Tag>,
-          1: <Tag color="gold">选片中</Tag>,
-          2: <Tag color="orange">选片完成</Tag>,
-          3: <Tag color="red">订单异常</Tag>,
-          4: <Tag color="green">已完成</Tag>,
+          0: (<Tag color="blue">待选片</Tag>),
+          1: (<Tag color="gold">选片中</Tag>),
+          2: (<Tag color="orange">选片完成</Tag>),
+          3: (<Tag color="red">订单异常</Tag>),
+          4: (<Tag color="green">已完成</Tag>),
         }[data.status]
       ) },
       {
@@ -74,7 +74,7 @@ export function OrderDetail(props: OrderDetailProps) {
     if (open) {
       fetchOrderDetail()
     }
-  }, [open, id])
+  }, [open, orderInfo])
 
   return (
     <Modal open={open} centered width={1000} footer={null} onCancel={onClose}>

@@ -86,7 +86,7 @@ const EditableCell: FC<PropsWithChildren<EditableCellProps>> = ({
   )
 }
 
-interface OrderModalFormProps {
+export interface OrderModalFormProps {
   open: boolean
   mode: 'create' | 'edit'
   onClose: () => void

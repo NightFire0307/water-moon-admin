@@ -1,6 +1,6 @@
 import { getRoleList } from '@/apis/role'
 import { getUserDetailById } from '@/apis/user'
-import { useUserInfo } from '@/store/useUserInfo'
+import { useUserInfo } from '@/store/useUserStore'
 import { SaveOutlined } from '@ant-design/icons'
 import { Button, Card, Form, Input, Select } from 'antd'
 import { useEffect, useState } from 'react'

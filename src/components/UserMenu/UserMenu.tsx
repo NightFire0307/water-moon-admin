@@ -1,12 +1,12 @@
 import type { MenuProps } from 'antd'
-import { getCurrentUser, logout } from '@/apis/login'
-import ChevronsUpDown from '@/assets/icons/chevrons-up-down.svg?react'
-import { useUserInfo } from '@/store/useUserInfo.tsx'
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Dropdown, Flex } from 'antd'
 import { User2 } from 'lucide-react'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getCurrentUser, logout } from '@/apis/login'
+import ChevronsUpDown from '@/assets/icons/chevrons-up-down.svg?react'
+import { useUserInfo } from '@/store/useUserStore'
 import styles from './UserMenu.module.less'
 
 interface UserMenuProps {

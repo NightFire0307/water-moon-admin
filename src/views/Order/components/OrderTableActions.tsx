@@ -1,4 +1,5 @@
-import type { AnyObject } from 'antd/es/_util/type'
+import { FileDoneOutlined, FilePdfOutlined, MoreOutlined } from '@ant-design/icons'
+import { Button, Dropdown, message, Modal } from 'antd'
 import { updateOrderStatus } from '@/apis/order'
 import IconEye from '@/assets/icons/eye.svg?react'
 import IconImage from '@/assets/icons/image.svg?react'
@@ -8,8 +9,6 @@ import IconPencil from '@/assets/icons/pencil.svg?react'
 import IconRotateCcw from '@/assets/icons/rotate-ccw.svg?react'
 import IconTrash from '@/assets/icons/trash.svg?react'
 import { type IOrder, OrderStatus } from '@/types/order.ts'
-import { FileDoneOutlined, FilePdfOutlined, MoreOutlined } from '@ant-design/icons'
-import { Button, Dropdown, message, Modal } from 'antd'
 
 const { confirm } = Modal
 
@@ -26,16 +25,16 @@ export enum OrderAction {
 }
 
 interface ActionButtonsProps {
-  record: AnyObject
-  onEdit: (record: AnyObject) => void
-  onViewDetail: (record: AnyObject) => void
-  onManagePhotos: (record: AnyObject) => void
-  onManageLinks: (record: AnyObject) => void
-  onResetStatus: (record: AnyObject) => void
-  onViewSelectionResult: (record: AnyObject) => void
-  onDelete: (record: AnyObject) => void
-  onExportPdf: (record: AnyObject) => void
-  onConfirm: (record: AnyObject) => void
+  record: IOrder
+  onEdit: (record: IOrder) => void
+  onViewDetail: (record: IOrder) => void
+  onManagePhotos: (record: IOrder) => void
+  onManageLinks: (record: IOrder) => void
+  onResetStatus: (record: IOrder) => void
+  onViewSelectionResult: (record: IOrder) => void
+  onDelete: (record: IOrder) => void
+  onExportPdf: (record: IOrder) => void
+  onConfirm: (record: IOrder) => void
 }
 
 export function ActionButtons(props: ActionButtonsProps) {
@@ -54,7 +53,7 @@ export function ActionButtons(props: ActionButtonsProps) {
 
   const status = (record as IOrder).status
 
-  function handleMenuClick(key: OrderAction, record: AnyObject) {
+  function handleMenuClick(key: OrderAction, record: IOrder) {
     switch (key) {
       case OrderAction.EDIT:
         onEdit(record)
@@ -123,7 +122,7 @@ export function ActionButtons(props: ActionButtonsProps) {
           },
           {
             key: OrderAction.VIEW_SELECT_RESULT,
-            label: '查看选片',
+            label: '查看选片结果',
             icon: <IconImage />,
             disabled: ![OrderStatus.SUBMITTED, OrderStatus.FINISHED].includes(status),
           },

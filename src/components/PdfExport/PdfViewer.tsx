@@ -1,10 +1,10 @@
-import { getOrderPdfData } from '@/apis/order.ts'
-import { PdfDocument } from '@/components/PdfExport/PdfDocument.tsx'
-import { useOrderInfoContext } from '@/contexts/OrderInfoContext.ts'
 import { CloseOutlined, DownloadOutlined, LoadingOutlined, MinusOutlined, PlusOutlined, PrinterOutlined } from '@ant-design/icons'
 import { Button, Divider, Modal, Space, Spin } from 'antd'
 import { type FC, useEffect, useMemo, useRef, useState } from 'react'
 import { Document, Page, type PageProps, pdfjs } from 'react-pdf'
+import { getOrderPdfData } from '@/apis/order.ts'
+import { PdfDocument } from '@/components/PdfExport/PdfDocument.tsx'
+import { useOrderStore } from '@/store/useOrderStore.ts'
 import { PdfPagination } from './PdfPagination'
 import styles from './PdfViewer.module.less'
 import { usePdfBlob } from './usePdfBlob.ts'
@@ -29,12 +29,12 @@ interface ModalTitleProps {
 
 // 模态框标题
 function ModalTitle({ onPrint, onDownload, onClose }: ModalTitleProps) {
-  const { orderNumber } = useOrderInfoContext()
+  const { orderInfo } = useOrderStore()
 
   return (
     <div className={styles.pdfViewerModalTitle}>
       <span>
-        { orderNumber }
+        { orderInfo?.orderNumber }
         {' - '}
         产品制作单
       </span>
@@ -74,7 +74,7 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
     loading: null,
   })
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const { id, orderNumber } = useOrderInfoContext()
+  const { orderInfo } = useOrderStore()
 
   // 放大缩小处理
   function handleZoom(delta: number) {
@@ -100,7 +100,7 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
 
   // 获取订单PDF数据
   const fetchDocumentData = async () => {
-    const res = await getOrderPdfData(id)
+    const res = await getOrderPdfData(orderInfo?.id)
     await generatePdfBlob(<PdfDocument data={res.data} />)
   }
 
@@ -116,7 +116,7 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
       title={(
         <ModalTitle
           onPrint={printPdf}
-          onDownload={() => downloadBlobAsPdf(orderNumber)}
+          onDownload={() => downloadBlobAsPdf(orderInfo?.orderNumber)}
           onClose={onClose}
         />
       )}
@@ -136,7 +136,7 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
       closable={false}
       width="100%"
       footer={null}
-      destroyOnClose
+      destroyOnHidden
     >
 
       <div className={styles.pdfViewerPager} ref={scrollContainerRef}>

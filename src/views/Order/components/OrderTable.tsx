@@ -1,23 +1,47 @@
+import type { TableProps } from 'antd/lib'
 import { ExclamationCircleOutlined, PlusOutlined, RedoOutlined } from '@ant-design/icons'
-import { Badge, Button, Checkbox, message, Modal, Space, Table, type TableColumnProps, Tag } from 'antd'
+import { Badge, Button, Checkbox, message, Modal, Space, Table, Tag } from 'antd'
 import { SearchIcon } from 'lucide-react'
-import { useEffect } from 'react'
+import { useEffect, useImperativeHandle } from 'react'
 import { getOrderDetailById, getOrderList, removeOrder, resetOrderStatus } from '@/apis/order'
 import { PageCard } from '@/components/PageCard'
 import { useFetch } from '@/hooks/useFetch'
 import usePagination from '@/hooks/usePagination'
 import useTableSelection from '@/hooks/useTableSelection'
+import { useOrderStore } from '@/store/useOrderStore'
 import { type IOrder, OrderStatus } from '@/types/order'
 import { ActionButtons } from './OrderTableActions'
 
 const { confirm } = Modal
 
+export interface OrderTableRef {
+  reload: () => void
+}
+
 interface OrderTableProps {
   searchOpen?: boolean
   handleSearch?: () => void
+  handleCreateOrder?: () => void
+  handleEditOrder?: (data: IOrder) => void
+  handleDetail?: (record: IOrder) => void
+  handleManagePhotos?: () => void
+  handleReviewResult?: () => void
+  handlePdfExport?: () => void
+  ref?: React.Ref<OrderTableRef>
 }
 
-export function OrderTable({ searchOpen, handleSearch }: OrderTableProps) {
+export function OrderTable({
+  searchOpen,
+  handleSearch,
+  handleEditOrder,
+  handleCreateOrder,
+  handleDetail,
+  handleManagePhotos,
+  handleReviewResult,
+  handlePdfExport,
+  ref,
+}: OrderTableProps) {
+  const { setOrderInfo } = useOrderStore()
   const { rowSelection } = useTableSelection({ type: 'checkbox' })
   const { pagination, current, pageSize, setTotal, reset } = usePagination()
   const { data, loading, refetch } = useFetch(
@@ -33,7 +57,11 @@ export function OrderTable({ searchOpen, handleSearch }: OrderTableProps) {
     },
   )
 
-  const columns: TableColumnProps[] = [
+  useImperativeHandle(ref, () => ({
+    reload: () => refetch(),
+  }))
+
+  const columns: TableProps<IOrder>['columns'] = [
     {
       title: '订单号',
       dataIndex: 'orderNumber',
@@ -104,17 +132,17 @@ export function OrderTable({ searchOpen, handleSearch }: OrderTableProps) {
         <ActionButtons
           record={record}
           onEdit={async (record) => {
-            setCurOrderInfo(record as IOrder)
+            setOrderInfo(record)
             const { data } = await getOrderDetailById(record.id)
-            setOrderModal({ open: true, mode: 'edit', initialValues: data })
+            handleEditOrder?.(data)
           }}
           onViewDetail={(record) => {
-            setCurOrderInfo(record as IOrder)
-            setOrderDetailOpen(true)
+            setOrderInfo(record)
+            handleDetail?.(record)
           }}
           onManagePhotos={(record) => {
-            setCurOrderInfo(record as IOrder)
-            setPhotoMgrOpen(true)
+            setOrderInfo(record)
+            handleManagePhotos?.()
           }}
           onManageLinks={() => {
           }}
@@ -138,16 +166,16 @@ export function OrderTable({ searchOpen, handleSearch }: OrderTableProps) {
             })
           }}
           onViewSelectionResult={() => {
-            setCurOrderInfo(record as IOrder)
-            setPhotoReviewOpen(true)
+            setOrderInfo(record)
+            handleReviewResult?.()
           }}
           onDelete={async (record) => {
             await removeOrder(record.id)
             refetch()
           }}
           onExportPdf={() => {
-            setCurOrderInfo(record as IOrder)
-            setPdfExportOpen(true)
+            setOrderInfo(record)
+            handlePdfExport?.()
           }}
           onConfirm={async () => {
             await refetch()
@@ -169,9 +197,7 @@ export function OrderTable({ searchOpen, handleSearch }: OrderTableProps) {
           <Button
             icon={<PlusOutlined />}
             type="primary"
-            onClick={() => {
-              // setOrderModal({ open: true, mode: 'create' })
-            }}
+            onClick={handleCreateOrder}
           >
             新增订单
           </Button>
@@ -188,6 +214,7 @@ export function OrderTable({ searchOpen, handleSearch }: OrderTableProps) {
         style={{ marginTop: '14px' }}
         rowSelection={rowSelection}
         pagination={pagination}
+        bordered
       />
     </PageCard>
   )

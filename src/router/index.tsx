@@ -1,4 +1,3 @@
-import { SelectionResult } from '@/views/Order/components/SelectionResult.tsx'
 import { Order } from '@/views/Order/index.tsx'
 import PackageManager from '@/views/Package/index.tsx'
 import { Profile } from '@/views/Profile/index.tsx'
@@ -53,13 +52,6 @@ export const router = createBrowserRouter([
             element: <Order />,
             handle: {
               title: '订单列表',
-            },
-          },
-          {
-            path: ':orderId',
-            element: <SelectionResult />,
-            handle: {
-              title: '选片结果',
             },
           },
         ],
