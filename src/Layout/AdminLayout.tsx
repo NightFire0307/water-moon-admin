@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, useMatches, useNavigate } from 'react-router-dom'
 import PanelLeftClose from '@/assets/icons/panel-left-close.svg?react'
 import PanelLeftOpen from '@/assets/icons/panel-left-open.svg?react'
+import reactSvg from '@/assets/react.svg'
 import UserMenu from '@/components/UserMenu/UserMenu.tsx'
 import styles from './AdminLayout.module.less'
 
@@ -48,7 +49,7 @@ function AdminLayout() {
     // 设置展开菜单项
     if (routeParts.length > 1) {
       const openKey = routeParts[routeParts.length - 2]
-      setOpenKeys(prev => [...prev, openKey])
+      setOpenKeys([openKey])
     }
   }, [matches])
 
@@ -99,10 +100,11 @@ function AdminLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider style={{ position: 'relative' }} width={250} collapsedWidth={65} trigger={null} collapsible collapsed={collapsed} theme="light">
+      <Sider className={styles.siderWrapper} width={250} collapsedWidth={65} trigger={null} collapsible collapsed={collapsed} theme="light">
         <Flex vertical>
           <div className={styles.logoWrapper}>
-            <div className={styles.logo}>L</div>
+            <img src={reactSvg} alt="React Logo" width={32} height={32} />
+            <div className={styles.logo}>Aqua Admin</div>
           </div>
 
           <div className={styles.menuWrapper}>
