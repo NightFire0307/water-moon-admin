@@ -1,10 +1,11 @@
-import { useImperativeHandle } from 'react'
 import type { ActionButtonOptions, FormSchema } from './types'
 import { Button, Form, type FormProps, Input, InputNumber, Radio, Select, Space } from 'antd'
+import { useImperativeHandle } from 'react'
 
 export interface BasicFormRef {
   validate: () => Promise<void>
   getValues: () => Record<string, any>
+  resetFields: () => void
 }
 
 export interface BasicFormProps {
@@ -27,13 +28,14 @@ export function BasicForm(props: BasicFormProps) {
     resetButtonOptions,
     submitButtonOptions,
     showDefaultButtons = true,
-    ref
+    ref,
   } = props
   const [form] = Form.useForm()
 
   useImperativeHandle(ref, () => ({
     validate: () => form.validateFields(),
     getValues: () => form.getFieldsValue(),
+    resetFields: () => form.resetFields(),
   }))
 
   return (

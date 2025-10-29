@@ -1,10 +1,10 @@
 import { Flex } from 'antd'
 import { AnimatePresence, motion } from 'motion/react'
 import { useRef, useState } from 'react'
+import { PDFViewer } from '@/components/PdfExport/PdfViewer'
 import { OrderDetail } from '@/views/Order/components/OrderDetail'
 import { OrderModalForm, type OrderModalFormProps } from '@/views/Order/components/OrderModalForm'
 import { OrderPhotoMgrModal } from '@/views/Order/components/OrderPhotoMgrModal'
-import { PDFViewer } from '@/components/PdfExport/PdfViewer'
 import { OrderPhotoReviewResultModal } from './components/OrderPhotoReviewResultModal'
 import { OrderSearchForm } from './components/OrderSearchForm'
 import { OrderTable, type OrderTableRef } from './components/OrderTable'
@@ -43,7 +43,7 @@ export function Order() {
         ref={orderTableRef}
         searchOpen={searchOpen}
         handleSearch={() => setSearchOpen(!searchOpen)}
-        handleEditOrder={(data) => setOrderModal({ open: true, mode: 'edit', initialValues: data  })}
+        handleEditOrder={data => setOrderModal({ open: true, mode: 'edit', initialValues: data })}
         handleCreateOrder={() => setOrderModal({ open: true, mode: 'create' })}
         handleDetail={orderDetailModal.show}
         handleManagePhotos={orderPhotoMgrModal.show}

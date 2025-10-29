@@ -1,8 +1,8 @@
 import type { IPermission } from '@/types/permissions'
-import { getPermissions } from '@/apis/permissions'
-import { useFetch } from '@/hooks/useFetch'
 import { Form, Input, Modal, Tree, type TreeDataNode, type TreeProps } from 'antd'
 import { type FC, useEffect, useState } from 'react'
+import { getPermissions } from '@/apis/permissions'
+import { useFetch } from '@/hooks/useFetch'
 
 export interface RoleFormModalProps {
   mode: 'create' | 'edit'
@@ -22,6 +22,7 @@ const RoleFormModal: FC<RoleFormModalProps> = ({ open, mode, initValues, onCreat
   const handleCancel = () => {
     onClose && onClose()
     setCheckedKeys([])
+    form.resetFields()
   }
 
   const onSelect: TreeProps['onSelect'] = (selectedKeys, info) => {
