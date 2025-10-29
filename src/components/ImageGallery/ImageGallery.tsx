@@ -3,11 +3,11 @@ import {
   ClearOutlined,
   ReloadOutlined,
 } from '@ant-design/icons'
-import { Button, Card, Divider, Empty, Flex, message, Modal, Space, Spin } from 'antd'
+import { Button, Card, Divider, Empty, Flex, message, Modal, Space, Spin, Upload, type UploadProps } from 'antd'
 import { UploadIcon } from 'lucide-react'
 import { getPhotosByOrderId, removeAllPhotos } from '@/apis/photo.ts'
 import useInfiniteScroll from '@/hooks/useInfiniteScroll'
-import { uploadStore } from '@/store/uploadStore'
+import { useUploadStore } from '@/store/useUploadStore'
 import styles from './ImageGallery.module.less'
 
 const { Meta } = Card
@@ -18,8 +18,8 @@ interface ImageGalleryProps {
 }
 
 export function ImageGallery(props: ImageGalleryProps) {
-  const { orderId } = props
-  const { openTaskCenter } = uploadStore()
+  const { orderId, orderNumber } = props
+  const { visible, openTaskCenter, createUploadOrder } = useUploadStore()
   const { observerRef, hasMore, data, reload } = useInfiniteScroll<GetPhotoListResult>(
     (page, pageSize) => getPhotosByOrderId({ orderId, current: page, pageSize }),
     {
@@ -28,6 +28,20 @@ export function ImageGallery(props: ImageGalleryProps) {
       pageSize: 20,
     },
   )
+
+  const uploadProps: UploadProps = {
+    multiple: true,
+    showUploadList: false,
+    beforeUpload: (file) => {
+      createUploadOrder(orderId.toString(), orderNumber, file)
+      return false
+    },
+    onChange: () => {
+      if (!visible) {
+        openTaskCenter()
+      }
+    },
+  }
 
   // 清空所有照片
   async function handleRemoveAllPhoto() {
@@ -53,13 +67,14 @@ export function ImageGallery(props: ImageGalleryProps) {
         </Space>
         <Space>
           <Button icon={<ReloadOutlined />} onClick={() => reload()}>刷新照片</Button>
-          <Button
-            type="primary"
-            icon={<UploadIcon size={16} />}
-            onClick={openTaskCenter}
-          >
-            创建上传任务
-          </Button>
+          <Upload {...uploadProps}>
+            <Button
+              type="primary"
+              icon={<UploadIcon size={16} />}
+            >
+              添加照片
+            </Button>
+          </Upload>
         </Space>
       </Flex>
       <Divider />

@@ -14,6 +14,7 @@ import PanelLeftOpen from '@/assets/icons/panel-left-open.svg?react'
 import reactSvg from '@/assets/react.svg'
 import UserMenu from '@/components/UserMenu/UserMenu.tsx'
 import styles from './AdminLayout.module.less'
+import { GlobalNotification } from '@/components/GlobalNotification/GlobalNotification'
 
 type MenuItem = Required<MenuProps>['items'][number]
 type ItemType = { title: string }[]
@@ -99,48 +100,52 @@ function AdminLayout() {
   }
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Sider className={styles.siderWrapper} width={250} collapsedWidth={65} trigger={null} collapsible collapsed={collapsed} theme="light">
-        <Flex vertical>
-          <div className={styles.logoWrapper}>
-            <img src={reactSvg} alt="React Logo" width={32} height={32} />
-            <div className={styles.logo}>Aqua Admin</div>
-          </div>
+    <>
+      <Layout style={{ minHeight: '100vh' }}>
+        <Sider className={styles.siderWrapper} width={250} collapsedWidth={65} trigger={null} collapsible collapsed={collapsed} theme="light">
+          <Flex vertical>
+            <div className={styles.logoWrapper}>
+              <img src={reactSvg} alt="React Logo" width={32} height={32} />
+              <div className={styles.logo}>Aqua Admin</div>
+            </div>
 
-          <div className={styles.menuWrapper}>
-            <Menu
-              style={{ height: '100%' }}
-              mode="inline"
-              selectedKeys={selectedKeys}
-              openKeys={openKeys}
-              items={menuItems}
-              onClick={handleMenuClick}
-              onOpenChange={openKey => setOpenKeys(openKey)}
+            <div className={styles.menuWrapper}>
+              <Menu
+                style={{ height: '100%' }}
+                mode="inline"
+                selectedKeys={selectedKeys}
+                openKeys={openKeys}
+                items={menuItems}
+                onClick={handleMenuClick}
+                onOpenChange={openKey => setOpenKeys(openKey)}
+              />
+
+            </div>
+
+            <UserMenu collapsed={collapsed} />
+          </Flex>
+        </Sider>
+        <Layout>
+          <Header className={styles['header-wrapper']}>
+            <Button
+              type="text"
+              icon={!collapsed
+                ? <PanelLeftClose width={20} height={20} style={{ color: '#434343' }} />
+                : <PanelLeftOpen width={20} height={20} style={{ color: '#434343' }} />}
+              onClick={toggle}
             />
-
-          </div>
-
-          <UserMenu collapsed={collapsed} />
-        </Flex>
-      </Sider>
-      <Layout>
-        <Header className={styles['header-wrapper']}>
-          <Button
-            type="text"
-            icon={!collapsed
-              ? <PanelLeftClose width={20} height={20} style={{ color: '#434343' }} />
-              : <PanelLeftOpen width={20} height={20} style={{ color: '#434343' }} />}
-            onClick={toggle}
-          />
-          <Breadcrumb items={breadcrumb} style={{ margin: '16px 0', fontWeight: 600 }} />
-        </Header>
-        <Content style={{ position: 'relative', overflowX: 'hidden', background: '#f5f5f5', padding: '16px' }}>
-          <div className={styles.content}>
-            <Outlet />
-          </div>
-        </Content>
+            <Breadcrumb items={breadcrumb} style={{ margin: '16px 0', fontWeight: 600 }} />
+          </Header>
+          <Content style={{ position: 'relative', overflowX: 'hidden', background: '#f5f5f5', padding: '16px' }}>
+            <div className={styles.content}>
+              <Outlet />
+            </div>
+          </Content>
+        </Layout>
       </Layout>
-    </Layout>
+
+      <GlobalNotification />
+    </>
   )
 }
 

@@ -8,6 +8,7 @@ import { OrderPhotoMgrModal } from '@/views/Order/components/OrderPhotoMgrModal'
 import { OrderPhotoReviewResultModal } from './components/OrderPhotoReviewResultModal'
 import { OrderSearchForm } from './components/OrderSearchForm'
 import { OrderTable, type OrderTableRef } from './components/OrderTable'
+import { OrderTaskDrawer } from './components/OrderTaskDrawer'
 import { useModal } from './hooks/useModal'
 
 export function Order() {
@@ -64,6 +65,7 @@ export function Order() {
       <OrderDetail open={orderDetailModal.open} onClose={orderDetailModal.hide} />
       <OrderPhotoMgrModal open={orderPhotoMgrModal.open} onClose={orderPhotoMgrModal.hide} />
       <OrderPhotoReviewResultModal open={orderPhotoReviewResultModal.open} onClose={orderPhotoReviewResultModal.hide} />
+      <OrderTaskDrawer />
       <PDFViewer open={orderPdfExportModal.open} onClose={orderPdfExportModal.hide} />
     </Flex>
   )

@@ -4,6 +4,7 @@ import { create } from 'zustand'
 import { devtools } from 'zustand/middleware'
 import { immer } from 'zustand/middleware/immer'
 import { notifyUploadComplete, uploadPhoto } from '@/apis/photo'
+import { useGlobalNotification } from './useGlobalNotification'
 
 export type UploadStatus = 'Pending' | 'Uploading' | 'Done' | 'Error' | 'Abort'
 
@@ -52,12 +53,12 @@ interface UploadActions {
   openTaskCenter: () => void
   closeTaskCenter: () => void
   setUploading: (val: boolean) => void
-  addQueueOrder: (orderId: string) => void // 将订单加入待上传队列
+  startOrderQueue: (orderId: string) => void // 开始订单上传队列
   startNextOrderUpload: () => void // 开始下一个订单的上传
   clearOrderPhotoQueue: (orderId: string) => void // 清空订单下所有上传队列
 }
 
-export const uploadStore = create<UploadState & UploadActions>()(
+export const useUploadStore = create<UploadState & UploadActions>()(
   devtools(immer((set, get) => ({
     visible: false,
     uploading: false,
@@ -144,6 +145,7 @@ export const uploadStore = create<UploadState & UploadActions>()(
       uploadFile(
         orderQueue?.photos || [],
         orderId,
+        orderQueue?.orderName,
         {
           onProgress,
           onSuccess,
@@ -256,7 +258,7 @@ export const uploadStore = create<UploadState & UploadActions>()(
       state.uploading = val
       return state
     }),
-    addQueueOrder: (orderId: string) => {
+    startOrderQueue: (orderId: string) => {
       set((state) => {
         if (!state.pendingOrderIds.includes(orderId)) {
           state.pendingOrderIds.push(orderId)
@@ -307,6 +309,7 @@ interface UploadOptions {
 async function uploadFile(
   photos: UploadPhoto[],
   orderId: string,
+  orderNumber: string,
   options?: UploadOptions,
 ) {
   const { onProgress, onSuccess, onError, onCancel } = options || {}
@@ -422,7 +425,7 @@ async function uploadFile(
             }
 
             const controller = new AbortController()
-            uploadStore.getState().updateAbortPhotoController(photo.file.uid, controller)
+            useUploadStore.getState().updateAbortPhotoController(photo.file.uid, controller)
 
             const formData = new FormData() // 创建表单数据
             formData.append('file', photo.file)
@@ -476,7 +479,15 @@ async function uploadFile(
     // 通知服务器所有照片上传完成
     await notifyUploadComplete(orderId)
 
+    // 通知用户上传完成
+    useGlobalNotification.getState().addNotification({
+      key: `upload-complete-${orderId}-${Date.now()}`,
+      type: 'success',
+      message: '上传完成',
+      description: `订单号 ${orderNumber} 的照片上传已完成，共上传成功 ${batchResult.completed} 张，失败 ${batchResult.failed} 张。`,
+    })
+
     // 调度下一个订单上传
-    uploadStore.getState().startNextOrderUpload()
+    useUploadStore.getState().startNextOrderUpload()
   }
 }

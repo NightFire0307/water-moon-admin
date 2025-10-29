@@ -1,5 +1,6 @@
 import type { GetRef, TableProps } from 'antd'
 import type { FC, PropsWithChildren, ReactNode } from 'react'
+import type { BasicFormRef } from '@/components/BasicForm/BasicForm'
 import type { PaginationParams } from '@/types/common'
 import type { IOrderDetail } from '@/types/order'
 import type { IPackage } from '@/types/package'
@@ -14,7 +15,6 @@ import { getProductList } from '@/apis/product'
 import IconTrash from '@/assets/icons/trash.svg?react'
 import { BasicForm } from '@/components/BasicForm'
 import { getOrderModalFormSchema } from './orderModalFormSchema'
-import type { BasicFormRef } from '@/components/BasicForm/BasicForm'
 
 // 获取 Form 实例类型
 type FormInstance<T> = GetRef<typeof Form<T>>

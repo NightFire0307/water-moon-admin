@@ -1,8 +1,8 @@
-import type { UploadPhoto, UploadStatus } from '@/store/uploadStore'
+import type { UploadPhoto, UploadStatus } from '@/store/useUploadStore'
 import { Button, Divider, Drawer, message, Progress, Space, Table, type TableColumnsType, type TableProps, Tag, Typography, Upload, type UploadProps } from 'antd'
 import { CloudUploadIcon } from 'lucide-react'
 import { useOrderInfoContext } from '@/contexts/OrderInfoContext'
-import { uploadStore } from '@/store/uploadStore'
+import { uploadStore } from '@/store/useUploadStore'
 
 const { Link } = Typography
 
