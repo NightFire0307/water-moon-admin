@@ -1,4 +1,4 @@
-import type { InputNumberProps, InputProps, RadioGroupProps, SelectProps } from 'antd'
+import type { InputNumberProps, InputProps, RadioGroupProps, SelectProps, SwitchProps } from 'antd'
 import type { Rule } from 'antd/es/form'
 
 // 表单组件属性映射
@@ -7,6 +7,7 @@ export interface ComponentPropsMap {
   Select: SelectProps
   InputNumber: InputNumberProps
   RadioGroup: RadioGroupProps
+  Switch: SwitchProps
 }
 
 // 操作按钮配置项
@@ -21,8 +22,10 @@ export interface ActionButtonOptions {
 export type FormSchema = FormSchemaMap[keyof FormSchemaMap]
 
 // 定义联动依赖类型
-export type FormItemDependencies = {
-  show?: boolean
+export interface FormItemDependencies {
+  show?: boolean | ((values: Record<string, any>) => boolean)
+  disabled?: boolean | ((values: Record<string, any>) => boolean)
+  required?: boolean | ((values: Record<string, any>) => boolean)
   triggerFields?: string[]
 }
 
