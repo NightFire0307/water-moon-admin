@@ -32,6 +32,7 @@ export interface FormItemDependencies {
 export interface NormalFormSchemaMap<K extends keyof ComponentPropsMap = keyof ComponentPropsMap> {
   component: K
   componentProps?: ComponentPropsMap[K]
+  optionLoader?: (values: Record<string, any>) => Promise<{ label: string, value: any }[]> | { label: string, value: any }[]
   fieldName: string
   label?: string
   required?: boolean

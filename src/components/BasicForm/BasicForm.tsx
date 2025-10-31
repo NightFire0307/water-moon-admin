@@ -1,10 +1,12 @@
 import type { ActionButtonOptions, ComponentPropsMap, FormSchema } from './types'
 import { Button, Form, type FormProps, Input, InputNumber, Radio, Select, Space, Switch } from 'antd'
-import { type FC, useCallback, useEffect, useImperativeHandle, useState } from 'react'
+import { type FC, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { debounce } from 'lodash-es'
 
 export interface BasicFormRef {
   validate: () => Promise<void>
-  getValues: () => Record<string, any>
+  getFieldValue: (name: string) => any
+  getFieldsValue: () => Record<string, any>
   resetFields: () => void
 }
 
@@ -32,10 +34,13 @@ export function BasicForm(props: BasicFormProps) {
   } = props
   const [form] = Form.useForm()
   const [dynamicAttrs, setDynamicAttrs] = useState<Record<string, { disabled?: boolean, required?: boolean, if?: boolean, show?: boolean }>>({})
+  const [optionsMap, setOptionsMap] = useState<Record<string, Array<{ label: string, value: any }>>>({}) // 存储动态加载的选项
+  const loadingRef = useRef<Record<string, boolean>>({}) // 用于追踪选项动态加载状态
 
   useImperativeHandle(ref, () => ({
     validate: () => form.validateFields(),
-    getValues: () => form.getFieldsValue(),
+    getFieldValue: (name: string) => form.getFieldValue(name),
+    getFieldsValue: () => form.getFieldsValue(),
     resetFields: () => form.resetFields(),
   }))
 
@@ -47,6 +52,47 @@ export function BasicForm(props: BasicFormProps) {
     RadioGroup: Radio.Group,
     Switch,
   }
+
+  // 动态加载选项
+  const loadOptions = useCallback(async (item: FormSchema, allValues: any) => {
+    if (item.component === 'Select' && item.optionLoader) {
+      loadingRef.current[item.fieldName] = true
+      try {
+        const options = await item.optionLoader(allValues)
+        setOptionsMap(prev => ({
+          ...prev,
+          [item.fieldName]: options,
+        }))
+      }
+      catch (err) {
+        console.error('加载选项失败:', err)
+      }
+      finally {
+        loadingRef.current[item.fieldName] = false
+      }
+    }
+  }, [])
+
+  /**
+   * 递归遍历 schema，加载需要动态加载选项的 Select 组件
+   * @param schemas 表单字段配置数组
+   * @param allValues 当前表单所有值
+   * @param isInitial 是否为初始加载
+   */
+  const traverseAndLoad = useCallback(
+    (schemas: FormSchema[], allValues: Record<string, any>, isInitial: boolean = false, changeValues?: Record<string, any>) => {
+      schemas.forEach((item) => {
+        if (item.component === 'Select' && item.optionLoader) {
+          if (isInitial || ( changeValues &&  item.dependencies?.triggerFields?.some(field => field in changeValues))) {
+            console.log('加载选项 for', item.fieldName)
+            loadOptions(item, allValues)
+          }
+        }
+        if (item.component !== 'custom' && item.children && item.children.length > 0) {
+          traverseAndLoad(item.children, allValues, isInitial, changeValues)
+        }
+      })
+  }, [loadOptions])
 
   // 计算联动属性
   const computedDynamicAttrs = useCallback((allValues: Record<string, any>) => {
@@ -75,13 +121,14 @@ export function BasicForm(props: BasicFormProps) {
   }, [schema])
 
   // 在 schema 变化时重新计算联动逻辑
-  const onFormValuesChange = (_: any, allValues: Record<string, any>) => {
+  const debounceOnFormValuesChange = debounce(useCallback((changeValues: Record<string, any>, allValues: Record<string, any>) => {
+    console.log(changeValues)
     computedDynamicAttrs(allValues)
-  }
+    traverseAndLoad(schema, allValues, false, changeValues)
+  }, [schema, computedDynamicAttrs, traverseAndLoad]), 300)
 
   // 渲染表单组件
   const renderFormItem = useCallback((item: FormSchema) => {
-    console.log('渲染表单组件')
     // 处理嵌套子字段
     if ('children' in item && item.children && item.children.length > 0) {
       return (
@@ -95,7 +142,8 @@ export function BasicForm(props: BasicFormProps) {
 
     // 处理自定义字段渲染
     if (item.component === 'custom') {
-      if (dynamicAttrs[item.fieldName]?.if === false) return null
+      if (dynamicAttrs[item.fieldName]?.if === false)
+        return null
       return item.render()
     }
 
@@ -108,6 +156,9 @@ export function BasicForm(props: BasicFormProps) {
       const Comp = componentMap[item.component]
       if (!Comp)
         return null
+
+      // 动态加载选项
+      const options = item.component === 'Select' && optionsMap[item.fieldName] ? optionsMap[item.fieldName] : item.componentProps?.options
 
       return (
         <Form.Item
@@ -124,19 +175,22 @@ export function BasicForm(props: BasicFormProps) {
         >
           <Comp
             {...item.componentProps}
+            options={options}
             disabled={item.disabled ?? dynamicAttrs[item.fieldName]?.disabled}
+            loading={loadingRef.current[item.fieldName]}
           />
         </Form.Item>
       )
     }
 
     return null
-
-  }, [schema, dynamicAttrs, componentMap])
+  }, [optionsMap, dynamicAttrs, componentMap])
 
   // 首次渲染时计算联动属性
   useEffect(() => {
-    computedDynamicAttrs(form.getFieldsValue())
+    const allValues = form.getFieldsValue()
+    computedDynamicAttrs(allValues)
+    traverseAndLoad(schema, allValues, true)
   }, [schema])
 
   return (
@@ -145,7 +199,7 @@ export function BasicForm(props: BasicFormProps) {
       layout={layout}
       initialValues={initialValues}
       onFinish={handleSubmit}
-      onValuesChange={onFormValuesChange}
+      onValuesChange={debounceOnFormValuesChange}
     >
       {
         schema.map(item => renderFormItem(item))
