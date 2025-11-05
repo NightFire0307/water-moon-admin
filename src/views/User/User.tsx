@@ -1,15 +1,16 @@
+import type { MenuProps, TableColumnProps } from 'antd'
 import type { IUser } from '@/types/user.ts'
 import type { UserFormModalProps } from '@/views/User/UserFormModal.tsx'
-import type { MenuProps, TableColumnProps } from 'antd'
-import { createUser, delUserById, getUserList, resetUserPassword, updateUser } from '@/apis/user.ts'
-import RotateCcW from '@/assets/icons/rotate-ccw.svg?react'
-import { useFetch } from '@/hooks/useFetch'
-import UserFormModal from '@/views/User/UserFormModal.tsx'
-import UserResetPwdModal from '@/views/User/UserResetPwdModal.tsx'
 import { DeleteOutlined, EditOutlined, ExclamationCircleFilled, MoreOutlined, SearchOutlined, UserAddOutlined } from '@ant-design/icons'
 import { Button, Dropdown, Flex, Form, Input, message, Modal, Space, Switch, Table, Tag } from 'antd'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
+import { createUser, delUserById, getUserList, resetUserPassword, updateUser } from '@/apis/user.ts'
+import RotateCcW from '@/assets/icons/rotate-ccw.svg?react'
+import { PageCard } from '@/components/PageCard'
+import { useFetch } from '@/hooks/useFetch'
+import UserFormModal from '@/views/User/UserFormModal.tsx'
+import UserResetPwdModal from '@/views/User/UserResetPwdModal.tsx'
 
 type IUserFormModal = Omit<UserFormModalProps, 'onClose' | 'onSubmit'>
 
@@ -207,7 +208,7 @@ function User() {
   }, [data])
 
   return (
-    <div style={{ padding: 24 }}>
+    <PageCard>
       <Space direction="vertical" style={{ width: '100%' }} size="middle">
         <Flex justify="space-between">
           <Form layout="inline">
@@ -233,7 +234,7 @@ function User() {
         onClose={() => setUserResetPwdModal({ open: false, userId: -1 })}
         onReset={handleUserResetPwd}
       />
-    </div>
+    </PageCard>
   )
 }
 

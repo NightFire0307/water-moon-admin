@@ -7,7 +7,7 @@ import { type UploadPhoto, useUploadStore } from '@/store/useUploadStore'
 
 export function OrderTaskDrawer() {
   const { orderInfo } = useOrderStore()
-  const { visible, getUploadPhotosByOrderId, orderQueues, startOrderQueue } = useUploadStore()
+  const { visible, getUploadPhotosByOrderId, orderQueues, startOrderQueue, closeTaskCenter } = useUploadStore()
 
   const dataSource = useMemo(() => {
     if (!orderInfo)
@@ -70,13 +70,13 @@ export function OrderTaskDrawer() {
       width="60%"
       extra={(
         <Button onClick={() => {
-          console.log('111')
           startOrderQueue(orderInfo?.id.toString())
         }}
         >
           开始上传
         </Button>
       )}
+      onClose={closeTaskCenter}
     >
       <Table
         rowKey="uid"

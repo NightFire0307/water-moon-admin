@@ -1,16 +1,17 @@
-import type { IPackage } from '@/types/package'
 import type { TableProps } from 'antd/lib'
-import { createPackage, deletePackage, getPackageById, getPackageList, updatePackage } from '@/apis/package'
-import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
-import { useFetch } from '@/hooks/useFetch'
-import usePagination from '@/hooks/usePagination'
-import useTableSelection from '@/hooks/useTableSelection'
+import type { IPackage } from '@/types/package'
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { Badge, Button, Divider, Empty, message, Modal, Popover, Space, Table, Tag } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import cs from 'classnames'
 import { Package, RotateCcw, Trash } from 'lucide-react'
 import { type FC, useEffect, useMemo, useState } from 'react'
+import { createPackage, deletePackage, getPackageById, getPackageList, updatePackage } from '@/apis/package'
+import { PageCard } from '@/components/PageCard'
+import SimpleForm, { type FieldSchema } from '@/components/SimpleForm'
+import { useFetch } from '@/hooks/useFetch'
+import usePagination from '@/hooks/usePagination'
+import useTableSelection from '@/hooks/useTableSelection'
 import { PackageActions } from './components/PackageActions'
 import { type PackageFormValues, PackageModal } from './components/PackageModal'
 import styles from './index.module.less'
@@ -248,7 +249,7 @@ const PackageManager: FC = () => {
   }, [current, pageSize])
 
   return (
-    <div style={{ padding: '24px' }}>
+    <PageCard>
       <Space>
         <SimpleForm fields={fields} form={form} layout="inline" />
         <Button type="primary" icon={<SearchOutlined />} onClick={handleSearchPackage}>
@@ -293,7 +294,7 @@ const PackageManager: FC = () => {
         onCreate={handleCreatePackage}
         onUpdate={handleUpdatePackage}
       />
-    </div>
+    </PageCard>
   )
 }
 

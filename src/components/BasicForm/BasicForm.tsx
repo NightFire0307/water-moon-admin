@@ -1,16 +1,16 @@
 import type { ActionButtonOptions, ComponentPropsMap, FormSchema } from './types'
 import { Button, Form, type FormProps, Input, InputNumber, Radio, Select, Space, Switch } from 'antd'
-import { type FC, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { debounce } from 'lodash-es'
+import { type FC, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
-export interface BasicFormRef {
+export interface BasicFormRef<T = any> {
   validate: () => Promise<void>
   getFieldValue: (name: string) => any
-  getFieldsValue: () => Record<string, any>
+  getFieldsValue: () => T
   resetFields: () => void
 }
 
-export interface BasicFormProps {
+export interface BasicFormProps<T = any> {
   schema: FormSchema[]
   initialValues?: object
   layout?: FormProps['layout']
@@ -18,7 +18,7 @@ export interface BasicFormProps {
   resetButtonOptions?: ActionButtonOptions
   submitButtonOptions?: ActionButtonOptions
   showDefaultButtons?: boolean // 是否显示默认的重置和提交按钮，默认为 true
-  ref?: React.Ref<BasicFormRef>
+  ref?: React.Ref<BasicFormRef<T>>
 }
 
 export function BasicForm(props: BasicFormProps) {
@@ -83,7 +83,7 @@ export function BasicForm(props: BasicFormProps) {
     (schemas: FormSchema[], allValues: Record<string, any>, isInitial: boolean = false, changeValues?: Record<string, any>) => {
       schemas.forEach((item) => {
         if (item.component === 'Select' && item.optionLoader) {
-          if (isInitial || ( changeValues &&  item.dependencies?.triggerFields?.some(field => field in changeValues))) {
+          if (isInitial || (changeValues && item.dependencies?.triggerFields?.some(field => field in changeValues))) {
             console.log('加载选项 for', item.fieldName)
             loadOptions(item, allValues)
           }
@@ -92,7 +92,9 @@ export function BasicForm(props: BasicFormProps) {
           traverseAndLoad(item.children, allValues, isInitial, changeValues)
         }
       })
-  }, [loadOptions])
+    },
+    [loadOptions],
+  )
 
   // 计算联动属性
   const computedDynamicAttrs = useCallback((allValues: Record<string, any>) => {
@@ -122,7 +124,6 @@ export function BasicForm(props: BasicFormProps) {
 
   // 在 schema 变化时重新计算联动逻辑
   const debounceOnFormValuesChange = debounce(useCallback((changeValues: Record<string, any>, allValues: Record<string, any>) => {
-    console.log(changeValues)
     computedDynamicAttrs(allValues)
     traverseAndLoad(schema, allValues, false, changeValues)
   }, [schema, computedDynamicAttrs, traverseAndLoad]), 300)

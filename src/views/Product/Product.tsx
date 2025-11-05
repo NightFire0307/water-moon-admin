@@ -1,15 +1,16 @@
-import type { IProduct } from '@/types/product.ts'
 import type { MenuProps, TableColumnsType } from 'antd'
 import type { ChangeEvent } from 'react'
-import { deleteProduct, getProductById, getProductList, getProductTypes } from '@/apis/product.ts'
-import usePagination from '@/hooks/usePagination.ts'
-import useTableSelection from '@/hooks/useTableSelection.ts'
-import { formatDate } from '@/utils/formatDate.ts'
-import { ProductModalForm } from '@/views/Product/ProductModalForm.tsx'
+import type { IProduct } from '@/types/product.ts'
 import { DeleteOutlined, EditOutlined, MoreOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import { Button, Dropdown, Flex, Form, Input, message, Select, Space, Table, Tag } from 'antd'
 import { useForm } from 'antd/es/form/Form'
 import { useEffect, useState } from 'react'
+import { deleteProduct, getProductById, getProductList, getProductTypes } from '@/apis/product.ts'
+import { PageCard } from '@/components/PageCard'
+import usePagination from '@/hooks/usePagination.ts'
+import useTableSelection from '@/hooks/useTableSelection.ts'
+import { formatDate } from '@/utils/formatDate.ts'
+import { ProductModalForm } from '@/views/Product/ProductModalForm.tsx'
 
 enum DropdownKeys {
   EDIT = 'edit',
@@ -161,7 +162,7 @@ export function Product() {
   ]
 
   return (
-    <div style={{ padding: '24px' }}>
+    <PageCard>
       <Flex justify="space-between">
         <Form form={form} layout="inline">
           <Form.Item name="name">
@@ -210,6 +211,6 @@ export function Product() {
           fetchProductList(current, pageSize)
         }}
       />
-    </div>
+    </PageCard>
   )
 }

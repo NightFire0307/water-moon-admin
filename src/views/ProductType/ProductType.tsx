@@ -1,5 +1,9 @@
-import type { IProductType } from '@/types/product.ts'
 import type { TableColumnsType } from 'antd'
+import type { IProductType } from '@/types/product.ts'
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import { Button, Divider, Form, Input, message, Popconfirm, Space, Table } from 'antd'
+import { useForm } from 'antd/es/form/Form'
+import { useEffect, useState } from 'react'
 import {
   batchDeleteProductType,
   createProductType,
@@ -9,14 +13,11 @@ import {
   queryProductByName,
   updateProductType,
 } from '@/apis/product.ts'
+import { PageCard } from '@/components/PageCard'
 import usePagination from '@/hooks/usePagination.ts'
 import useTableSelection from '@/hooks/useTableSelection.ts'
 import { formatDate } from '@/utils/formatDate.ts'
 import { ProductTypeModalForm } from '@/views/ProductType/ProductTypeModalForm.tsx'
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
-import { Button, Divider, Form, Input, message, Popconfirm, Space, Table } from 'antd'
-import { useForm } from 'antd/es/form/Form'
-import { useEffect, useState } from 'react'
 
 interface IProductQueryForm {
   onQuery: (name: string) => void
@@ -160,7 +161,7 @@ export function ProductType() {
   }, [current, pageSize])
 
   return (
-    <div style={{ padding: '24px' }}>
+    <PageCard>
       <ProductQueryForm
         onQuery={handleQuery}
         onReset={() => {
@@ -204,6 +205,6 @@ export function ProductType() {
           setInitialData(undefined)
         }}
       />
-    </div>
+    </PageCard>
   )
 }

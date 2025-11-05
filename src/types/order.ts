@@ -11,18 +11,19 @@ export enum OrderStatus {
 }
 
 export interface ProductsInfo {
-  id?: number
-  name: string
+  id: number
+  type: 'package' | 'single'
   count: number
 }
 
 export interface CreateOrderData {
-  order_number: string
-  customer_name: string
-  customer_phone: string
-  order_products: ProductsInfo[]
-  max_select_photos: number
-  extra_photo_price: number
+  orderNumber: string
+  customerName: string
+  customerPhone: string
+  orderProducts: ProductsInfo[]
+  maxSelectPhotos: number
+  extraPhotoPrice: number
+  validUntil: Date
 }
 
 interface OrderProducts {
