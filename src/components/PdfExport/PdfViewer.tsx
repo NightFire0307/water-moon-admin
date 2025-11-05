@@ -16,10 +16,12 @@ interface ExportPdfProps {
   onClose?: () => void
 }
 
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString()
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
+
+// pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+//   'pdfjs-dist/build/pdf.worker.min.mjs',
+//   import.meta.url,
+// ).toString()
 
 interface ModalTitleProps {
   onDownload?: () => void
@@ -69,7 +71,7 @@ export const PDFViewer: FC<ExportPdfProps> = ({ open, onClose }) => {
     downloadBlobAsPdf,
   } = usePdfBlob()
   const [pageProps, setPageProps] = useState<PageProps>({
-    scale: 1.2,
+    scale: 1,
     canvasBackground: '#f3f5f7',
     loading: null,
   })

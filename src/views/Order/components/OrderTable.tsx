@@ -78,17 +78,17 @@ export function OrderTable({
         let text: string
         switch (value) {
           case OrderStatus.PENDING:
-            color = 'blue'
+            color = 'default'
             text = '待选片'
             break
           case OrderStatus.PRE_SELECT:
             status = 'processing'
-            color = 'gold'
+            color = 'blue'
             text = '预选阶段'
             break
           case OrderStatus.PRODUCT_SELECT:
             status = 'processing'
-            color = 'purple'
+            color = 'cyan'
             text = '产品选片阶段'
             break
           case OrderStatus.SUBMITTED:
@@ -96,7 +96,7 @@ export function OrderTable({
             text = '选片已提交'
             break
           case OrderStatus.CANCEL:
-            color = 'gray'
+            color = 'red'
             text = '订单取消'
             break
           case OrderStatus.FINISHED:
